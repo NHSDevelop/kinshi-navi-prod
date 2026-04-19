@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Link from "next/link";
 import { PwaClient } from "@/features/push/pwa-client";
+import { GoogleTagManager } from "@next/third-parties/google";
 
 const SITE_DESCRIPTION =
   "Kinshi Naviは長野県長野高等学校の文化祭、「金鵄祭」の公式Webアプリです。";
@@ -81,6 +82,7 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <meta name="apple-mobile-web-app-title" content="K-Navi" />
+      <GoogleTagManager gtmId="G-VYFHW582FS" />
       <body className="font-sans antialiased min-h-screen flex flex-col">
         <PwaClient />
         <main>{children}</main>
