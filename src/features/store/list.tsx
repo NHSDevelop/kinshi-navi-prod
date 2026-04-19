@@ -27,10 +27,6 @@ import {
 } from "@/components/ui/table";
 import Link from "next/link";
 
-interface StoreListProps {
-  eventSlug: string;
-}
-
 const initialState: FormState<Store[]> = {
   success: false,
   message: null,
@@ -38,7 +34,7 @@ const initialState: FormState<Store[]> = {
   data: [],
 };
 
-export default function StoreList({ eventSlug }: StoreListProps) {
+export default function StoreList() {
   const hasFetchedInitial = useRef(false);
   const [state, formAction, isPending] = useActionState<
     FormState<Store[]>,
@@ -50,20 +46,18 @@ export default function StoreList({ eventSlug }: StoreListProps) {
     hasFetchedInitial.current = true;
 
     const formData = new FormData();
-    formData.set("eventSlug", eventSlug);
     formData.set("storeType", "all");
 
     startTransition(() => {
       formAction(formData);
     });
-  }, [eventSlug, formAction]);
+  }, [formAction]);
 
   return (
     <div className="space-y-4 lg:space-y-8">
       <div className="space-y-4 lg:space-y-8">
         <p className="text-lg font-bold">店舗を絞り込む</p>
         <form action={formAction} className="flex gap-4">
-          <input type="hidden" name="eventSlug" value={eventSlug} />
           <Field>
             <Select name="storeType" disabled={isPending}>
               <SelectTrigger>
@@ -127,9 +121,7 @@ export default function StoreList({ eventSlug }: StoreListProps) {
                   </TableCell>
                   <TableCell>
                     <Button asChild variant="card">
-                      <Link href={`/event/${eventSlug}/store/${store.slug}`}>
-                        店舗ページ
-                      </Link>
+                      <Link href={`/store/${store.slug}`}>店舗ページ</Link>
                     </Button>
                   </TableCell>
                 </TableRow>

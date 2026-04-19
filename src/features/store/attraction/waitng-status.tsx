@@ -80,7 +80,6 @@ export default async function AttracionWaitngStatus({
           </TableHeader>
           <TableBody>
             {waitingStatusList.map((attraction) => {
-              //TODO 待ち時間の計算式を再検討する
               const waitingPeople = attraction.waitingPeople;
               const groupCount = Math.ceil(
                 waitingPeople / (attraction.peopleCapacity || 1),

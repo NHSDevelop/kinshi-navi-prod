@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
 import { z } from "zod";
@@ -7,7 +6,6 @@ import {
   events,
   pushSubscriptions,
   stores,
-  Ticket,
   tickets,
   type TicketStatus,
 } from "@/lib/db/schema";
@@ -184,7 +182,6 @@ export async function callFirstTicket(
         userId: tickets.userId,
         index: tickets.index,
         isPaper: tickets.isPaper,
-        eventSlug: events.slug,
       })
       .from(tickets)
       .innerJoin(attractions, eq(tickets.attractionId, attractions.id))
@@ -228,7 +225,7 @@ export async function callFirstTicket(
           sub,
           "チケットが呼び出されました",
           `あなたのチケット（番号: ${ticket.index}）が呼び出されました。企画へお越しください。`,
-          `/event/${ticket.eventSlug}/anonymous-user/`,
+          `/anonymous-user/`,
         );
       }
     }

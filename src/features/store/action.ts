@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
 import { getDb } from "@/lib/db/drizzle";
@@ -6,14 +5,18 @@ import {
   attractions,
   foods,
   Store,
+  items,
+  registerLogs,
   stores,
+  stockLogs,
+  tickets,
   type StoreType,
 } from "@/lib/db/schema";
 import { FormState } from "@/lib/type";
 import { eq } from "drizzle-orm";
 import z from "zod";
-import { getEventBySlug } from "../event/action";
 import { slugSchema } from "@/lib/schemas/store";
+import { getMainEvent } from "../event/action";
 
 export type ZodErrors = {
   slug?: string[];
@@ -234,11 +237,10 @@ export async function getStoresByFormByEventSlug(
   _prevState: FormState<Store[]>,
   formData: FormData,
 ): Promise<FormState<Store[]>> {
-  const eventSlug = formData.get("eventSlug") as string;
   const storeType = formData.get("storeType") as StoreType | "all";
 
   try {
-    const event = await getEventBySlug(eventSlug);
+    const event = await getMainEvent();
     if (!event) {
       return {
         success: false,
@@ -288,5 +290,116 @@ export async function getStoreIdByStoreSlug(
   } catch (error) {
     console.log(error);
     return null;
+  }
+}
+
+export async function deleteStore(prevState: unknown, formData: FormData) {
+  const storeId = formData.get("storeId") as string;
+  try {
+    const db = await getDb();
+
+    const attractionRows = await db
+      .select({ id: attractions.id })
+      .from(attractions)
+      .where(eq(attractions.storeId, storeId))
+      .limit(1);
+    if (attractionRows.length > 0) {
+      const ticketRows = await db
+        .select({ id: tickets.id })
+        .from(tickets)
+        .innerJoin(attractions, eq(tickets.attractionId, attractions.id))
+        .where(eq(attractions.storeId, storeId))
+        .limit(1);
+      if (ticketRows.length > 0) {
+        return {
+          success: false,
+          error: "チケットが存在するため店舗を削除できません。",
+        };
+      }
+    }
+
+    const foodRows = await db
+      .select({ id: foods.id })
+      .from(foods)
+      .where(eq(foods.storeId, storeId))
+      .limit(1);
+    if (foodRows.length > 0) {
+      const itemRows = await db
+        .select({ id: items.id })
+        .from(items)
+        .innerJoin(foods, eq(items.foodId, foods.id))
+        .where(eq(foods.storeId, storeId))
+        .limit(1);
+      if (itemRows.length > 0) {
+        const stockLogRows = await db
+          .select({ id: stockLogs.id })
+          .from(stockLogs)
+          .innerJoin(items, eq(stockLogs.itemId, items.id))
+          .innerJoin(foods, eq(items.foodId, foods.id))
+          .where(eq(foods.storeId, storeId))
+          .limit(1);
+        if (stockLogRows.length > 0) {
+          return {
+            success: false,
+            error: "在庫ログが存在するため店舗を削除できません。",
+          };
+        }
+      }
+
+      const registerLogRows = await db
+        .select({ id: registerLogs.id })
+        .from(registerLogs)
+        .innerJoin(foods, eq(registerLogs.foodId, foods.id))
+        .where(eq(foods.storeId, storeId))
+        .limit(1);
+      if (registerLogRows.length > 0) {
+        return {
+          success: false,
+          error: "会計ログが存在するため店舗を削除できません。",
+        };
+      }
+    }
+
+    await db.delete(stores).where(eq(stores.id, storeId));
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      success: false,
+      error: "サーバーエラーが発生しました",
+    };
+  }
+}
+
+export async function toActiveStore(prevState: unknown, formData: FormData) {
+  try {
+    const db = getDb();
+    const storeId = formData.get("storeId") as string;
+    const storeRows = await db
+      .select()
+      .from(stores)
+      .where(eq(stores.id, storeId))
+      .limit(1);
+    const store = storeRows[0];
+    if (!store) {
+      return {
+        success: false,
+        message: "該当するイベントが存在しません",
+      };
+    }
+    await db.update(stores).set({ isActive: !store.isActive });
+    return {
+      success: true,
+      message: "操作が完了しました。",
+      isActive: !store.isActive,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      success: false,
+      message: "サーバーエラーが発生しました",
+    };
   }
 }

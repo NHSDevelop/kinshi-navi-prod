@@ -1,11 +1,9 @@
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { auth } from "@/lib/auth";
 import { getDb } from "@/lib/db/drizzle";
 import { admins, staffs, users } from "@/lib/db/schema";
 import { ADMIN_ROLE_MAP } from "@/lib/type";
 import { eq } from "drizzle-orm";
-import { headers } from "next/headers";
 
 interface UserInfoProps {
   userId: string;
@@ -42,8 +40,6 @@ export default async function UserInfo({ userId }: UserInfoProps) {
       ? (ADMIN_ROLE_MAP[adminRows[0].role as keyof typeof ADMIN_ROLE_MAP]
           ?.label ?? adminRows[0].role)
       : null;
-
-  //TODO adminとstaffと関連する組織やイベントを取得する
 
   return (
     <Card>

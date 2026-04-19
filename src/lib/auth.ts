@@ -47,7 +47,7 @@ const lazyD1 = new Proxy({} as D1Database, {
 const lazyDb = drizzle(lazyD1, { schema });
 
 export const auth = betterAuth({
-  appName: "Gakusai Hub",
+  appName: "Kinshi Navi",
   database: drizzleAdapter(lazyDb, {
     provider: "sqlite",
     schema,

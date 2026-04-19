@@ -18,7 +18,6 @@ export type StockChangedReason = (typeof stockChangedReasonValues)[number];
 
 export const roleValues = [
   "SUPER_ADMIN",
-  "ORGANIZATION_ADMIN",
   "EVENT_ADMIN",
   "STORE_ADMIN",
   "STAFF",
@@ -26,15 +25,11 @@ export const roleValues = [
 export type Role = (typeof roleValues)[number];
 
 export const inviteTargetRoleValues = [
-  "ORGANIZATION_ADMIN",
   "EVENT_ADMIN",
   "STORE_ADMIN",
   "STAFF",
 ] as const;
 export type InviteTargetRole = (typeof inviteTargetRoleValues)[number];
-
-export const organizationPlanValues = ["FREE"] as const;
-export type OrganizationPlan = (typeof inviteTargetRoleValues)[number];
 
 export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
@@ -91,39 +86,18 @@ export const verifications = sqliteTable("verifications", {
   updatedAt: integer("updatedAt", { mode: "timestamp_ms" }),
 });
 
-export const organizations = sqliteTable("organizations", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => createId()),
-  slug: text("slug").notNull(),
-  name: text("name").notNull(),
-  description: text("description"),
-  plan: text("plan", { enum: organizationPlanValues }).default("FREE"),
-  createdAt: integer("createdAt", { mode: "timestamp_ms" })
-    .notNull()
-    .$defaultFn(() => new Date()),
-  updatedAt: integer("updatedAt", { mode: "timestamp_ms" })
-    .notNull()
-    .$defaultFn(() => new Date())
-    .$onUpdateFn(() => new Date()),
-});
-export type Organization = typeof organizations.$inferSelect;
-
 export const events = sqliteTable("events", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => createId()),
-  slug: text("slug").notNull(),
   name: text("name").notNull(),
   isActive: integer("isActive", { mode: "boolean" }).notNull().default(false),
+  isMain: integer("isActive", { mode: "boolean" }).notNull().default(false),
   startedAtDate: integer("startedAtDate", { mode: "timestamp_ms" }),
   startedAtTime: text("startedAtTime"),
   finishedAtDate: integer("finishedAtDate", { mode: "timestamp_ms" }),
   finishedAtTime: text("finishedAtTime"),
   description: text("description"),
-  organizationId: text("organizationId")
-    .references(() => organizations.id)
-    .notNull(),
   createdAt: integer("createdAt", { mode: "timestamp_ms" })
     .notNull()
     .$defaultFn(() => new Date()),
@@ -325,7 +299,6 @@ export const admins = sqliteTable("admins", {
     .unique()
     .references(() => users.id, { onDelete: "cascade" }),
   role: text("role", { enum: roleValues }).$type<Role>().notNull(),
-  organizationId: text("organizationId").references(() => organizations.id),
   eventId: text("eventId").references(() => events.id),
   storeId: text("storeId").references(() => stores.id),
   createdAt: integer("createdAt", { mode: "timestamp_ms" })
@@ -373,9 +346,6 @@ export const invites = sqliteTable("invites", {
   targetScope: text("targetScope", { enum: inviteTargetRoleValues })
     .$type<InviteTargetRole>()
     .notNull(),
-  organizationId: text("organizationId").references(() => organizations.id, {
-    onDelete: "cascade",
-  }),
   eventId: text("eventId").references(() => events.id, {
     onDelete: "cascade",
   }),
@@ -451,17 +421,6 @@ export const pushSubscriptionsRelations = relations(
   }),
 );
 
-export const eventsRelations = relations(events, ({ one }) => ({
-  organization: one(organizations, {
-    fields: [events.organizationId],
-    references: [organizations.id],
-  }),
-}));
-
-export const organizationsRelations = relations(organizations, ({ many }) => ({
-  events: many(events),
-}));
-
 export const storesRelations = relations(stores, ({ one, many }) => ({
   event: one(events, {
     fields: [stores.eventId],
@@ -526,10 +485,6 @@ export const adminsRelations = relations(admins, ({ one }) => ({
     fields: [admins.userId],
     references: [users.id],
   }),
-  organization: one(organizations, {
-    fields: [admins.organizationId],
-    references: [organizations.id],
-  }),
   event: one(events, {
     fields: [admins.eventId],
     references: [events.id],
@@ -544,10 +499,6 @@ export const invitesRelations = relations(invites, ({ one }) => ({
   issuerAdmin: one(admins, {
     fields: [invites.issuerAdminId],
     references: [admins.id],
-  }),
-  organization: one(organizations, {
-    fields: [invites.organizationId],
-    references: [organizations.id],
   }),
   event: one(events, {
     fields: [invites.eventId],

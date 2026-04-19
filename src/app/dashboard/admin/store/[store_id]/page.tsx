@@ -2,7 +2,14 @@ import AttractionInfo from "@/features/store/attraction/info";
 import ItemList from "@/features/store/food/item/list";
 import StoreInfo from "@/features/store/info";
 import { getDbAsync } from "@/lib/db/drizzle";
-import { attractions, foods, admins, users, staffs } from "@/lib/db/schema";
+import {
+  attractions,
+  foods,
+  admins,
+  users,
+  staffs,
+  stores,
+} from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import Link from "next/link";
 import { AiFillEdit } from "react-icons/ai";
@@ -18,6 +25,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
+import DeleteStore from "@/features/store/delete";
+import ToActiveStore from "@/features/store/to-active";
+import { notFound } from "next/navigation";
 
 interface AdminStorePageProps {
   params: Promise<{ store_id: string }>;
@@ -27,6 +37,14 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
   const { store_id } = await params;
 
   const db = await getDbAsync();
+  const storeRows = await db
+    .select()
+    .from(stores)
+    .where(eq(stores.id, store_id))
+    .limit(1);
+  if (!storeRows[0]) {
+    notFound();
+  }
 
   const attractionRows = await db
     .select()
@@ -75,6 +93,10 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
         </Button>
       </div>
       <StoreInfo storeId={store_id} />
+      <ToActiveStore
+        storeId={storeRows[0].id}
+        isActive={storeRows[0].isActive}
+      />
       <Separator />
       {attractionRows?.length > 0 && (
         <div className="space-y-4 lg:space-y-8">
@@ -168,6 +190,8 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
       ) : (
         <NotFoundPrompt context="該当するスタッフ" />
       )}
+      <Separator />
+      <DeleteStore storeId={store_id} pushUrl="/dashboard" />
     </div>
   );
 }

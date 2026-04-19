@@ -1,8 +1,8 @@
-const DEFAULT_SITE_URL = "https://gakusai-hub.jp";
+const DEFAULT_SITE_URL = "https://kinshi-navi.com/";
 
-export const SITE_NAME = "Gakusai Hub";
+export const SITE_NAME = "Kinshi Navi";
 export const SITE_DESCRIPTION =
-  "Gakusai Hubは、学校の文化祭向けの総合Webサービス。インストール不要、教育機関なら無料で利用可能。チケット機能、商品管理機能、運営管理機能など、豊富な機能で文化祭を簡単サポート。";
+  "Kinshi Naviは長野県長野高等学校の文化祭「金鵄祭」の公式Webアプリです。";
 
 export function getSiteUrl(): URL {
   const rawUrl =

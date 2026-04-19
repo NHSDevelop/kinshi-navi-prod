@@ -1,19 +1,15 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
-import { getDb } from "@/lib/db/drizzle";
-import { events } from "@/lib/db/schema";
+import { getDb, getDbAsync } from "@/lib/db/drizzle";
+import { admins, Event, events, stores } from "@/lib/db/schema";
 import z from "zod";
 import { eq } from "drizzle-orm";
-import { slugSchema } from "@/lib/schemas/store";
 
 export type ZodErrors = {
-  slug?: string[];
   name?: string[];
 } | null;
 
 export type EventState = {
-  slug?: string;
   name?: string;
   zodErrors?: ZodErrors;
   message?: string | null;
@@ -43,7 +39,6 @@ export type UpdateEventConfigState = {
 };
 
 const CreateEventSchema = z.object({
-  slug: slugSchema,
   name: z.string().min(1, "必須項目です"),
 });
 
@@ -52,17 +47,14 @@ export async function createEvent(
   formData: FormData,
 ): Promise<EventState> {
   try {
-    const slug = formData.get("slug") as string;
     const name = formData.get("name") as string;
 
     const validationResult = CreateEventSchema.safeParse({
-      slug,
       name,
     });
 
     if (!validationResult.success) {
       return {
-        slug,
         name,
         zodErrors: validationResult.error.flatten().fieldErrors,
         message: "入力形式が正しくありません。",
@@ -70,25 +62,11 @@ export async function createEvent(
       };
     }
 
-    const { slug: validatedSlug, name: validatedName } = validationResult.data;
-    const organizationId = formData.get("organizationId") as string;
+    const { name: validatedName } = validationResult.data;
     const db = await getDb();
-    const eventRows = await db
-      .select()
-      .from(events)
-      .where(eq(events.slug, validatedSlug));
-    if (eventRows.length > 0) {
-      return {
-        zodErrors: null,
-        message: "その識別名はすでに使用されています。",
-        success: false,
-      };
-    }
 
     await db.insert(events).values({
-      slug: validatedSlug,
       name: validatedName,
-      organizationId: organizationId,
     });
 
     return {
@@ -108,7 +86,6 @@ export async function createEvent(
 
 const eventConfigSchema = z.object({
   name: z.string().min(1, "必須項目です"),
-  isActive: z.boolean(),
   startedAtDate: z.date().nullable(),
   startedAtTime: z
     .string()
@@ -126,10 +103,8 @@ export async function updateEventConfig(
   prevState: unknown,
   formData: FormData,
 ): Promise<UpdateEventConfigState> {
-  const isActiveRaw = formData.get("isActive");
   const validationResult = eventConfigSchema.safeParse({
     name: formData.get("name"),
-    isActive: isActiveRaw === "true" || isActiveRaw === "on",
     startedAtDate: formData.get("startedAtDate")
       ? new Date(formData.get("startedAtDate") as string)
       : null,
@@ -163,7 +138,6 @@ export async function updateEventConfig(
   }
   const {
     name,
-    isActive,
     startedAtDate,
     startedAtTime,
     finishedAtDate,
@@ -178,7 +152,6 @@ export async function updateEventConfig(
       .update(events)
       .set({
         name: name,
-        isActive: isActive,
         startedAtDate: startedAtDate,
         startedAtTime: startedAtTime,
         finishedAtDate: finishedAtDate,
@@ -204,28 +177,158 @@ export async function updateEventConfig(
   }
 }
 
-export async function getEventBySlug(eventSlug: string) {
-  const db = await getDb();
+export async function toActiveEvent(prevState: unknown, formData: FormData) {
   try {
+    const db = getDb();
+    const eventId = formData.get("eventId") as string;
     const eventRows = await db
       .select()
       .from(events)
-      .where(eq(events.slug, eventSlug))
+      .where(eq(events.id, eventId))
       .limit(1);
-    return eventRows[0] ?? null;
+    const event = eventRows[0];
+    if (!event) {
+      return {
+        success: false,
+        message: "該当するイベントが存在しません",
+      };
+    }
+    await db.update(events).set({ isActive: !event.isActive });
+    return {
+      success: true,
+      message: "操作が完了しました。",
+      isActive: !event.isActive,
+    };
   } catch (error) {
     console.log(error);
-    return null;
+    return {
+      success: false,
+      message: "サーバーエラーが発生しました",
+    };
   }
 }
 
-export async function getEventIdByEventSlug(
-  eventSlug: string,
-): Promise<string> {
-  const event = await getEventBySlug(eventSlug);
-  if (!event) {
-    throw new Error("イベントが見つかりません");
+export async function toMainEvent(prevState: unknown, formData: FormData) {
+  try {
+    const db = getDb();
+    const eventId = formData.get("eventId") as string;
+    const eventRows = await db
+      .select()
+      .from(events)
+      .where(eq(events.id, eventId))
+      .limit(1);
+    const event = eventRows[0];
+    if (!event) {
+      return {
+        success: false,
+        message: "該当するイベントが存在しません",
+      };
+    }
+    const mainEvents = await db
+      .select()
+      .from(events)
+      .where(eq(events.isMain, true))
+      .limit(1);
+    if (event.isMain === true && mainEvents.length === 1) {
+      return {
+        success: false,
+        message: "メインイベントを0個にすることはできません。",
+        isMain: event.isMain,
+      };
+    }
+    if (event.isMain === false && mainEvents.length > 0) {
+      return {
+        success: false,
+        message: "メインイベントを複数にすることはできません。",
+        isMain: event.isMain,
+      };
+    }
+    await db.update(events).set({ isMain: !event.isMain });
+    return {
+      success: true,
+      message: "操作が完了しました。",
+      isMain: !event.isMain,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      success: false,
+      message: "サーバーエラーが発生しました",
+    };
   }
+}
 
-  return event.id;
+export async function getMainEvent(): Promise<Event | null> {
+  const db = await getDbAsync();
+  const eventRows = await db
+    .select()
+    .from(events)
+    .where(eq(events.isMain, true))
+    .limit(1);
+  if (!eventRows[0]) {
+    return null;
+  }
+  return eventRows[0];
+}
+
+export async function deleteEvent(prevState: unknown, formData: FormData) {
+  try {
+    const eventId = formData.get("eventId") as string;
+    const db = await getDb();
+
+    const eventRows = await db
+      .select()
+      .from(events)
+      .where(eq(events.id, eventId))
+      .limit(1);
+    const event = eventRows[0];
+    if (!event) {
+      return {
+        success: false,
+        error: "該当するイベントが存在しません。",
+      };
+    }
+
+    if (event.isMain) {
+      return {
+        success: false,
+        error: "メインイベントは削除できません。",
+      };
+    }
+
+    const storeRows = await db
+      .select({ id: stores.id })
+      .from(stores)
+      .where(eq(stores.eventId, eventId))
+      .limit(1);
+    if (storeRows.length > 0) {
+      return {
+        success: false,
+        error: "店舗が存在するためイベントを削除できません。",
+      };
+    }
+
+    const adminRows = await db
+      .select({ id: admins.id })
+      .from(admins)
+      .where(eq(admins.eventId, eventId))
+      .limit(1);
+    if (adminRows.length > 0) {
+      return {
+        success: false,
+        error: "管理者が存在するためイベントを削除できません。",
+      };
+    }
+
+    await db.delete(events).where(eq(events.id, eventId));
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      success: false,
+      error: "サーバーエラーが発生しました",
+    };
+  }
 }

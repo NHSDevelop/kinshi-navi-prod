@@ -2,7 +2,7 @@ import { Separator } from "@/components/ui/separator";
 import EventInfo from "@/features/event/info";
 import StoreSelectLink from "@/features/store/components/select-link";
 import { getDbAsync } from "@/lib/db/drizzle";
-import { admins, stores, users } from "@/lib/db/schema";
+import { admins, events, stores, users } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 import Link from "next/link";
 import { AiFillEdit, AiFillPlusCircle } from "react-icons/ai";
@@ -16,6 +16,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
+import ToMainEvent from "@/features/event/to-main";
+import DeleteEvent from "@/features/event/delete";
+import { notFound } from "next/navigation";
+import ToActiveEvent from "@/features/event/to-active";
 
 export default async function AdminEventPage(props: {
   params: Promise<{ event_id: string }>;
@@ -23,6 +27,15 @@ export default async function AdminEventPage(props: {
   const { event_id } = await props.params;
 
   const db = await getDbAsync();
+  const eventRows = await db
+    .select()
+    .from(events)
+    .where(eq(events.id, event_id))
+    .limit(1);
+
+  if (!eventRows[0]) {
+    notFound();
+  }
 
   const storeRows = await db
     .select({ id: stores.id, name: stores.name })
@@ -39,6 +52,8 @@ export default async function AdminEventPage(props: {
     .from(admins)
     .innerJoin(users, eq(users.id, admins.userId))
     .where(and(eq(admins.eventId, event_id), eq(admins.role, "EVENT_ADMIN")));
+
+  //TODO ToActiveEventの時にInfoが変化しないのを修正する
 
   return (
     <div className="space-y-4 lg:space-y-8">
@@ -57,7 +72,8 @@ export default async function AdminEventPage(props: {
       </div>
 
       <EventInfo eventId={event_id} />
-
+      <ToMainEvent eventId={event_id} isMain={eventRows[0].isMain} />
+      <ToActiveEvent eventId={event_id} isActive={eventRows[0].isActive} />
       <Separator />
       <div className="flex items-center justify-between">
         <h2 className="text-lg">イベント内の店舗の管理</h2>
@@ -112,6 +128,8 @@ export default async function AdminEventPage(props: {
       ) : (
         <NotFoundPrompt context="該当する管理者" />
       )}
+      <Separator />
+      <DeleteEvent eventId={event_id} pushUrl="/dashboard" />
     </div>
   );
 }

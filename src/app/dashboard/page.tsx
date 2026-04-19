@@ -8,7 +8,6 @@ import { auth } from "@/lib/auth";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 
-//TODO 組織一覧も追加する
 export default async function DashBordHomePage() {
   const session = await auth.api.getSession({ headers: await headers() });
 
@@ -50,16 +49,6 @@ export default async function DashBordHomePage() {
         )}
         {adminRows.length > 0 && (
           <>
-            {adminRows[0].role === "ORGANIZATION_ADMIN" &&
-              adminRows[0].organizationId && (
-                <Button asChild variant="card">
-                  <Link
-                    href={`/dashboard/admin/organization/${adminRows[0].organizationId}`}
-                  >
-                    組織管理画面
-                  </Link>
-                </Button>
-              )}
             {adminRows[0].role === "EVENT_ADMIN" && adminRows[0].eventId && (
               <Button asChild variant="card">
                 <Link href={`/dashboard/admin/event/${adminRows[0].eventId}`}>

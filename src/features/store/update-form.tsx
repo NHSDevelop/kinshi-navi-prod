@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useState } from "react";
 import { updateStoreConfig } from "./action";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,6 @@ import { ErrorPrompt } from "@/components/prompt/error-prompt";
 import { MessagePrompt } from "@/components/prompt/message-prompt";
 import { Store } from "@/lib/db/schema";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { ja } from "date-fns/locale";
@@ -50,8 +49,6 @@ export default function UpdateStoreConfigForm({
     updateStoreConfig,
     INITIAL_STATE,
   );
-  const [checked, setChecked] = useState(store.isActive);
-  const isActiveRef = useRef<HTMLInputElement>(null);
   const [startedAtDate, setStartedAtDate] = useState<Date | null>(
     store.startedAtDate ? new Date(store.startedAtDate) : null,
   );
@@ -91,30 +88,6 @@ export default function UpdateStoreConfigForm({
                     defaultValue={state.name || store.name}
                   />
                   <FieldError message={state.zodErrors?.name?.[0]} />
-                </Field>
-                <Field>
-                  <div className="flex flex-row items-center gap-2 w-fit">
-                    <FieldLabel htmlFor="isActive" className="mb-0">
-                      開催中か
-                    </FieldLabel>
-                    <Checkbox
-                      checked={checked}
-                      onCheckedChange={(value) => {
-                        const next = value === true;
-                        setChecked(next);
-                        if (isActiveRef.current) {
-                          isActiveRef.current.value = next ? "true" : "false";
-                        }
-                      }}
-                      id="isActive"
-                    />
-                  </div>
-                  <input
-                    ref={isActiveRef}
-                    type="hidden"
-                    name="isActive"
-                    value={checked ? "true" : "false"}
-                  />
                 </Field>
                 <Field>
                   <FieldLabel>開催日</FieldLabel>

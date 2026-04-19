@@ -8,9 +8,9 @@ export default async function DashBoardLayout({
 }) {
   return (
     <>
-      <header className="border-b-2 w-full flex h-20 items-center px-4 sm:px-6 lg:px-8 justify-between bg-main-400">
+      <header className="border-b-2 w-full flex h-20 items-center px-4 sm:px-6 lg:px-8 justify-between bg-main-100">
         <Link href={"/dashboard"} className="text-lg md:text-xl  font-bold">
-          Dashboard | Gakusai Hub
+          Dashboard | Kinshi Navi
         </Link>
         <Link
           href={"/dashboard/user"}

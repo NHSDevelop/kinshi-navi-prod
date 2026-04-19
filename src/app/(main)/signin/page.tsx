@@ -10,7 +10,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "サインイン | Gakusai Hub",
+  title: "サインイン | Kinshi Navi",
 };
 
 interface Props {

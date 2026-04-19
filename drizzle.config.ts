@@ -12,7 +12,7 @@ const config = isProduction
       schema: "./src/lib/db/schema.ts",
       dialect: "sqlite",
       dbCredentials: {
-        url: ".wrangler/state/v3/d1/miniflare-D1DatabaseObject/58b754ca4ad588979b87252e51f86b39e15f8a6e1031c8045e36ea10232c4b6b.sqlite",
+        url: ".wrangler/state/v3/d1/miniflare-D1DatabaseObject/6d5dc8d402d07ca283bdf4e21e2a296c08d1c0640a2a7d1caf022a09ef7c47ae.sqlite",
       },
     });
 export default config;
