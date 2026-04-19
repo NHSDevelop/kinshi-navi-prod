@@ -1,0 +1,38 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
+  "name": "gakusai-hub",
+  "compatibility_date": "2025-09-27",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "gakusai-hub",
+    },
+  ],
+  "images": {
+    "binding": "IMAGES",
+  },
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+    },
+    "traces": {
+      "enabled": false,
+    },
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "gakusai-hub-prod",
+      "database_id": "5a647b9c-1379-439e-ade9-0f98279bdffa",
+      "migrations_dir": "drizzle/migrations",
+      "remote": false,
+    },
+  ],
+}

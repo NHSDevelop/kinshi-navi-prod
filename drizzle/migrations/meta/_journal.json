@@ -1,0 +1,48 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1775130676027,
+      "tag": "0000_stale_bug",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1775649729199,
+      "tag": "0001_simple_silver_samurai",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1775650126715,
+      "tag": "0002_careful_rage",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1775651249870,
+      "tag": "0003_naive_umar",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1775912535511,
+      "tag": "0004_absurd_maestro",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1775964360519,
+      "tag": "0005_round_grandmaster",
+      "breakpoints": true
+    }
+  ]
+}

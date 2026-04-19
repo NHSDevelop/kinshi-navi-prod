@@ -1,0 +1,1 @@
+ALTER TABLE `system_infos` ADD `title` text NOT NULL;

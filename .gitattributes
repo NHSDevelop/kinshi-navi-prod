@@ -1,0 +1,6 @@
+# デフォルトで改行コードをLFに統一（Vercel等のLinux環境に合わせる）
+* text=auto eol=lf
+
+# 画像などのバイナリファイルは変更しない
+*.png binary
+*.jpg binary
