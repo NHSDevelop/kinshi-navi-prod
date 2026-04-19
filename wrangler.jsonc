@@ -18,6 +18,13 @@
   "images": {
     "binding": "IMAGES",
   },
+  "r2_buckets": [
+    {
+      "binding": "MY_BUCKET",
+      "bucket_name": "kinshi-navi-prod",
+    },
+  ],
+
   "observability": {
     "logs": {
       "enabled": true,
