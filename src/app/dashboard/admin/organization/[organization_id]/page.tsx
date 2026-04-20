@@ -1,6 +1,6 @@
 import EventSelectLink from "@/features/event/components/select-link";
 import OrganizationInfo from "@/features/organization/info";
-import { getDbAsync } from "@/lib/db/drizzle";
+import { getDb } from "@/lib/db/drizzle";
 import { events, admins, users } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import Link from "next/link";
@@ -23,7 +23,7 @@ export default async function AdminOrganizationPage(props: {
 }) {
   const { organization_id } = await props.params;
 
-  const db = await getDbAsync();
+  const db = await getDb();
 
   const eventRows = await db
     .select({ id: events.id, name: events.name })

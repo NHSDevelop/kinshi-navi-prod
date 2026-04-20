@@ -2,6 +2,8 @@ import { Separator } from "@/components/ui/separator";
 import EventList from "@/features/event/list";
 import { Metadata } from "next";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "イベント一覧 | Gakusai Hub",
 };

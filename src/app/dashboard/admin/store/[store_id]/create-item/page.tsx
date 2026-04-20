@@ -1,5 +1,5 @@
 import { CreateItem } from "@/features/store/food/item/create";
-import { getDbAsync } from "@/lib/db/drizzle";
+import { getDb } from "@/lib/db/drizzle";
 import { foods } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { Separator } from "@/components/ui/separator";
@@ -9,7 +9,7 @@ export default async function CreateFoodItemPage(props: {
 }) {
   const { store_id } = await props.params;
 
-  const db = await getDbAsync();
+  const db = await getDb();
 
   const foodRows = await db
     .select()

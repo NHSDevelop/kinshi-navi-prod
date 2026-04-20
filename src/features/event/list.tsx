@@ -10,10 +10,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import Link from "next/link";
-import { getDbAsync } from "@/lib/db/drizzle";
+import { getDb } from "@/lib/db/drizzle";
 
 export default async function EventList() {
-  const db = await getDbAsync();
+  const db = await getDb();
   const eventRows = await db.query.events.findMany({
     with: {
       organization: true,

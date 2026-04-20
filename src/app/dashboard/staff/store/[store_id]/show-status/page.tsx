@@ -2,7 +2,7 @@ import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { RoutePollingRefresh } from "@/components/polling/route-polling-refresh";
-import { getDbAsync } from "@/lib/db/drizzle";
+import { getDb } from "@/lib/db/drizzle";
 import { attractions, tickets } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
@@ -12,7 +12,7 @@ export default async function ShowAttractionStatusPage(props: {
   params: Promise<{ store_id: string }>;
 }) {
   const { store_id } = await props.params;
-  const db = await getDbAsync();
+  const db = await getDb();
   const attractionRows = await db
     .select()
     .from(attractions)

@@ -1,7 +1,7 @@
 import AttractionInfo from "@/features/store/attraction/info";
 import ItemList from "@/features/store/food/item/list";
 import StoreInfo from "@/features/store/info";
-import { getDbAsync } from "@/lib/db/drizzle";
+import { getDb } from "@/lib/db/drizzle";
 import { attractions, foods, admins, users, staffs } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import Link from "next/link";
@@ -26,7 +26,7 @@ interface AdminStorePageProps {
 export default async function AdminStorePage({ params }: AdminStorePageProps) {
   const { store_id } = await params;
 
-  const db = await getDbAsync();
+  const db = await getDb();
 
   const attractionRows = await db
     .select()
