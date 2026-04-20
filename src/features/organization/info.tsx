@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getDbAsync } from "@/lib/db/drizzle";
+import { getDb } from "@/lib/db/drizzle";
 import { organizations } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
@@ -10,7 +10,7 @@ interface OrganizationInfoProps {
 export default async function OrganizationInfo({
   organizationId,
 }: OrganizationInfoProps) {
-  const db = await getDbAsync();
+  const db = await getDb();
   const organizationRows = await db
     .select()
     .from(organizations)

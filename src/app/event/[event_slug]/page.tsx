@@ -6,6 +6,8 @@ import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
+export const revalidate = 60;
+
 export default async function EventTopPage(props: {
   params: Promise<{ event_slug: string }>;
 }) {

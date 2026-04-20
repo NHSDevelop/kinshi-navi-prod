@@ -1,7 +1,7 @@
 import { Separator } from "@/components/ui/separator";
 import EventInfo from "@/features/event/info";
 import StoreSelectLink from "@/features/store/components/select-link";
-import { getDbAsync } from "@/lib/db/drizzle";
+import { getDb } from "@/lib/db/drizzle";
 import { admins, stores, users } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 import Link from "next/link";
@@ -22,7 +22,7 @@ export default async function AdminEventPage(props: {
 }) {
   const { event_id } = await props.params;
 
-  const db = await getDbAsync();
+  const db = await getDb();
 
   const storeRows = await db
     .select({ id: stores.id, name: stores.name })

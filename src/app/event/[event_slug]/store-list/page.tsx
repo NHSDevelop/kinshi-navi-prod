@@ -1,6 +1,8 @@
 import { Separator } from "@/components/ui/separator";
 import StoreList from "@/features/store/list";
 
+export const revalidate = 60;
+
 export default async function StoreListPage(props: {
   params: Promise<{ event_slug: string }>;
 }) {

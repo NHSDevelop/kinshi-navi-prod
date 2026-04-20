@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getDbAsync } from "@/lib/db/drizzle";
+import { getDb } from "@/lib/db/drizzle";
 import { admins, staffs } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { redirect } from "next/navigation";
@@ -18,7 +18,7 @@ export default async function DashBordHomePage() {
 
   const userId = session.user.id;
 
-  const db = await getDbAsync();
+  const db = await getDb();
 
   const superAdminRows = await db
     .select()
