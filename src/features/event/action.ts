@@ -1,6 +1,6 @@
 "use server";
 
-import { getDb, getDbAsync } from "@/lib/db/drizzle";
+import { getDb, getDb } from "@/lib/db/drizzle";
 import { admins, Event, events, stores } from "@/lib/db/schema";
 import z from "zod";
 import { eq } from "drizzle-orm";
@@ -179,7 +179,7 @@ export async function updateEventConfig(
 
 export async function toActiveEvent(prevState: unknown, formData: FormData) {
   try {
-    const db = getDb();
+    const db = await getDb();
     const eventId = formData.get("eventId") as string;
     const eventRows = await db
       .select()
@@ -210,7 +210,7 @@ export async function toActiveEvent(prevState: unknown, formData: FormData) {
 
 export async function toMainEvent(prevState: unknown, formData: FormData) {
   try {
-    const db = getDb();
+    const db = await getDb();
     const eventId = formData.get("eventId") as string;
     const eventRows = await db
       .select()
@@ -259,7 +259,7 @@ export async function toMainEvent(prevState: unknown, formData: FormData) {
 }
 
 export async function getMainEvent(): Promise<Event | null> {
-  const db = await getDbAsync();
+  const db = await getDb();
   const eventRows = await db
     .select()
     .from(events)

@@ -1,13 +1,13 @@
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { events } from "@/lib/db/schema";
-import { getDbAsync } from "@/lib/db/drizzle";
+import { getDb } from "@/lib/db/drizzle";
 import EventSelectLink from "@/features/event/components/select-link";
 import Link from "next/link";
 import { AiFillPlusCircle } from "react-icons/ai";
 
 export default async function SuperAdminHomePage() {
-  const db = await getDbAsync();
+  const db = await getDb();
 
   const eventRows = await db.select().from(events);
   return (

@@ -23,6 +23,10 @@
       "binding": "MY_BUCKET",
       "bucket_name": "kinshi-navi-prod",
     },
+    {
+      "binding": "NEXT_CACHE_R2_BUCKET",
+      "bucket_name": "kinshi-navi-cache",
+    },
   ],
 
   "observability": {

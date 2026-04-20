@@ -1,4 +1,4 @@
-import { getDbAsync } from "@/lib/db/drizzle";
+import { getDb } from "@/lib/db/drizzle";
 import { admins } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { auth } from "@/lib/auth";
@@ -18,7 +18,7 @@ export default async function SuperAdminLayout({
 
   const userId = session.user.id;
 
-  const db = await getDbAsync();
+  const db = await getDb();
 
   const rows = await db
     .select({ userId: admins.userId })

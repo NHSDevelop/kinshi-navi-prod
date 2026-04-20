@@ -1,7 +1,7 @@
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import { getCurrentUser } from "@/features/auth/anonymous/action";
 import IssueTicket from "@/features/store/attraction/ticket/issue";
-import { getDbAsync } from "@/lib/db/drizzle";
+import { getDb } from "@/lib/db/drizzle";
 import { attractions, stores } from "@/lib/db/schema";
 
 import { eq } from "drizzle-orm";
@@ -9,7 +9,7 @@ import { eq } from "drizzle-orm";
 export default async function StaffIssueTicketPage(props: {
   params: Promise<{ store_id: string }>;
 }) {
-  const db = await getDbAsync();
+  const db = await getDb();
   const user = await getCurrentUser();
   if (!user) {
     return <NotFoundPrompt context="ユーザー" />;
