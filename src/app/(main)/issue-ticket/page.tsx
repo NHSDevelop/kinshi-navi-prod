@@ -5,6 +5,8 @@ import { getMainEvent } from "@/features/event/action";
 import IssueTicket from "@/features/store/attraction/ticket/issue";
 import { notFound } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 export default async function TicketIssuePage() {
   const event = await getMainEvent();
   if (!event) {

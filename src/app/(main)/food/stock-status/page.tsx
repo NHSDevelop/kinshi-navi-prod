@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { getMainEvent } from "@/features/event/action";
 import { RoutePollingRefresh } from "@/components/polling/route-polling-refresh";
 
+export const dynamic = "force-dynamic";
+
 export default async function FoodStockStatusPage() {
   const event = await getMainEvent();
   if (!event) {

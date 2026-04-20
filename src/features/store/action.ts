@@ -376,6 +376,7 @@ export async function deleteStore(prevState: unknown, formData: FormData) {
 export async function toActiveStore(prevState: unknown, formData: FormData) {
   try {
     const db = await getDb();
+    const storeId = formData.get("storeId") as string;
     const storeRows = await db
       .select()
       .from(stores)

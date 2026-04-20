@@ -1,6 +1,6 @@
 "use server";
 
-import { getDb, getDb } from "@/lib/db/drizzle";
+import { getDb } from "@/lib/db/drizzle";
 import { admins, Event, events, stores } from "@/lib/db/schema";
 import z from "zod";
 import { eq } from "drizzle-orm";

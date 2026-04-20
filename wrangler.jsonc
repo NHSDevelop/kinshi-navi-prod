@@ -24,7 +24,7 @@
       "bucket_name": "kinshi-navi-prod",
     },
     {
-      "binding": "NEXT_CACHE_R2_BUCKET",
+      "binding": "NEXT_INC_CACHE_R2_BUCKET",
       "bucket_name": "kinshi-navi-cache",
     },
   ],
