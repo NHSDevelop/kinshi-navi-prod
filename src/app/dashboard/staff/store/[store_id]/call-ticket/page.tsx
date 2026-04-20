@@ -1,6 +1,6 @@
 import { Separator } from "@/components/ui/separator";
 import FirstCallTicketForm from "@/features/store/attraction/ticket/first-call-form";
-import { getDb } from "@/lib/db/drizzle";
+import { getDbAsync } from "@/lib/db/drizzle";
 import { attractions } from "@/lib/db/schema";
 
 import { eq } from "drizzle-orm";
@@ -8,7 +8,7 @@ import { eq } from "drizzle-orm";
 export default async function CallTicketPage(props: {
   params: Promise<{ store_id: string }>;
 }) {
-  const db = await getDb();
+  const db = await getDbAsync();
   const { store_id } = await props.params;
   const attractionRows = await db
     .select()

@@ -1,14 +1,14 @@
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import { Separator } from "@/components/ui/separator";
 import OrganizationSelectLink from "@/features/organization/components/select-link";
-import { getDb } from "@/lib/db/drizzle";
+import { getDbAsync } from "@/lib/db/drizzle";
 import { AiFillPlusCircle } from "react-icons/ai";
 import { Button } from "@/components/ui/button";
 
 import Link from "next/link";
 
 export default async function SuperAdminHomePage() {
-  const db = await getDb();
+  const db = await getDbAsync();
   const organizationRows = await db.query.organizations.findMany();
   return (
     <div className="space-y-4 lg:space-y-8">
