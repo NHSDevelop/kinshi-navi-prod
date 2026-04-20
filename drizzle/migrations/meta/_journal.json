@@ -57,6 +57,13 @@
       "when": 1776579239831,
       "tag": "0007_needy_vector",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1776666448153,
+      "tag": "0008_massive_obadiah_stane",
+      "breakpoints": true
     }
   ]
 }

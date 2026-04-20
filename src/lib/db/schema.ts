@@ -1,6 +1,7 @@
 import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { uniqueIndex } from "drizzle-orm/sqlite-core";
 
 export const storeTypeValues = ["ATTRACTION", "FOOD"] as const;
 export type StoreType = (typeof storeTypeValues)[number];
@@ -388,6 +389,38 @@ export const systemInfos = sqliteTable("system_infos", {
 
 export type SystemInfo = typeof systemInfos.$inferSelect;
 
+export const storeVotes = sqliteTable(
+  "store_votes",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => createId()),
+    storeId: text("storeId")
+      .notNull()
+      .references(() => stores.id, { onDelete: "cascade" }),
+    storeType: text("storeType", { enum: storeTypeValues })
+      .$type<StoreType>()
+      .notNull(),
+    userId: text("userId")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: integer("createdAt", { mode: "timestamp_ms" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+    updatedAt: integer("updatedAt", { mode: "timestamp_ms" })
+      .notNull()
+      .$defaultFn(() => new Date())
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => ({
+    userStoreTypeUnique: uniqueIndex(
+      "store_votes_user_id_store_type_unique",
+    ).on(table.userId, table.storeType),
+  }),
+);
+
+export type StoreVote = typeof storeVotes.$inferSelect;
+
 export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(sessions),
   accounts: many(accounts),
@@ -395,6 +428,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   staffs: many(staffs),
   tickets: many(tickets),
   pushSubscriptions: many(pushSubscriptions),
+  storeVotes: many(storeVotes),
 }));
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
@@ -436,6 +470,18 @@ export const storesRelations = relations(stores, ({ one, many }) => ({
   }),
   admins: many(admins),
   staffs: many(staffs),
+  storeVotes: many(storeVotes),
+}));
+
+export const storeVotesRelations = relations(storeVotes, ({ one }) => ({
+  user: one(users, {
+    fields: [storeVotes.userId],
+    references: [users.id],
+  }),
+  store: one(stores, {
+    fields: [storeVotes.storeId],
+    references: [stores.id],
+  }),
 }));
 
 export const attractionsRelations = relations(attractions, ({ one, many }) => ({
