@@ -1,16 +1,14 @@
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import { Separator } from "@/components/ui/separator";
-import { getDb } from "@/lib/db/drizzle";
+import { getDbAsync } from "@/lib/db/drizzle";
 import { systemInfos } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-
-export const revalidate = 3600;
 
 export default async function SystemInfoPage(props: {
   params: Promise<{ systemInfo_id: string }>;
 }) {
   const { systemInfo_id } = await props.params;
-  const db = await getDb();
+  const db = await getDbAsync();
   const systemInfoRows = await db
     .select()
     .from(systemInfos)

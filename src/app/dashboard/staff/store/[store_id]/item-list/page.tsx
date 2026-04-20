@@ -1,7 +1,7 @@
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import { Separator } from "@/components/ui/separator";
 import ItemList from "@/features/store/food/item/list";
-import { getDb } from "@/lib/db/drizzle";
+import { getDbAsync } from "@/lib/db/drizzle";
 import { foods } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
@@ -10,7 +10,7 @@ export default async function ItemListPage(props: {
 }) {
   const { store_id } = await props.params;
 
-  const db = await getDb();
+  const db = await getDbAsync();
   const foodRows = await db
     .select()
     .from(foods)

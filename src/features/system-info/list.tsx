@@ -1,11 +1,11 @@
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
-import { getDb } from "@/lib/db/drizzle";
+import { getDbAsync } from "@/lib/db/drizzle";
 import { systemInfos } from "@/lib/db/schema";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import Link from "next/link";
 
 export async function SystemInfoList() {
-  const db = await getDb();
+  const db = await getDbAsync();
   const systemInfoRows = await db.select().from(systemInfos);
   return (
     <>

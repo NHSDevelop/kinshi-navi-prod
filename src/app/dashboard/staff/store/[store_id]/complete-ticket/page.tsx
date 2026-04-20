@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import CompleteTicket from "@/features/store/attraction/ticket/complete";
-import { getDb } from "@/lib/db/drizzle";
+import { getDbAsync } from "@/lib/db/drizzle";
 import { attractions } from "@/lib/db/schema";
 
 import { eq } from "drizzle-orm";
@@ -10,7 +10,7 @@ import Link from "next/link";
 export default async function CallTicketPage(props: {
   params: Promise<{ store_id: string }>;
 }) {
-  const db = await getDb();
+  const db = await getDbAsync();
   const { store_id } = await props.params;
   const attractionRows = await db
     .select()

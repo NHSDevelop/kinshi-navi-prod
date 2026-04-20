@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getDb } from "@/lib/db/drizzle";
+import { getDbAsync } from "@/lib/db/drizzle";
 import { events } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +12,7 @@ interface EventInfoProps {
 }
 
 export default async function EventInfo({ eventId }: EventInfoProps) {
-  const db = await getDb();
+  const db = await getDbAsync();
   const eventRows = await db
     .select()
     .from(events)

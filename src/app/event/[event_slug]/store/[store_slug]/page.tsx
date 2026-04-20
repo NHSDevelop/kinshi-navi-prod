@@ -7,8 +7,6 @@ import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import FoodInfo from "@/features/store/food/info";
 import ItemList from "@/features/store/food/item/list";
 
-export const revalidate = 60;
-
 export default async function StorePage(props: {
   params: Promise<{ store_slug: string }>;
 }) {
