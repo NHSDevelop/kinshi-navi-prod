@@ -401,9 +401,12 @@ export const storeVotes = sqliteTable(
     storeType: text("storeType", { enum: storeTypeValues })
       .$type<StoreType>()
       .notNull(),
-    userId: text("userId")
+    eventId: text("eventId")
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+      .references(() => events.id, { onDelete: "cascade" }),
+    userId: text("userId").references(() => users.id, {
+      onDelete: "set null",
+    }),
     createdAt: integer("createdAt", { mode: "timestamp_ms" })
       .notNull()
       .$defaultFn(() => new Date()),
@@ -415,7 +418,7 @@ export const storeVotes = sqliteTable(
   (table) => ({
     userStoreTypeUnique: uniqueIndex(
       "store_votes_user_id_store_type_unique",
-    ).on(table.userId, table.storeType),
+    ).on(table.userId, table.storeType, table.eventId),
   }),
 );
 
@@ -481,6 +484,10 @@ export const storeVotesRelations = relations(storeVotes, ({ one }) => ({
   store: one(stores, {
     fields: [storeVotes.storeId],
     references: [stores.id],
+  }),
+  event: one(events, {
+    fields: [storeVotes.eventId],
+    references: [events.id],
   }),
 }));
 

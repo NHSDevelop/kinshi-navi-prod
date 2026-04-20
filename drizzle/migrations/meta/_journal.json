@@ -64,6 +64,20 @@
       "when": 1776666448153,
       "tag": "0008_massive_obadiah_stane",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1776692231444,
+      "tag": "0009_sudden_maggott",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1776693265733,
+      "tag": "0010_even_hiroim",
+      "breakpoints": true
     }
   ]
 }

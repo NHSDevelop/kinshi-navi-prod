@@ -4,12 +4,6 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 export default async function EventTopPage() {
-  /*const event = await getMainEvent();
-
-  if (!event) {
-    notFound();
-  }*/
-
   return (
     <div className="space-y-4 lg:space-y-8">
       <h1 className="text-lg md:text-xl font-bold">トップページ</h1>
@@ -27,6 +21,12 @@ export default async function EventTopPage() {
           </Button>
           <Button asChild variant="card" className="shrink-0">
             <Link href={`/food/stock-status`}>模擬店の在庫状況</Link>
+          </Button>
+          <Button asChild variant="card" className="shrink-0">
+            <Link href={`/vote/attraction`}>企画の人気投票（仮）</Link>
+          </Button>
+          <Button asChild variant="card" className="shrink-0">
+            <Link href={`/vote/food`}>模擬店の人気投票（仮）</Link>
           </Button>
         </div>
         <ScrollBar orientation="horizontal" />

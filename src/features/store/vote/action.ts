@@ -1,8 +1,14 @@
 "use server";
 
 import { getDb } from "@/lib/db/drizzle";
-import { storeTypeValues, type StoreType, storeVotes } from "@/lib/db/schema";
+import {
+  storeTypeValues,
+  type StoreType,
+  stores,
+  storeVotes,
+} from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
+import { getMainEvent } from "@/features/event/action";
 
 function isStoreType(value: unknown): value is StoreType {
   return (
@@ -13,6 +19,14 @@ function isStoreType(value: unknown): value is StoreType {
 export async function createStoreVote(prevState: unknown, formData: FormData) {
   try {
     const db = await getDb();
+    const mainEvent = await getMainEvent();
+    if (!mainEvent) {
+      return {
+        success: false,
+        message: "メインイベントが設定されていません。",
+      };
+    }
+
     const userId = formData.get("userId") as string;
     const storeId = formData.get("storeId") as string;
     const storeType = formData.get("storeType");
@@ -20,8 +34,26 @@ export async function createStoreVote(prevState: unknown, formData: FormData) {
     if (!isStoreType(storeType)) {
       return {
         success: false,
-        message: null,
-        error: "店舗種別が不正です。",
+        message: "店舗種別が不正です。",
+      };
+    }
+
+    const storeRows = await db
+      .select({ id: stores.id })
+      .from(stores)
+      .where(
+        and(
+          eq(stores.id, storeId),
+          eq(stores.eventId, mainEvent.id),
+          eq(stores.storeType, storeType),
+        ),
+      )
+      .limit(1);
+
+    if (!storeRows[0]) {
+      return {
+        success: false,
+        message: "投票対象の店舗が不正です。",
       };
     }
 
@@ -29,20 +61,25 @@ export async function createStoreVote(prevState: unknown, formData: FormData) {
       .select()
       .from(storeVotes)
       .where(
-        and(eq(storeVotes.userId, userId), eq(storeVotes.storeType, storeType)),
+        and(
+          eq(storeVotes.userId, userId),
+          eq(storeVotes.storeType, storeType),
+          eq(storeVotes.eventId, mainEvent.id),
+        ),
       );
 
     if (voteRows.length > 0) {
       return {
         success: false,
-        message: null,
-        error: "この店舗には既に投票済みです。",
+        message:
+          "投票はユーザー一人につき企画・模擬店ごとに一回しかできません。",
       };
     }
     await db.insert(storeVotes).values({
       userId: userId,
       storeId: storeId,
       storeType: storeType,
+      eventId: mainEvent.id,
     });
     return {
       success: true,

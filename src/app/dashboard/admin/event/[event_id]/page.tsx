@@ -129,6 +129,12 @@ export default async function AdminEventPage(props: {
         <NotFoundPrompt context="該当する管理者" />
       )}
       <Separator />
+      <Button asChild variant="card">
+        <Link href={`/dashboard/admin/event/${event_id}/vote-result`}>
+          投票結果を見る
+        </Link>
+      </Button>
+      <Separator />
       <DeleteEvent eventId={event_id} pushUrl="/dashboard" />
     </div>
   );
