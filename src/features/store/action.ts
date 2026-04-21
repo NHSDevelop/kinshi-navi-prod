@@ -34,6 +34,7 @@ export type StoreState = {
 
 export type UpdateStoreConfigZodErrors = {
   name?: string[];
+  imageUrl?: string[];
   startedAtDate?: string[];
   startedAtTime?: string[];
   finishedAtDate?: string[];
@@ -43,6 +44,7 @@ export type UpdateStoreConfigZodErrors = {
 
 export type UpdateStoreConfigState = {
   name?: string;
+  imageUrl?: string;
   startedAtDate?: string;
   startedAtTime?: string;
   finishedAtDate?: string;
@@ -138,6 +140,7 @@ export async function createStore(
 
 const storeConfigSchema = z.object({
   name: z.string().min(1, "必須項目です"),
+  imageUrl: z.string().url("画像URLの形式が正しくありません").nullable(),
   isActive: z.boolean(),
   startedAtDate: z.date().nullable(),
   startedAtTime: z
@@ -159,6 +162,9 @@ export async function updateStoreConfig(
   const isActiveRaw = formData.get("isActive");
   const validationResult = storeConfigSchema.safeParse({
     name: formData.get("name"),
+    imageUrl: formData.get("imageUrl")
+      ? (formData.get("imageUrl") as string)
+      : null,
     isActive: isActiveRaw === "true" || isActiveRaw === "on",
     startedAtDate: formData.get("startedAtDate")
       ? new Date(formData.get("startedAtDate") as string)
@@ -180,6 +186,7 @@ export async function updateStoreConfig(
     console.log(validationResult.error);
     return {
       name: (formData.get("name") as string) || "",
+      imageUrl: (formData.get("imageUrl") as string) || "",
       startedAtDate: (formData.get("startedAtDate") as string) || "",
       startedAtTime: (formData.get("startedAtTime") as string) || "",
       finishedAtDate: (formData.get("finishedAtDate") as string) || "",
@@ -193,6 +200,7 @@ export async function updateStoreConfig(
   }
   const {
     name,
+    imageUrl,
     isActive,
     startedAtDate,
     startedAtTime,
@@ -208,6 +216,7 @@ export async function updateStoreConfig(
       .update(stores)
       .set({
         name: name,
+        imageUrl: imageUrl,
         isActive: isActive,
         startedAtDate: startedAtDate,
         startedAtTime: startedAtTime,

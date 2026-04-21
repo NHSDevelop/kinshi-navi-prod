@@ -14,6 +14,7 @@ export const storeCreateSchema = z.object({
 
 export const storeUpdateConfigSchema = z.object({
   name: z.string().min(1, "店舗名は必須です"),
+  imageUrl: z.string().url("画像URLの形式が正しくありません").nullable(),
   isActive: z.boolean(),
   startedAtDate: z.date().nullable(),
   startedAtTime: z

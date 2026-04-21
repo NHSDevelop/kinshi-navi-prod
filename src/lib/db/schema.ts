@@ -116,6 +116,7 @@ export const stores = sqliteTable("stores", {
     .$defaultFn(() => createId()),
   slug: text("slug").notNull(),
   name: text("name").notNull(),
+  imageUrl: text("imageUrl"),
   isActive: integer("isActive", { mode: "boolean" }).notNull().default(false),
   startedAtDate: integer("startedAtDate", { mode: "timestamp_ms" }),
   startedAtTime: text("startedAtTime"),

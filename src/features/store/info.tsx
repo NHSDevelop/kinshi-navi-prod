@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { STORE_TYPE_MAP } from "@/lib/type";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
+import Image from "next/image";
 
 interface StoreInfoProps {
   storeId: string;
@@ -59,18 +60,30 @@ export default async function StoreInfo({ storeId }: StoreInfoProps) {
             )}
           </div>
         </CardHeader>
-        <CardContent className="flex gap-2">
-          <div className="flex flex-col items-start gap-4">
-            <p>名前：</p>
-            <p>開催日：</p>
-            <p>開催時間：</p>
-            <p>詳細：</p>
-          </div>
-          <div className="flex flex-col items-start gap-4">
-            <p>{store.name}</p>
-            <p>{dateRange}</p>
-            <p>{timeRange}</p>
-            <p>{store.description ?? "なし"}</p>
+        <CardContent className="flex flex-col gap-4 md:gap-8 md:flex-row md:items-start">
+          {store.imageUrl && (
+            <Image
+              src={store.imageUrl}
+              alt={`${store.name}の画像`}
+              width={600}
+              height={800}
+              unoptimized
+              className="h-auto w-full max-w-xs rounded-md border md:max-w-sm"
+            />
+          )}
+          <div className="flex gap-2 md:flex-1">
+            <div className="flex flex-col items-start gap-4">
+              <p>名前：</p>
+              <p>開催日：</p>
+              <p>開催時間：</p>
+              <p>詳細：</p>
+            </div>
+            <div className="flex flex-col items-start gap-4">
+              <p>{store.name}</p>
+              <p>{dateRange}</p>
+              <p>{timeRange}</p>
+              <p>{store.description ?? "なし"}</p>
+            </div>
           </div>
         </CardContent>
       </Card>
