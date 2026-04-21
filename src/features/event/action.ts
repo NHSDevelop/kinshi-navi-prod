@@ -122,7 +122,6 @@ export async function updateEventConfig(
       : null,
   });
   if (!validationResult.success) {
-    console.log(validationResult.error);
     return {
       name: (formData.get("name") as string) || "",
       startedAtDate: (formData.get("startedAtDate") as string) || "",

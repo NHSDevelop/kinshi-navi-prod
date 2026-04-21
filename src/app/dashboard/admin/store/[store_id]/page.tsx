@@ -86,7 +86,7 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
         <Button asChild variant="card">
           <div className="flex gap-2">
             <AiFillEdit />
-            <Link href={`/dashboard/admin/store/${store_id}/edit-config`}>
+            <Link href={`/dashboard/admin/store/${store_id}/edit-config/store`}>
               設定を編集
             </Link>
           </div>
@@ -100,7 +100,19 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
       <Separator />
       {attractionRows?.length > 0 && (
         <div className="space-y-4 lg:space-y-8">
-          <h2 className="text-lg">企画の情報</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg">企画の情報</h2>
+            <Button asChild variant="card">
+              <div className="flex gap-2">
+                <AiFillEdit />
+                <Link
+                  href={`/dashboard/admin/store/${store_id}/edit-config/attraction`}
+                >
+                  設定を編集
+                </Link>
+              </div>
+            </Button>
+          </div>
           <AttractionInfo attractionId={attractionRows[0].id} />
         </div>
       )}

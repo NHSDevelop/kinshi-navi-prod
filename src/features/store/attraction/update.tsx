@@ -4,17 +4,17 @@ import { eq } from "drizzle-orm";
 import UpdateAttractionConfigForm from "./update-form";
 
 interface UpdateAttractionConfigProps {
-  attractionId: string;
+  storeId: string;
 }
 
 export default async function UpdateAttractionConfig({
-  attractionId,
+  storeId,
 }: UpdateAttractionConfigProps) {
   const db = await getDb();
   const rows = await db
     .select()
     .from(attractions)
-    .where(eq(attractions.id, attractionId))
+    .where(eq(attractions.storeId, storeId))
     .limit(1);
   const attraction = rows[0];
   if (!attraction) {

@@ -49,7 +49,6 @@ export async function createInvite(prevState: unknown, formData: FormData) {
     });
 
     if (validationResult.error) {
-      console.log(validationResult.error);
       return {
         success: false,
         message: null,

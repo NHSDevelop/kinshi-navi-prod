@@ -26,8 +26,16 @@ export default async function AttractionInfo({
         <CardTitle>企画の情報</CardTitle>
       </CardHeader>
       <CardContent>
-        <p>一組当たりのプレイ時間:{attraction.playTime}分</p>
-        <p>一組当たりの最大人数:{attraction.peopleCapacity}人</p>
+        <div className="flex gap-2 md:flex-1">
+          <div className="flex flex-col items-start gap-4">
+            <p>一組当たりのプレイ時間：</p>
+            <p>一組当たりの最大人数：</p>
+          </div>
+          <div className="flex flex-col items-start gap-4">
+            <p>{attraction.playTime}分</p>
+            <p>{attraction.peopleCapacity}人</p>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

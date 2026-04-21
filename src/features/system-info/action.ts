@@ -37,7 +37,6 @@ export async function createSystemInfo(prevState: unknown, formData: FormData) {
     });
     //TODO 仮実装
     if (validationResult.error) {
-      console.log(validationResult.error);
       return {
         success: false,
         message: null,
@@ -77,7 +76,6 @@ export async function updateSystemInfo(
     });
 
     if (!validationResult.success) {
-      console.log(validationResult.error);
       return {
         title: (formData.get("title") as string) || "",
         meta: (formData.get("meta") as string) || "",

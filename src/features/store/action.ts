@@ -183,7 +183,6 @@ export async function updateStoreConfig(
       : null,
   });
   if (!validationResult.success) {
-    console.log(validationResult.error);
     return {
       name: (formData.get("name") as string) || "",
       imageUrl: (formData.get("imageUrl") as string) || "",
