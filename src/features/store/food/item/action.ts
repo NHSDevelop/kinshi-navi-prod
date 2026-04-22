@@ -1,7 +1,7 @@
 "use server";
 
 import z from "zod";
-import { foods, items } from "@/lib/db/schema";
+import { foods, Item, items } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { getDb } from "@/lib/db/drizzle";
 
@@ -173,4 +173,18 @@ export async function updateItemConfig(
       error: "サーバーエラーが発生しました",
     };
   }
+}
+
+export async function getItemsByFoodId(foodId: string): Promise<Item[] | null> {
+  try {
+    const db = await getDb();
+    const itemRows = await db
+      .select()
+      .from(items)
+      .where(eq(items.foodId, foodId));
+    return itemRows;
+  } catch (error) {
+    console.log(error);
+  }
+  return null;
 }

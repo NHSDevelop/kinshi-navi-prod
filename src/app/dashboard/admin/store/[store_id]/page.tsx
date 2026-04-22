@@ -28,6 +28,7 @@ import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import DeleteStore from "@/features/store/delete";
 import ToActiveStore from "@/features/store/to-active";
 import { notFound } from "next/navigation";
+import ItemSelectLink from "@/features/store/food/item/components/select-link";
 
 interface AdminStorePageProps {
   params: Promise<{ store_id: string }>;
@@ -56,6 +57,7 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
     .from(foods)
     .where(eq(foods.storeId, store_id))
     .limit(1);
+
   const adminRows = await db
     .select({
       id: admins.id,
@@ -152,6 +154,16 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
               </Link>
             </Button>
           </div>
+          <Separator />
+          <h3 className="text-lg">商品設定の更新</h3>
+          <ItemSelectLink
+            foodId={foodRows[0].id}
+            href={`/dashboard/admin/store/${store_id}/edit-item`}
+            context="商品の設定を編集"
+          />
+          <Separator />
+          <h3 className="text-lg">商品一覧</h3>
+          <Separator />
           <ItemList foodId={foodRows[0].id} storeId={store_id} />
         </div>
       )}
