@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import FoodInfo from "@/features/store/food/info";
 import ItemList from "@/features/store/food/item/list";
+import { Separator } from "@/components/ui/separator";
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +53,7 @@ export default async function StorePage(props: {
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-bold">{storeRows[0].name} | 店舗ページ</h1>
+      <Separator />
       <StoreInfo storeId={storeRows[0].id} />
       {storeRows[0].storeType === "ATTRACTION" && attraction && (
         <AttractionInfo attractionId={attraction.id} />

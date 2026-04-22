@@ -82,6 +82,9 @@ export function InstallPrompt() {
             <p className="text-sm text-muted-foreground">
               インストールは数十秒で終わり、プッシュ通知を受け取れるようになります。
             </p>
+            <p className="text-sm text-muted-foreground">
+              インストールする際、チケットなどのデータはブラウザから受け継がれませんのでご注意ください。
+            </p>
             <div className="flex items-center gap-2">
               <Button onClick={handleInstall} disabled={isInstalling}>
                 {isInstalling ? "確認中..." : "インストールする"}

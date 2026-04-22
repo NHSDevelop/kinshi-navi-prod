@@ -82,4 +82,4 @@ Kinshi Navi運営事務局（以下、「当方」といいます。）は、本
 本ポリシーに関するお問い合わせは、下記の窓口までお願いいたします。
 
 Kinshi Navi運営事務局  
-Eメールアドレス：support@gakusai-hub.jp
+Eメールアドレス：kinshiapp2@gmail.com

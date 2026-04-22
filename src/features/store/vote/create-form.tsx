@@ -11,7 +11,7 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AiFillClockCircle } from "react-icons/ai";
+import { AiOutlineCloseCircle } from "react-icons/ai";
 import { MessagePrompt } from "@/components/prompt/message-prompt";
 import { ErrorPrompt } from "@/components/prompt/error-prompt";
 
@@ -28,15 +28,36 @@ export default function CreateStoreVoteForm({
 }: Props) {
   const [state, formAction, isPending] = useActionState(createStoreVote, null);
   const [chosenStoreId, setChosenStoreId] = useState<string>("");
-  const [chosenStoreImageUrl, setChosenStoreImageUrl] = useState<string | null>(
-    "",
-  );
+  const [chosenStoreName, setChosenStorename] = useState<string>("");
+  const [chosenStoreImageUrl, setChosenStoreImageUrl] = useState<string>("");
   const filterdStores = stores.filter((store) => store.storeType === storeType);
 
   const handleClick = (store: Store) => {
     setChosenStoreId(store.id);
-    setChosenStoreImageUrl(store.imageUrl);
+    setChosenStorename(store.name);
+    if (store.imageUrl) {
+      setChosenStoreImageUrl(store.imageUrl);
+    } else {
+      setChosenStoreImageUrl("default");
+    }
   };
+
+  const handleCancel = () => {
+    setChosenStoreId("");
+    setChosenStorename("");
+    setChosenStoreImageUrl("");
+  };
+
+  const selectedImageSrc =
+    chosenStoreImageUrl === ""
+      ? "/images/choose-store.png"
+      : chosenStoreImageUrl === "default"
+        ? "/images/not-found-store-image.png"
+        : chosenStoreImageUrl;
+
+  const selectedImageWidth = chosenStoreImageUrl === "default" ? 200 : 300;
+  const selectedImageHeight = chosenStoreImageUrl === "default" ? 300 : 400;
+
   return (
     <div className="flex flex-col gap-8 items-center">
       <Card className="flex w-full flex-col items-center justify-center">
@@ -46,29 +67,34 @@ export default function CreateStoreVoteForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={formAction}>
+          <form
+            action={formAction}
+            className="flex flex-col justify-center items-center gap-2"
+          >
             <input type="hidden" name="userId" value={userId} />
             <input type="hidden" name="storeType" value={storeType} />
             <input type="hidden" name="storeId" value={chosenStoreId} />
-            {chosenStoreImageUrl ? (
-              <Image
-                src={chosenStoreImageUrl}
-                alt={`$選択中の画像`}
-                width={300}
-                height={400}
-                loading="eager"
-                className="object-contain rounded-md"
-              />
-            ) : (
-              <Image
-                src="/images/choose-store.png"
-                alt={`$選択中の画像`}
-                width={300}
-                height={400}
-                loading="eager"
-                className="object-contain rounded-md"
-              />
-            )}
+
+            <Image
+              src={selectedImageSrc}
+              alt="選択中の画像"
+              width={selectedImageWidth}
+              height={selectedImageHeight}
+              loading="eager"
+              className="object-contain rounded-md"
+            />
+
+            <p className="text-lg">
+              選択中の店舗：{chosenStoreName ? chosenStoreName : "なし"}
+            </p>
+
+            <Button type="button" onClick={handleCancel}>
+              <div className="flex max-w-ws">
+                <AiOutlineCloseCircle />
+                <p>選択を解除</p>
+              </div>
+            </Button>
+
             <Button
               type="submit"
               disabled={isPending}
@@ -78,6 +104,7 @@ export default function CreateStoreVoteForm({
               {isPending ? "投票中" : "投票する"}
             </Button>
           </form>
+
           {state?.success && state?.message && (
             <MessagePrompt message={state.message} />
           )}
@@ -86,36 +113,35 @@ export default function CreateStoreVoteForm({
           )}
         </CardContent>
       </Card>
+
       <Card className="w-full grid grid-cols-3 md:grid-cols-4 p-4 gap-2">
         {filterdStores.map((store) => (
           <div
             key={store.id}
-            className="flex flex-col md:gap-4 justify-center items-center border rounded-md p-2"
+            className="flex flex-col justify-center items-center border-2 rounded-md p-2 md:p-4"
           >
-            {store.imageUrl && (
-              <button onClick={() => handleClick(store)}>
-                {store.imageUrl ? (
-                  <Image
-                    src={store.imageUrl}
-                    alt={`${store.name}の画像`}
-                    width={200}
-                    height={300}
-                    loading="eager"
-                    className="object-contain rounded-md"
-                  />
-                ) : (
-                  <Image
-                    src="/images/not-found-store-image.png"
-                    alt={`$選択中の画像`}
-                    width={200}
-                    height={300}
-                    loading="eager"
-                    className="object-contain rounded-md"
-                  />
-                )}
-              </button>
-            )}
-            <p className="md:text-lg">{store.name}</p>
+            <button onClick={() => handleClick(store)}>
+              {store.imageUrl ? (
+                <Image
+                  src={store.imageUrl}
+                  alt={`${store.name}の画像`}
+                  width={200}
+                  height={300}
+                  loading="eager"
+                  className="object-contain rounded-md"
+                />
+              ) : (
+                <Image
+                  src="/images/not-found-store-image.png"
+                  alt="画像なし"
+                  width={200}
+                  height={300}
+                  loading="eager"
+                  className="object-contain rounded-md"
+                />
+              )}
+            </button>
+            <p className="mt-2 md:mt-4 text-sm md:text-lg">{store.name}</p>
           </div>
         ))}
       </Card>

@@ -98,48 +98,48 @@ export default function RootLayout({
               </div>
               <div className="flex gap-8 md:gap-16  me-4">
                 <div>
-                  <h2 className="mb-6 md:text-lg font-semibold text-heading uppercase">
+                  <h2 className="mb-6 text-sm md:text-lg font-semibold text-heading uppercase">
                     サイトマップ
                   </h2>
                   <ul className="flex flex-col font-medium gap-2">
                     <li>
-                      <Link href={"/"} className="text-sm md:text-base">
+                      <Link href={"/"} className="text-xs md:text-base">
                         サイトトップ
                       </Link>
                     </li>
                   </ul>
                 </div>
                 <div>
-                  <h2 className="mb-6 md:text-lg font-semibold text-heading uppercase">
+                  <h2 className="mb-6 text-sm md:text-lg font-semibold text-heading uppercase">
                     ガイド
                   </h2>
                   <ul className="flex flex-col font-medium gap-2">
                     <li>
-                      <Link href={"/help"} className="text-sm md:text-base">
+                      <Link href={"/help"} className="text-xs md:text-base">
                         使い方ガイド
                       </Link>
                     </li>
                     <li>
-                      <Link href={"/terms"} className="text-sm md:text-base">
+                      <Link href={"/terms"} className="text-xs md:text-base">
                         利用規約
                       </Link>
                     </li>
                     <li>
-                      <Link href={"/policy"} className="text-sm md:text-base">
+                      <Link href={"/policy"} className="text-xs md:text-base">
                         プライバシーポリシー
                       </Link>
                     </li>
                   </ul>
                 </div>
                 <div>
-                  <h2 className="mb-6 md:text-lg font-semibold text-heading uppercase">
+                  <h2 className="mb-6 text-sm md:text-lg font-semibold text-heading uppercase">
                     管理者の方へ
                   </h2>
                   <ul className="flex flex-col font-medium gap-2">
                     <li>
                       <Link
                         href={"/dashboard"}
-                        className="text-sm md:text-base"
+                        className="text-xs md:text-base"
                       >
                         管理者ページ
                       </Link>
@@ -147,7 +147,7 @@ export default function RootLayout({
                     <li>
                       <Link
                         href={"/help/admin"}
-                        className="text-sm md:text-base"
+                        className="text-xs md:text-base"
                       >
                         管理者向けガイド
                       </Link>

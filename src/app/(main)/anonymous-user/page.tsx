@@ -6,6 +6,8 @@ import DeleteAnonymousUser from "@/features/auth/anonymous/delete";
 import { Separator } from "@/components/ui/separator";
 import { redirect } from "next/navigation";
 import { InstallPrompt } from "@/features/push/install";
+import { HelpPrompt } from "@/components/prompt/help";
+import ReloadButton from "@/components/polling/reload-button";
 
 export default async function AnonymousUserPage() {
   const user = await getCurrentUser();
@@ -23,7 +25,28 @@ export default async function AnonymousUserPage() {
       <InstallPrompt />
       <PushNotificationManager userId={user.id} />
       <Separator />
-      <h2 className="text-lg md:text-xl font-bold">取得したチケット</h2>
+      <div className="flex justify-between  items-center">
+        <h2 className="text-lg md:text-xl font-bold">取得したチケット</h2>
+        <HelpPrompt title="チケットについて">
+          <ul className="w-auto list-disc space-y-4">
+            <li className="text-sm">
+              チケットが「呼び出し中」になったら、企画の開催場所までお越しください。
+            </li>
+            <li className="text-sm">
+              企画に参加する際は、画面右上のユーザーアイコンから、「ゲストユーザーページ」にあるチケットのQRコードを受付にて係員に表示してください。
+            </li>
+            <li className="text-sm">
+              チケットが呼び出されたかどうかは、このページ以外にも「イベントページ」→「企画の待機状況」からご覧になることができます。
+            </li>
+            <li className="text-sm">
+              呼び出されていてもチケットが「発券済み」の場合は、お手数ですが画面の再読み込みをお願いします。
+            </li>
+            <li className="text-sm">
+              プッシュ通知を購読していると、チケットが呼び出されたときに通知を受け取ることができます。
+            </li>
+          </ul>
+        </HelpPrompt>
+      </div>
       <UserTicketList userId={user.id} />
       <Separator />
       {user.isAnonymous && <DeleteAnonymousUser />}

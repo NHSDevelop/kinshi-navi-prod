@@ -23,10 +23,10 @@ export default async function EventTopPage() {
             <Link href={`/food/stock-status`}>模擬店の在庫状況</Link>
           </Button>
           <Button asChild variant="card" className="shrink-0">
-            <Link href={`/vote/attraction`}>企画の人気投票（仮）</Link>
+            <Link href={`/vote/attraction`}>企画の人気投票</Link>
           </Button>
           <Button asChild variant="card" className="shrink-0">
-            <Link href={`/vote/food`}>模擬店の人気投票（仮）</Link>
+            <Link href={`/vote/food`}>模擬店の人気投票</Link>
           </Button>
         </div>
         <ScrollBar orientation="horizontal" />
