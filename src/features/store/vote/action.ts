@@ -89,8 +89,7 @@ export async function createStoreVote(prevState: unknown, formData: FormData) {
     console.log(error);
     return {
       success: false,
-      message: null,
-      error: "サーバーエラーが発生しました。",
+      message: "サーバーエラーが発生しました。",
     };
   }
 }
