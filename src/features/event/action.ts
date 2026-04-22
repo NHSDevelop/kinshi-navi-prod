@@ -192,7 +192,10 @@ export async function toActiveEvent(prevState: unknown, formData: FormData) {
         message: "該当するイベントが存在しません",
       };
     }
-    await db.update(events).set({ isActive: !event.isActive });
+    await db
+      .update(events)
+      .set({ isActive: !event.isActive })
+      .where(eq(events.id, eventId));
     return {
       success: true,
       message: "操作が完了しました。",
@@ -242,7 +245,10 @@ export async function toMainEvent(prevState: unknown, formData: FormData) {
         isMain: event.isMain,
       };
     }
-    await db.update(events).set({ isMain: !event.isMain });
+    await db
+      .update(events)
+      .set({ isMain: !event.isMain })
+      .where(eq(events.id, eventId));
     return {
       success: true,
       message: "操作が完了しました。",

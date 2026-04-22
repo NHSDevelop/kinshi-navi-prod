@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, startTransition } from "react";
-import { getStoresByFormByEventSlug } from "./action";
+import { getStoresInMainEvent } from "./action";
 import { Field } from "@/components/ui/field";
 import {
   Select,
@@ -39,7 +39,7 @@ export default function StoreList() {
   const [state, formAction, isPending] = useActionState<
     FormState<Store[]>,
     FormData
-  >(getStoresByFormByEventSlug, initialState);
+  >(getStoresInMainEvent, initialState);
 
   useEffect(() => {
     if (hasFetchedInitial.current) return;

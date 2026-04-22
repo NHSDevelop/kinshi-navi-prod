@@ -8,7 +8,7 @@ export default async function IssueStoreAdminInvitePage(props: {
   const { event_id } = await props.params;
   const mainEvent = await getMainEvent();
 
-  if (!mainEvent || mainEvent.id !== event_id) {
+  if (!mainEvent || String(mainEvent.id) !== event_id) {
     notFound();
   }
 

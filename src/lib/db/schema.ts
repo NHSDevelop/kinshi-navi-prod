@@ -92,8 +92,9 @@ export const events = sqliteTable("events", {
     .primaryKey()
     .$defaultFn(() => createId()),
   name: text("name").notNull(),
+  imageUrl: text("imageUrl"),
   isActive: integer("isActive", { mode: "boolean" }).notNull().default(false),
-  isMain: integer("isActive", { mode: "boolean" }).notNull().default(false),
+  isMain: integer("isMain", { mode: "boolean" }).notNull().default(false),
   startedAtDate: integer("startedAtDate", { mode: "timestamp_ms" }),
   startedAtTime: text("startedAtTime"),
   finishedAtDate: integer("finishedAtDate", { mode: "timestamp_ms" }),
@@ -140,7 +141,7 @@ export const stores = sqliteTable("stores", {
 
 export type Store = typeof stores.$inferSelect;
 
-export const attractions = sqliteTable("attracions", {
+export const attractions = sqliteTable("attractions", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => createId()),
@@ -215,6 +216,7 @@ export const items = sqliteTable("items", {
   name: text("name").notNull(),
   stock: integer("stock").notNull().default(0),
   price: integer("price").notNull(),
+  imageUrl: text("imageUrl"),
   foodId: text("foodId")
     .notNull()
     .references(() => foods.id, { onDelete: "cascade" }),

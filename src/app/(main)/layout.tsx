@@ -13,8 +13,9 @@ export default async function MainLayout({
           Kinshi Navi
         </Link>
         <Link
-          href={`/anonymous-user`}
+          href="/anonymous-user"
           className="bg-gray-50 border border-gray-950 rounded-full w-8 h-8 flex items-center justify-center"
+          aria-label="ユーザーページへ"
         >
           <AiOutlineUser />
         </Link>

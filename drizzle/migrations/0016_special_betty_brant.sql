@@ -1,0 +1,1 @@
+ALTER TABLE `events` ADD `isMain` integer DEFAULT false NOT NULL;

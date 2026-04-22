@@ -61,6 +61,9 @@ export default async function StorePage(props: {
       {storeRows[0].storeType === "FOOD" && food && (
         <div className="flex flex-col gap-4 md:gap-8">
           <FoodInfo foodId={food.id} />
+          <Separator />
+          <h2 className="text-lg font-bold">商品一覧</h2>
+          <Separator />
           <ItemList foodId={food.id} />
         </div>
       )}

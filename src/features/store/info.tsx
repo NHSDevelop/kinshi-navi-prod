@@ -60,7 +60,7 @@ export default async function StoreInfo({ storeId }: StoreInfoProps) {
             )}
           </div>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4 md:gap-8 md:flex-row md:items-start">
+        <CardContent className="flex flex-col gap-4 md:gap-8 md:flex-row md:items-center">
           {store.imageUrl ? (
             <Image
               src={store.imageUrl}
@@ -68,12 +68,12 @@ export default async function StoreInfo({ storeId }: StoreInfoProps) {
               width={300}
               height={400}
               loading="eager"
-              className="object-contain rounded-md"
+              className="object-contain rounded-md border-2"
             />
           ) : (
             <Image
-              src="/images/not-found-store-image.png"
-              alt={`$選択中の画像`}
+              src="/images/default-image.png"
+              alt={`選択中の画像`}
               width={300}
               height={400}
               loading="eager"

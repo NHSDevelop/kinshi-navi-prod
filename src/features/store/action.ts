@@ -241,7 +241,7 @@ export async function updateStoreConfig(
   }
 }
 
-export async function getStoresByFormByEventSlug(
+export async function getStoresInMainEvent(
   _prevState: FormState<Store[]>,
   formData: FormData,
 ): Promise<FormState<Store[]>> {
@@ -394,10 +394,13 @@ export async function toActiveStore(prevState: unknown, formData: FormData) {
     if (!store) {
       return {
         success: false,
-        message: "該当するイベントが存在しません",
+        message: "該当する店舗が存在しません",
       };
     }
-    await db.update(stores).set({ isActive: !store.isActive });
+    await db
+      .update(stores)
+      .set({ isActive: !store.isActive })
+      .where(eq(stores.id, storeId));
     return {
       success: true,
       message: "操作が完了しました。",

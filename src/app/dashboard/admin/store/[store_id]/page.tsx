@@ -152,7 +152,7 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
               </Link>
             </Button>
           </div>
-          <ItemList foodId={foodRows[0].id} />
+          <ItemList foodId={foodRows[0].id} storeId={store_id} />
         </div>
       )}
       <Separator />

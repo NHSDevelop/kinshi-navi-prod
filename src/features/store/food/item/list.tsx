@@ -10,38 +10,29 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import ItemInfo from "./info";
 
 interface ItemListProps {
   foodId: string;
+  storeId?: string;
 }
 
-export default async function ItemList({ foodId }: ItemListProps) {
+export default async function ItemList({ foodId, storeId }: ItemListProps) {
   const db = await getDb();
-  const itemList = await db
+  const itemRows = await db
     .select()
     .from(items)
     .where(eq(items.foodId, foodId));
   return (
     <div className="space-y-4 lg:space-y-8">
-      {itemList.length > 0 ? (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>商品名</TableHead>
-              <TableHead>価格（円）</TableHead>
-              <TableHead>在庫数（個）</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {itemList.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell>{item.name}</TableCell>
-                <TableCell>{item.price}</TableCell>
-                <TableCell>{item.stock}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+      {itemRows.length > 0 ? (
+        <div className="flex flex-col gap-4">
+          {itemRows.map((item) => (
+            <ItemInfo key={item.id} itemId={item.id} />
+          ))}
+        </div>
       ) : (
         <NotFoundPrompt context="商品" />
       )}

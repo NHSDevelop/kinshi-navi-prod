@@ -49,7 +49,7 @@ export default async function SuperAdminHomePage() {
           context="招待リンクを発行"
         />
       ) : (
-        <p>組織内のイベントが存在しません。</p>
+        <p>管理するイベントが存在しません。</p>
       )}
       <Separator />
     </div>

@@ -52,7 +52,7 @@ export default function CreateStoreVoteForm({
     chosenStoreImageUrl === ""
       ? "/images/choose-store.png"
       : chosenStoreImageUrl === "default"
-        ? "/images/not-found-store-image.png"
+        ? "/images/default-image.png"
         : chosenStoreImageUrl;
 
   const selectedImageWidth = chosenStoreImageUrl === "default" ? 200 : 300;
@@ -132,7 +132,7 @@ export default function CreateStoreVoteForm({
                 />
               ) : (
                 <Image
-                  src="/images/not-found-store-image.png"
+                  src="/images/default-image.png"
                   alt="画像なし"
                   width={200}
                   height={300}

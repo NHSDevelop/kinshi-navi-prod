@@ -11,13 +11,13 @@ import { getDb } from "@/lib/db/drizzle";
 import { attractions, stores, tickets } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 
-interface AttracionWaitngStatusProps {
+interface AttractionWaitngStatusProps {
   eventId: string;
 }
 
-export default async function AttracionWaitngStatus({
+export default async function AttractionWaitngStatus({
   eventId,
-}: AttracionWaitngStatusProps) {
+}: AttractionWaitngStatusProps) {
   const db = await getDb();
   const rows = await db
     .select({
