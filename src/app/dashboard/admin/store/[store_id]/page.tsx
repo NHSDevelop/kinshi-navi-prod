@@ -147,6 +147,11 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
               </Link>
             </Button>
             <Button asChild variant="card">
+              <Link href={`/dashboard/staff/store/${store_id}/register`}>
+                レジページ
+              </Link>
+            </Button>
+            <Button asChild variant="card">
               <Link
                 href={`/dashboard/staff/store/${store_id}/register-log-history`}
               >

@@ -20,6 +20,7 @@ import ToMainEvent from "@/features/event/to-main";
 import DeleteEvent from "@/features/event/delete";
 import { notFound } from "next/navigation";
 import ToActiveEvent from "@/features/event/to-active";
+import CreateRegisterLane from "@/features/store/food/register/lane/create";
 
 export default async function AdminEventPage(props: {
   params: Promise<{ event_id: string }>;
@@ -38,7 +39,7 @@ export default async function AdminEventPage(props: {
   }
 
   const storeRows = await db
-    .select({ id: stores.id, name: stores.name })
+    .select({ id: stores.id, name: stores.name, storeType: stores.storeType })
     .from(stores)
     .where(eq(stores.eventId, event_id));
 
@@ -108,6 +109,9 @@ export default async function AdminEventPage(props: {
       ) : (
         <p>イベント内の店舗が存在しません。</p>
       )}
+      <Separator />
+      <p className="text-lg">模擬店とレジレーンの紐づけ</p>
+      <CreateRegisterLane eventId={event_id} />
       <Separator />
       <p className="text-lg">イベントの管理者一覧</p>
       {adminRows.length > 0 ? (

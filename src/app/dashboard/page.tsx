@@ -3,13 +3,12 @@ import { getDb } from "@/lib/db/drizzle";
 import { admins, staffs } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { getSessionFromRequestHeaders } from "@/lib/auth-session";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 
 export default async function DashBordHomePage() {
-  const session = await auth.api.getSession({ headers: await headers() });
+  const session = await getSessionFromRequestHeaders();
 
   if (!session?.user) {
     redirect("/signin");

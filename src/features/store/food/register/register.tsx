@@ -2,7 +2,7 @@ import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import { getDb } from "@/lib/db/drizzle";
 import { foods, items, registerLanes } from "@/lib/db/schema";
 import { eq, inArray } from "drizzle-orm";
-import FoodRegisterForm from "./register/register-form";
+import FoodRegisterForm from "./register-form";
 
 type Props = {
   storeId: string;

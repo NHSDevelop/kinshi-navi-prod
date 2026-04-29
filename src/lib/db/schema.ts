@@ -253,10 +253,43 @@ export const stockLogs = sqliteTable("stock_logs", {
 
 export type StockLog = typeof stockLogs.$inferSelect;
 
+export const registerLanes = sqliteTable(
+  "register_lanes",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => createId()),
+    eventId: text("eventId")
+      .notNull()
+      .references(() => events.id, { onDelete: "cascade" }),
+    foodId: text("foodId").references(() => foods.id, { onDelete: "set null" }),
+    laneNumber: integer("laneNumber").notNull(),
+    name: text("name"),
+    isActive: integer("isActive", { mode: "boolean" }).notNull().default(true),
+    createdAt: integer("createdAt", { mode: "timestamp_ms" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+    updatedAt: integer("updatedAt", { mode: "timestamp_ms" })
+      .notNull()
+      .$defaultFn(() => new Date())
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => ({
+    eventIdLaneNumberUnique: uniqueIndex(
+      "register_lanes_event_id_lane_number_unique",
+    ).on(table.eventId, table.laneNumber),
+  }),
+);
+
+export type RegisterLane = typeof registerLanes.$inferSelect;
+
 export const registerLogs = sqliteTable("register_logs", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => createId()),
+  laneId: text("laneId")
+    .notNull()
+    .references(() => registerLanes.id),
   foodId: text("foodId")
     .notNull()
     .references(() => foods.id),
@@ -508,6 +541,7 @@ export const foodsRelations = relations(foods, ({ one, many }) => ({
     references: [stores.id],
   }),
   items: many(items),
+  registerLanes: many(registerLanes),
 }));
 
 export const ticketsRelations = relations(tickets, ({ one }) => ({
@@ -578,5 +612,31 @@ export const staffsRelations = relations(staffs, ({ one }) => ({
   store: one(stores, {
     fields: [staffs.storeId],
     references: [stores.id],
+  }),
+}));
+
+export const registerLanesRelations = relations(
+  registerLanes,
+  ({ one, many }) => ({
+    event: one(events, {
+      fields: [registerLanes.eventId],
+      references: [events.id],
+    }),
+    store: one(foods, {
+      fields: [registerLanes.foodId],
+      references: [foods.id],
+    }),
+    registerLogs: many(registerLogs),
+  }),
+);
+
+export const registerLogsRelations = relations(registerLogs, ({ one }) => ({
+  lane: one(registerLanes, {
+    fields: [registerLogs.laneId],
+    references: [registerLanes.id],
+  }),
+  food: one(foods, {
+    fields: [registerLogs.foodId],
+    references: [foods.id],
   }),
 }));

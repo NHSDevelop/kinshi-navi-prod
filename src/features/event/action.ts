@@ -4,6 +4,9 @@ import { getDb } from "@/lib/db/drizzle";
 import { admins, Event, events, stores } from "@/lib/db/schema";
 import z from "zod";
 import { eq } from "drizzle-orm";
+import { revalidateTag, unstable_cache } from "next/cache";
+
+const MAIN_EVENT_CACHE_TAG = "main-event";
 
 export type ZodErrors = {
   name?: string[];
@@ -68,6 +71,8 @@ export async function createEvent(
     await db.insert(events).values({
       name: validatedName,
     });
+
+    revalidateTag(MAIN_EVENT_CACHE_TAG, "max");
 
     return {
       zodErrors: null,
@@ -160,6 +165,8 @@ export async function updateEventConfig(
       })
       .where(eq(events.id, eventId));
 
+    revalidateTag(MAIN_EVENT_CACHE_TAG, "max");
+
     return {
       zodErrors: null,
       success: true,
@@ -196,6 +203,8 @@ export async function toActiveEvent(prevState: unknown, formData: FormData) {
       .update(events)
       .set({ isActive: !event.isActive })
       .where(eq(events.id, eventId));
+
+    revalidateTag(MAIN_EVENT_CACHE_TAG, "max");
     return {
       success: true,
       message: "操作が完了しました。",
@@ -249,6 +258,8 @@ export async function toMainEvent(prevState: unknown, formData: FormData) {
       .update(events)
       .set({ isMain: !event.isMain })
       .where(eq(events.id, eventId));
+
+    revalidateTag(MAIN_EVENT_CACHE_TAG, "max");
     return {
       success: true,
       message: "操作が完了しました。",
@@ -263,18 +274,24 @@ export async function toMainEvent(prevState: unknown, formData: FormData) {
   }
 }
 
-export async function getMainEvent(): Promise<Event | null> {
+async function fetchMainEvent(): Promise<Event | null> {
   const db = await getDb();
   const eventRows = await db
     .select()
     .from(events)
     .where(eq(events.isMain, true))
     .limit(1);
-  if (!eventRows[0]) {
-    return null;
-  }
-  return eventRows[0];
+  return eventRows[0] ?? null;
 }
+
+export const getMainEvent = unstable_cache(
+  fetchMainEvent,
+  [MAIN_EVENT_CACHE_TAG],
+  {
+    revalidate: 60,
+    tags: [MAIN_EVENT_CACHE_TAG],
+  },
+);
 
 export async function deleteEvent(prevState: unknown, formData: FormData) {
   try {
@@ -326,6 +343,8 @@ export async function deleteEvent(prevState: unknown, formData: FormData) {
     }
 
     await db.delete(events).where(eq(events.id, eventId));
+
+    revalidateTag(MAIN_EVENT_CACHE_TAG, "max");
     return {
       success: true,
     };

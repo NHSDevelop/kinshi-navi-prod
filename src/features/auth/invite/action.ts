@@ -1,6 +1,5 @@
 "use server";
 
-import { auth } from "@/lib/auth";
 import { getDb } from "@/lib/db/drizzle";
 import {
   admins,
@@ -16,8 +15,8 @@ import {
   generateInviteToken,
   hashInviteToken,
 } from "@/features/auth/invite/lib";
+import { getSessionFromRequestHeaders } from "@/lib/auth-session";
 import { eq } from "drizzle-orm";
-import { headers } from "next/headers";
 import z from "zod";
 import { redirect } from "next/navigation";
 
@@ -56,7 +55,7 @@ export async function createInvite(prevState: unknown, formData: FormData) {
       };
     }
 
-    const session = await auth.api.getSession({ headers: await headers() });
+    const session = await getSessionFromRequestHeaders();
     if (!session?.user) {
       return {
         success: false,
@@ -125,7 +124,7 @@ export async function createInvite(prevState: unknown, formData: FormData) {
 }
 
 export async function acceptInvite(token: string) {
-  const session = await auth.api.getSession({ headers: await headers() });
+  const session = await getSessionFromRequestHeaders();
   if (!session?.user) {
     redirect(`/signin?token=${token}`);
   }

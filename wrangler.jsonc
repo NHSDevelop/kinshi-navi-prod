@@ -28,7 +28,20 @@
       "bucket_name": "kinshi-navi-cache",
     },
   ],
-
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "NEXT_CACHE_DO_QUEUE",
+        "class_name": "DOQueueHandler",
+      },
+    ],
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["DOQueueHandler"],
+    },
+  ],
   "observability": {
     "logs": {
       "enabled": true,
@@ -45,6 +58,11 @@
       "database_id": "1fd0c0bd-ccbc-42a2-aab3-fb222c8abb14",
       "migrations_dir": "drizzle/migrations",
       "remote": false,
+    },
+    {
+      "binding": "NEXT_TAG_CACHE_D1",
+      "database_id": "60787eb3-52e8-44ce-8f0f-5eb7bfdc6cc6",
+      "database_name": "kinshi-navi-d1-cache",
     },
   ],
 }

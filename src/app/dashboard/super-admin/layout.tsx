@@ -1,16 +1,15 @@
 import { getDb } from "@/lib/db/drizzle";
 import { admins } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { getSessionFromRequestHeaders } from "@/lib/auth-session";
 
 export default async function SuperAdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth.api.getSession({ headers: await headers() });
+  const session = await getSessionFromRequestHeaders();
 
   if (!session?.user) {
     redirect("/signin/dashboard/super-admin");

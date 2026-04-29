@@ -210,24 +210,33 @@ export async function callFirstTicket(
       .set({ status: "CALLED" })
       .where(inArray(tickets.id, ids));
 
-    for (const ticket of issuedTickets) {
-      if (ticket.isPaper) {
+    const digitalTickets = issuedTickets.filter((ticket) => !ticket.isPaper);
+    const userIds = Array.from(
+      new Set(digitalTickets.map((ticket) => ticket.userId)),
+    );
+    const subscriptionRows =
+      userIds.length > 0
+        ? await db
+            .select()
+            .from(pushSubscriptions)
+            .where(inArray(pushSubscriptions.userId, userIds))
+        : [];
+
+    const subscriptionByUserId = new Map(
+      subscriptionRows.map((sub) => [sub.userId, sub]),
+    );
+
+    for (const ticket of digitalTickets) {
+      const sub = subscriptionByUserId.get(ticket.userId);
+      if (!sub) {
         continue;
       }
-      const subRows = await db
-        .select()
-        .from(pushSubscriptions)
-        .where(eq(pushSubscriptions.userId, ticket.userId))
-        .limit(1);
-      const sub = subRows[0];
-      if (sub) {
-        await sendPushNotification(
-          sub,
-          "チケットが呼び出されました",
-          `あなたのチケット（番号: ${ticket.index}）が呼び出されました。企画へお越しください。`,
-          `/anonymous-user/`,
-        );
-      }
+      await sendPushNotification(
+        sub,
+        "チケットが呼び出されました",
+        `あなたのチケット（番号: ${ticket.index}）が呼び出されました。企画へお越しください。`,
+        `/anonymous-user/`,
+      );
     }
 
     if (ids.length === 0) {

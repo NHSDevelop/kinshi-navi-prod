@@ -1,11 +1,19 @@
 import Link from "next/link";
 import { AiOutlineUser } from "react-icons/ai";
+import { getSessionFromRequestHeaders } from "@/lib/auth-session";
+import { redirect } from "next/navigation";
 
 export default async function DashBoardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await getSessionFromRequestHeaders();
+
+  if (!session?.user || session.user.isAnonymous) {
+    redirect("/signin");
+  }
+
   return (
     <>
       <header className="border-b-2 w-full flex h-20 items-center px-4 sm:px-6 lg:px-8 justify-between bg-main-100">

@@ -15,9 +15,19 @@ import { Input } from "@/components/ui/input";
 import { MessagePrompt } from "@/components/prompt/message-prompt";
 import { ErrorPrompt } from "@/components/prompt/error-prompt";
 import { FieldError } from "@/components/ui/field-error";
+import { RegisterLane } from "@/lib/db/schema";
+import {
+  Select,
+  SelectGroup,
+  SelectValue,
+  SelectContent,
+  SelectTrigger,
+  SelectItem,
+} from "@/components/ui/select";
 
 interface CreateRegisterLogFormProps {
   foodId: string;
+  lanes: RegisterLane[];
 }
 
 const INITIAL_STATE: RegisterLogState = {
@@ -25,6 +35,7 @@ const INITIAL_STATE: RegisterLogState = {
   totalAmount: "",
   amountPaid: "",
   meta: "",
+  laneId: "",
   zodErrors: null,
   message: null,
   success: false,
@@ -32,6 +43,7 @@ const INITIAL_STATE: RegisterLogState = {
 
 export default function CreateRegisterLogForm({
   foodId,
+  lanes,
 }: CreateRegisterLogFormProps) {
   const [state, formAction, isPending] = useActionState(
     createRegisterLog,
@@ -49,6 +61,23 @@ export default function CreateRegisterLogForm({
             <FieldSet>
               <input type="hidden" name="foodId" value={foodId} />
               <FieldGroup>
+                <Field>
+                  <FieldLabel>レーン番号</FieldLabel>
+                  <Select name="storeType" required disabled={isPending}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="レーン番号を選択" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {lanes.map((lane) => (
+                          <SelectItem key={lane.id} value={lane.id}>
+                            {lane.laneNumber}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </Field>
                 <Field>
                   <FieldLabel>合計金額</FieldLabel>
                   <Input
