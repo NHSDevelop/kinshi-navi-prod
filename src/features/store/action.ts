@@ -13,10 +13,10 @@ import {
   type StoreType,
 } from "@/lib/db/schema";
 import { FormState } from "@/lib/type";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import z from "zod";
 import { slugSchema } from "@/lib/schemas/store";
-import { getMainEvent } from "../event/action";
+import { unstable_cache } from "next/cache";
 
 export type ZodErrors = {
   slug?: string[];
@@ -241,6 +241,32 @@ export async function updateStoreConfig(
   }
 }
 
+// キャッシュ対象のコア処理
+const getCachedStoresInMainEvent = unstable_cache(
+  async (eventId: string, storeType: StoreType | "all" | null) => {
+    const db = await getDb();
+
+    // DB WHERE で storeType フィルタリング
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const whereConditions: Array<any> = [eq(stores.eventId, eventId)];
+    if (storeType && storeType !== "all") {
+      whereConditions.push(eq(stores.storeType, storeType));
+    }
+
+    const storeRows = await db
+      .select()
+      .from(stores)
+      .where(and(...whereConditions));
+    storeRows.sort((a, b) => a.name.localeCompare(b.name, "ja"));
+    return storeRows;
+  },
+  ["stores-in-main-event"],
+  {
+    revalidate: 60,
+    tags: ["stores-in-main-event"],
+  },
+);
+
 export async function getStoresInMainEvent(
   _prevState: FormState<Store[]>,
   formData: FormData,
@@ -248,30 +274,18 @@ export async function getStoresInMainEvent(
   const storeType = formData.get("storeType") as StoreType | "all";
 
   try {
-    const event = await getMainEvent();
-    if (!event) {
-      return {
-        success: false,
-        message: null,
-        error: "サーバーエラーが発生しました",
-      };
-    }
-    const db = await getDb();
+    const mainEventId = process.env.MAIN_EVENT_ID as string;
 
-    const storeRows = await db
-      .select()
-      .from(stores)
-      .where(eq(stores.eventId, event.id));
-    const filteredStoreRows =
-      !storeType || storeType === "all"
-        ? storeRows
-        : storeRows.filter((store) => store.storeType === storeType);
-    storeRows.sort((a, b) => a.name.localeCompare(b.name, "ja"));
+    // キャッシュ版を呼び出し
+    const storeRows = await getCachedStoresInMainEvent(
+      mainEventId,
+      storeType || "all",
+    );
     return {
       success: true,
       message: null,
       error: null,
-      data: filteredStoreRows,
+      data: storeRows,
     };
   } catch (error) {
     console.log(error);

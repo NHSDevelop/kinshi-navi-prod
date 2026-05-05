@@ -1,4 +1,3 @@
-import { getCurrentUser } from "@/features/auth/anonymous/action";
 import CreateAnonymousUser from "@/features/auth/anonymous/create";
 import { PushNotificationManager } from "@/features/push/manager";
 import UserTicketList from "@/features/store/attraction/ticket/user-list";
@@ -7,14 +6,16 @@ import { Separator } from "@/components/ui/separator";
 import { redirect } from "next/navigation";
 import { InstallPrompt } from "@/features/push/install";
 import { HelpPrompt } from "@/components/prompt/help";
-import ReloadButton from "@/components/polling/reload-button";
+import { getSessionFromRequestHeaders } from "@/lib/auth-session";
 
 export default async function AnonymousUserPage() {
-  const user = await getCurrentUser();
+  const session = await getSessionFromRequestHeaders();
+  const user = session?.user;
+
   if (!user) {
     return <CreateAnonymousUser />;
   }
-  if (user && user.isAnonymous === false) {
+  if (user.isAnonymous === false) {
     redirect("/dashboard/user");
   }
   return (

@@ -1,5 +1,9 @@
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { NextRequest, NextResponse } from "next/server";
+import sharp from "sharp";
+
+const RESOLUTIONS = [640, 1024, 1600] as const;
+const WEBP_QUALITY = 75;
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,6 +22,14 @@ export async function POST(req: NextRequest) {
     const imageFileDataArrayBuffer = await imageFileData.arrayBuffer();
     const imageFileDataBuffer = Buffer.from(imageFileDataArrayBuffer);
 
+    // ファイル名の拡張子を除去
+    const fileNameWithoutExt = imageFileData.name
+      .replace(/\.[^/.]+$/, "")
+      .replace(/[^a-zA-Z0-9-_]/g, "-")
+      .toLowerCase();
+    const timestamp = Date.now();
+    const baseFileName = `${timestamp}-${fileNameWithoutExt}`;
+
     const s3 = new S3Client({
       region: "auto",
       endpoint: process.env.R2_ENDPOINT!,
@@ -27,22 +39,43 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    const key = `images/${Date.now()}_${imageFileData.name}`;
+    // 複数解像度で webp に変換
+    const uploadedUrls: Array<{ width: number; url: string }> = [];
+    const sharpInstance = sharp(imageFileDataBuffer).withMetadata();
 
-    await s3.send(
-      new PutObjectCommand({
-        Bucket: process.env.R2_BUCKET_NAME,
-        Key: key,
-        ContentType: imageFileData.type,
-        Body: imageFileDataBuffer,
-      }),
-    );
+    for (const width of RESOLUTIONS) {
+      const webpBuffer = await sharpInstance
+        .resize(width, width, {
+          fit: "inside",
+          withoutEnlargement: true,
+        })
+        .webp({ quality: WEBP_QUALITY })
+        .toBuffer();
 
-    const uploadedUrlUse = `${process.env.R2_BUCKET_URL}/${key}`;
+      const key = `images/${baseFileName}-${width}w.webp`;
+
+      await s3.send(
+        new PutObjectCommand({
+          Bucket: process.env.R2_BUCKET_NAME,
+          Key: key,
+          ContentType: "image/webp",
+          Body: webpBuffer,
+          CacheControl: "public, max-age=31536000, immutable",
+        }),
+      );
+
+      const url = `${process.env.R2_BUCKET_URL}/${key}`;
+      uploadedUrls.push({ width, url });
+    }
+
+    // メイン URL（1024px）とsrcset を構築
+    const mainUrl = uploadedUrls.find((u) => u.width === 1024)?.url;
+    const srcset = uploadedUrls.map((u) => `${u.url} ${u.width}w`).join(", ");
 
     return NextResponse.json({
       message: "アップロードに成功しました。",
-      url: uploadedUrlUse,
+      url: mainUrl,
+      srcset,
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {

@@ -10,13 +10,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { and, eq } from "drizzle-orm";
-import { getMainEvent } from "@/features/event/action";
 
 export default async function StoreVoteResult() {
   const db = await getDb();
-  const mainEvent = await getMainEvent();
+  const mainEventId = process.env.MAIN_EVENT_ID as string;
 
-  if (!mainEvent) {
+  if (!mainEventId) {
     return <NotFoundPrompt context="メインイベント" />;
   }
 
@@ -25,10 +24,7 @@ export default async function StoreVoteResult() {
     .from(storeVotes)
     .innerJoin(stores, eq(stores.id, storeVotes.storeId))
     .where(
-      and(
-        eq(storeVotes.eventId, mainEvent.id),
-        eq(stores.eventId, mainEvent.id),
-      ),
+      and(eq(storeVotes.eventId, mainEventId), eq(stores.eventId, mainEventId)),
     );
 
   const voteResults = Array.from(

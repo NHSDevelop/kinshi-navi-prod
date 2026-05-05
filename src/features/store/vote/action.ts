@@ -8,7 +8,6 @@ import {
   storeVotes,
 } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
-import { getMainEvent } from "@/features/event/action";
 
 function isStoreType(value: unknown): value is StoreType {
   return (
@@ -19,8 +18,8 @@ function isStoreType(value: unknown): value is StoreType {
 export async function createStoreVote(prevState: unknown, formData: FormData) {
   try {
     const db = await getDb();
-    const mainEvent = await getMainEvent();
-    if (!mainEvent) {
+    const mainEventId = process.env.MAIN_EVENT_ID as string;
+    if (!mainEventId) {
       return {
         success: false,
         message: "メインイベントが設定されていません。",
@@ -44,7 +43,7 @@ export async function createStoreVote(prevState: unknown, formData: FormData) {
       .where(
         and(
           eq(stores.id, storeId),
-          eq(stores.eventId, mainEvent.id),
+          eq(stores.eventId, mainEventId),
           eq(stores.storeType, storeType),
         ),
       )
@@ -64,7 +63,7 @@ export async function createStoreVote(prevState: unknown, formData: FormData) {
         and(
           eq(storeVotes.userId, userId),
           eq(storeVotes.storeType, storeType),
-          eq(storeVotes.eventId, mainEvent.id),
+          eq(storeVotes.eventId, mainEventId),
         ),
       );
 
@@ -79,7 +78,7 @@ export async function createStoreVote(prevState: unknown, formData: FormData) {
       userId: userId,
       storeId: storeId,
       storeType: storeType,
-      eventId: mainEvent.id,
+      eventId: mainEventId,
     });
     return {
       success: true,

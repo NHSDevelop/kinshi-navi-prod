@@ -1,10 +1,12 @@
 import { Separator } from "@/components/ui/separator";
-import { getCurrentUser } from "@/features/auth/anonymous/action";
 import DeleteAuthUser from "@/features/auth/delete";
 import { redirect } from "next/navigation";
+import { getSessionFromRequestHeaders } from "@/lib/auth-session";
 
 export default async function UserSettingsPage() {
-  const user = await getCurrentUser();
+  const session = await getSessionFromRequestHeaders();
+  const user = session?.user;
+
   if (!user) {
     redirect("/signin");
   }

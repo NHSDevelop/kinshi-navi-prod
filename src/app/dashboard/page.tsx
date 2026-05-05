@@ -18,23 +18,16 @@ export default async function DashBordHomePage() {
 
   const db = await getDb();
 
-  const superAdminRows = await db
-    .select()
-    .from(admins)
-    .where(and(eq(admins.userId, userId), eq(admins.role, "SUPER_ADMIN")))
-    .limit(1);
+  // 並列化してDB クエリ削減
+  const [adminRows, staffRows] = await Promise.all([
+    db.select().from(admins).where(eq(admins.userId, userId)).limit(1),
+    db.select().from(staffs).where(eq(staffs.userId, userId)).limit(1),
+  ]);
 
-  const adminRows = await db
-    .select()
-    .from(admins)
-    .where(eq(admins.userId, userId))
-    .limit(1);
-
-  const staffRows = await db
-    .select()
-    .from(staffs)
-    .where(eq(staffs.userId, userId))
-    .limit(1);
+  // superAdminはadminRows から判定
+  const superAdminRows = adminRows.filter(
+    (admin) => admin.role === "SUPER_ADMIN",
+  );
 
   return (
     <div className="flex flex-col gap-4">

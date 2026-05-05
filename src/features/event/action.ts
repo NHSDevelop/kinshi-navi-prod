@@ -275,11 +275,17 @@ export async function toMainEvent(prevState: unknown, formData: FormData) {
 }
 
 async function fetchMainEvent(): Promise<Event | null> {
+  const mainEventId = process.env.MAIN_EVENT_ID;
+  if (!mainEventId) {
+    console.error("MAIN_EVENT_ID environment variable is not set");
+    return null;
+  }
+
   const db = await getDb();
   const eventRows = await db
     .select()
     .from(events)
-    .where(eq(events.isMain, true))
+    .where(eq(events.id, mainEventId))
     .limit(1);
   return eventRows[0] ?? null;
 }

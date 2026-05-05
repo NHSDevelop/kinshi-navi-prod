@@ -1,13 +1,15 @@
-import { getCurrentUser } from "@/features/auth/anonymous/action";
 import CreateAnonymousUser from "@/features/auth/anonymous/create";
 import Link from "next/link";
 import UserInfo from "@/features/auth/anonymous/info";
 import Signout from "@/features/auth/signout";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { getSessionFromRequestHeaders } from "@/lib/auth-session";
 
 export default async function UserPage() {
-  const user = await getCurrentUser();
+  const session = await getSessionFromRequestHeaders();
+  const user = session?.user;
+
   if (!user) {
     return <CreateAnonymousUser />;
   }
