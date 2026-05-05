@@ -10,7 +10,7 @@ interface CreateStockLogProps {
 export default async function CreateStockLog({ storeId }: CreateStockLogProps) {
   const db = await getDb();
   const foodRows = await db
-    .select()
+    .select({ id: foods.id })
     .from(foods)
     .where(eq(foods.storeId, storeId))
     .limit(1);
@@ -19,7 +19,17 @@ export default async function CreateStockLog({ storeId }: CreateStockLogProps) {
     return <p>模擬店が存在しません。</p>;
   }
   const itemList = await db
-    .select()
+    .select({
+      id: items.id,
+      name: items.name,
+      createdAt: items.createdAt,
+      updatedAt: items.updatedAt,
+      imageUrl: items.imageUrl,
+      description: items.description,
+      stock: items.stock,
+      price: items.price,
+      foodId: items.foodId,
+    })
     .from(items)
     .where(eq(items.foodId, food.id));
 

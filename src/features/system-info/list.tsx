@@ -6,7 +6,13 @@ import Link from "next/link";
 
 export async function SystemInfoList() {
   const db = await getDb();
-  const systemInfoRows = await db.select().from(systemInfos);
+  const systemInfoRows = await db
+    .select({
+      id: systemInfos.id,
+      createdAt: systemInfos.createdAt,
+      title: systemInfos.title,
+    })
+    .from(systemInfos);
   return (
     <>
       {systemInfoRows.length > 0 ? (

@@ -17,6 +17,9 @@ import {
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
+// Store情報は1日に1回程度変わるため、ISR 1時間でキャッシュ
+export const revalidate = 3600;
+
 export default async function StoreStaffHomePage(props: {
   params: Promise<{ store_id: string }>;
 }) {
@@ -24,7 +27,7 @@ export default async function StoreStaffHomePage(props: {
 
   const db = await getDb();
   const storeRows = await db
-    .select()
+    .select({ id: stores.id, name: stores.name, storeType: stores.storeType })
     .from(stores)
     .where(eq(stores.id, store_id))
     .limit(1);

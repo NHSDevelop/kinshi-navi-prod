@@ -12,7 +12,12 @@ export default async function SystemInfoPage(props: {
   const { systemInfo_id } = await props.params;
   const db = await getDb();
   const systemInfoRows = await db
-    .select()
+    .select({
+      id: systemInfos.id,
+      title: systemInfos.title,
+      meta: systemInfos.meta,
+      createdAt: systemInfos.createdAt,
+    })
     .from(systemInfos)
     .where(eq(systemInfos.id, systemInfo_id))
     .limit(1);

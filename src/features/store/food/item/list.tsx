@@ -1,17 +1,7 @@
 import { getDb } from "@/lib/db/drizzle";
 import { items } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import ItemInfo from "./info";
 
 interface ItemListProps {
@@ -19,10 +9,15 @@ interface ItemListProps {
   storeId?: string;
 }
 
-export default async function ItemList({ foodId, storeId }: ItemListProps) {
+export default async function ItemList({ foodId }: ItemListProps) {
   const db = await getDb();
   const itemRows = await db
-    .select()
+    .select({
+      id: items.id,
+      name: items.name,
+      stock: items.stock,
+      price: items.price,
+    })
     .from(items)
     .where(eq(items.foodId, foodId));
   return (

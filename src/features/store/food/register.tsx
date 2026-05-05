@@ -22,7 +22,16 @@ export default async function FoodRegister({ storeId }: Props) {
   const foodIds = foodRows.map((food) => food.id);
 
   const laneRows = await db
-    .select()
+    .select({
+      id: registerLanes.id,
+      eventId: registerLanes.eventId,
+      foodId: registerLanes.foodId,
+      laneNumber: registerLanes.laneNumber,
+      name: registerLanes.name,
+      isActive: registerLanes.isActive,
+      createdAt: registerLanes.createdAt,
+      updatedAt: registerLanes.updatedAt,
+    })
     .from(registerLanes)
     .where(inArray(registerLanes.foodId, foodIds));
 
@@ -31,7 +40,17 @@ export default async function FoodRegister({ storeId }: Props) {
   }
 
   const itemRows = await db
-    .select()
+    .select({
+      id: items.id,
+      name: items.name,
+      foodId: items.foodId,
+      stock: items.stock,
+      price: items.price,
+      imageUrl: items.imageUrl,
+      description: items.description,
+      createdAt: items.createdAt,
+      updatedAt: items.updatedAt,
+    })
     .from(items)
     .where(inArray(items.foodId, foodIds));
 

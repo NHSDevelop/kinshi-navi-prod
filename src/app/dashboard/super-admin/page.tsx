@@ -9,7 +9,14 @@ import { AiFillPlusCircle } from "react-icons/ai";
 export default async function SuperAdminHomePage() {
   const db = await getDb();
 
-  const eventRows = await db.select().from(events);
+  const eventRows = await db
+    .select({
+      id: events.id,
+      name: events.name,
+      isActive: events.isActive,
+      isMain: events.isMain,
+    })
+    .from(events);
   return (
     <div className="space-y-4 lg:space-y-8">
       <h1 className="font-bold text-xl">システムの管理</h1>

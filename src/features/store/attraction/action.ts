@@ -4,6 +4,7 @@ import { getDb } from "@/lib/db/drizzle";
 import { attractions } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import z from "zod";
+import { revalidatePath } from "next/cache";
 
 export async function createAttraction(prevState: unknown, formData: FormData) {
   const storeId = formData.get("storeId") as string;
@@ -13,6 +14,12 @@ export async function createAttraction(prevState: unknown, formData: FormData) {
     await db.insert(attractions).values({
       storeId: storeId,
     });
+    revalidatePath(`/dashboard/staff/store/${storeId}`);
+    revalidatePath(`/dashboard/admin/store/${storeId}`);
+    revalidatePath(`/dashboard/staff/store/${storeId}/item-list`);
+    revalidatePath(`/dashboard/staff/store/${storeId}/call-ticket`);
+    revalidatePath(`/dashboard/admin/store/${storeId}/create-item`);
+    revalidatePath("/attraction/waiting-status");
     return {
       success: true,
       message: "操作が完了しました。",
@@ -76,6 +83,21 @@ export async function updateAttractionConfig(
 
   try {
     const db = await getDb();
+    const attractionRows = await db
+      .select({ storeId: attractions.storeId })
+      .from(attractions)
+      .where(eq(attractions.id, attractionId))
+      .limit(1);
+    const attraction = attractionRows[0];
+
+    if (!attraction) {
+      return {
+        zodErrors: null,
+        success: false,
+        message: "企画が存在しません。",
+      };
+    }
+
     await db
       .update(attractions)
       .set({
@@ -83,6 +105,13 @@ export async function updateAttractionConfig(
         peopleCapacity: peopleCapacity,
       })
       .where(eq(attractions.id, attractionId));
+
+    revalidatePath(`/dashboard/staff/store/${attraction.storeId}`);
+    revalidatePath(`/dashboard/admin/store/${attraction.storeId}`);
+    revalidatePath(`/dashboard/staff/store/${attraction.storeId}/item-list`);
+    revalidatePath(`/dashboard/staff/store/${attraction.storeId}/call-ticket`);
+    revalidatePath(`/dashboard/admin/store/${attraction.storeId}/create-item`);
+    revalidatePath("/attraction/waiting-status");
     return {
       zodErrors: null,
       message: "操作が完了しました。",

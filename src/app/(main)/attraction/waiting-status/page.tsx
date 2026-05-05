@@ -2,6 +2,9 @@ import { Separator } from "@/components/ui/separator";
 import AttractionWaitngStatus from "@/features/store/attraction/waitng-status";
 import { RoutePollingRefresh } from "@/components/polling/route-polling-refresh";
 
+// 待機状況は15分単位で十分（ポーリングは5分）
+export const revalidate = 15 * 60;
+
 export default async function AttractionWaitStatusPage() {
   const eventId = process.env.MAIN_EVENT_ID as string;
 

@@ -22,7 +22,17 @@ export default async function TicketListPage(props: {
     return <NotFoundPrompt context="企画" />;
   }
   const initialTickets = await db
-    .select()
+    .select({
+      id: tickets.id,
+      index: tickets.index,
+      numberOfPeople: tickets.numberOfPeople,
+      status: tickets.status,
+      isPaper: tickets.isPaper,
+      createdAt: tickets.createdAt,
+      updatedAt: tickets.updatedAt,
+      userId: tickets.userId,
+      attractionId: tickets.attractionId,
+    })
     .from(tickets)
     .where(eq(tickets.attractionId, attractionRows[0].id));
 

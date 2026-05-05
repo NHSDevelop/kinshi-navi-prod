@@ -2,7 +2,8 @@ import { Separator } from "@/components/ui/separator";
 import ItemStockStatus from "@/features/store/food/item/stock-status";
 import { RoutePollingRefresh } from "@/components/polling/route-polling-refresh";
 
-export const dynamic = "force-dynamic";
+// 在庫状況は15分単位で十分（ポーリングは5分、force-dynamic廃止してISR化）
+export const revalidate = 15 * 60;
 
 export default async function FoodStockStatusPage() {
   const mainEventId = process.env.MAIN_EVENT_ID as string;

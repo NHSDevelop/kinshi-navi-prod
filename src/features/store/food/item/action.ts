@@ -4,6 +4,7 @@ import z from "zod";
 import { foods, Item, items } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { getDb } from "@/lib/db/drizzle";
+import { revalidatePath } from "next/cache";
 
 const RegisterSchema = z.object({
   name: z.string().min(1, "必須項目です"),
@@ -90,6 +91,22 @@ export async function createItem(
       price: price,
     });
 
+    const storeIdRows = await db
+      .select({ storeId: foods.storeId })
+      .from(foods)
+      .where(eq(foods.id, foodId))
+      .limit(1);
+    const storeId = storeIdRows[0]?.storeId;
+
+    if (storeId) {
+      revalidatePath(`/dashboard/staff/store/${storeId}`);
+      revalidatePath(`/dashboard/admin/store/${storeId}`);
+      revalidatePath(`/dashboard/staff/store/${storeId}/item-list`);
+      revalidatePath(`/dashboard/staff/store/${storeId}/call-ticket`);
+      revalidatePath(`/dashboard/admin/store/${storeId}/create-item`);
+      revalidatePath("/food/stock-status");
+    }
+
     return {
       zodErrors: null,
       message: "商品の登録が完了しました。",
@@ -148,6 +165,21 @@ export async function updateItemConfig(
 
   try {
     const db = await getDb();
+    const itemRows = await db
+      .select({ foodId: items.foodId })
+      .from(items)
+      .where(eq(items.id, itemId))
+      .limit(1);
+    const item = itemRows[0];
+
+    if (!item) {
+      return {
+        zodErrors: null,
+        success: false,
+        message: "商品が存在しません。",
+      };
+    }
+
     await db
       .update(items)
       .set({
@@ -158,6 +190,22 @@ export async function updateItemConfig(
         updatedAt: new Date(),
       })
       .where(eq(items.id, itemId));
+
+    const storeIdRows = await db
+      .select({ storeId: foods.storeId })
+      .from(foods)
+      .where(eq(foods.id, item.foodId))
+      .limit(1);
+    const storeId = storeIdRows[0]?.storeId;
+
+    if (storeId) {
+      revalidatePath(`/dashboard/staff/store/${storeId}`);
+      revalidatePath(`/dashboard/admin/store/${storeId}`);
+      revalidatePath(`/dashboard/staff/store/${storeId}/item-list`);
+      revalidatePath(`/dashboard/staff/store/${storeId}/call-ticket`);
+      revalidatePath(`/dashboard/admin/store/${storeId}/create-item`);
+      revalidatePath("/food/stock-status");
+    }
 
     return {
       zodErrors: null,

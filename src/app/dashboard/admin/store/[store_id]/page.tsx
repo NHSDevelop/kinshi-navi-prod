@@ -30,6 +30,9 @@ import ToActiveStore from "@/features/store/to-active";
 import { notFound } from "next/navigation";
 import ItemSelectLink from "@/features/store/food/item/components/select-link";
 
+// Store情報は1日に1回程度変わるため、ISR 1時間でキャッシュ
+export const revalidate = 3600;
+
 interface AdminStorePageProps {
   params: Promise<{ store_id: string }>;
 }

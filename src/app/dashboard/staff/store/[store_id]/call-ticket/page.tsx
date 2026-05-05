@@ -5,13 +5,16 @@ import { attractions } from "@/lib/db/schema";
 
 import { eq } from "drizzle-orm";
 
+// Attraction情報は1日に1回程度変わるため、ISR 1時間でキャッシュ
+export const revalidate = 3600;
+
 export default async function CallTicketPage(props: {
   params: Promise<{ store_id: string }>;
 }) {
   const db = await getDb();
   const { store_id } = await props.params;
   const attractionRows = await db
-    .select()
+    .select({ id: attractions.id, storeId: attractions.storeId })
     .from(attractions)
     .where(eq(attractions.storeId, store_id))
     .limit(1);

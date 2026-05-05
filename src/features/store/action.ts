@@ -16,7 +16,7 @@ import { FormState } from "@/lib/type";
 import { eq, and } from "drizzle-orm";
 import z from "zod";
 import { slugSchema } from "@/lib/schemas/store";
-import { unstable_cache } from "next/cache";
+import { unstable_cache, revalidatePath } from "next/cache";
 
 export type ZodErrors = {
   slug?: string[];
@@ -31,6 +31,19 @@ export type StoreState = {
   message?: string | null;
   success?: boolean;
 };
+
+// ISR 対象ページを無効化する関数
+function invalidateStorePages(storeId?: string) {
+  if (storeId) {
+    revalidatePath(`/dashboard/staff/store/${storeId}`);
+    revalidatePath(`/dashboard/admin/store/${storeId}`);
+    revalidatePath(`/dashboard/staff/store/${storeId}/item-list`);
+    revalidatePath(`/dashboard/staff/store/${storeId}/call-ticket`);
+    revalidatePath(`/dashboard/admin/store/${storeId}/create-item`);
+  }
+  revalidatePath("/attraction/waiting-status");
+  revalidatePath("/food/stock-status");
+}
 
 export type UpdateStoreConfigZodErrors = {
   name?: string[];
@@ -85,7 +98,10 @@ export async function createStore(
   const eventId = formData.get("eventId") as string;
   const db = await getDb();
 
-  const storeRows = await db.select().from(stores).where(eq(stores.slug, slug));
+  const storeRows = await db
+    .select({ id: stores.id })
+    .from(stores)
+    .where(eq(stores.slug, slug));
   if (storeRows.length > 0) {
     return {
       zodErrors: null,
@@ -123,6 +139,7 @@ export async function createStore(
         break;
     }
 
+    invalidateStorePages(createdStore.id);
     return {
       zodErrors: null,
       message: "操作が完了しました。",
@@ -225,6 +242,7 @@ export async function updateStoreConfig(
         updatedAt: new Date(),
       })
       .where(eq(stores.id, storeId));
+    invalidateStorePages(storeId);
     return {
       zodErrors: null,
       success: true,
@@ -383,6 +401,7 @@ export async function deleteStore(prevState: unknown, formData: FormData) {
     }
 
     await db.delete(stores).where(eq(stores.id, storeId));
+    invalidateStorePages();
     return {
       success: true,
     };
@@ -415,6 +434,7 @@ export async function toActiveStore(prevState: unknown, formData: FormData) {
       .update(stores)
       .set({ isActive: !store.isActive })
       .where(eq(stores.id, storeId));
+    invalidateStorePages(storeId);
     return {
       success: true,
       message: "操作が完了しました。",
