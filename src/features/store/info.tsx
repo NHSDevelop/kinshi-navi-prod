@@ -1,7 +1,6 @@
 import { getDb } from "@/lib/db/drizzle";
 import { stores } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { STORE_TYPE_MAP } from "@/lib/type";
 import { format } from "date-fns";
@@ -43,11 +42,32 @@ export default async function StoreInfo({ storeId }: StoreInfoProps) {
       : "未設定";
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader>
-          <div className="flex gap-4 items-center">
-            <CardTitle>{store.name}</CardTitle>
+    <div className="flex flex-row items-center gap-4 md:gap-8">
+      <div className="shrink-0 self-center mr-4">
+        {store.imageUrl ? (
+          <Image
+            src={store.imageUrl}
+            alt={`${store.name}の画像`}
+            width={160}
+            height={220}
+            loading="eager"
+            className="rounded-md border border-slate-200 object-contain"
+          />
+        ) : (
+          <Image
+            src="/images/default-image.png"
+            alt={`デフォルト画像`}
+            width={160}
+            height={220}
+            loading="eager"
+            className="rounded-md border border-slate-200 object-contain"
+          />
+        )}
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col gap-4">
+        <div>
+          <h3 className="text-lg font-semibold text-main-950">{store.name}</h3>
+          <div className="mt-2 flex flex-wrap gap-2">
             <Badge>{storeType}</Badge>
             {store.isActive ? (
               <Badge variant="success" className="text-sm">
@@ -59,43 +79,18 @@ export default async function StoreInfo({ storeId }: StoreInfoProps) {
               </Badge>
             )}
           </div>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4 md:gap-8 md:flex-row md:items-center">
-          {store.imageUrl ? (
-            <Image
-              src={store.imageUrl}
-              alt={`${store.name}の画像`}
-              width={300}
-              height={400}
-              loading="eager"
-              className="object-contain rounded-md border-2"
-            />
-          ) : (
-            <Image
-              src="/images/default-image.png"
-              alt={`選択中の画像`}
-              width={300}
-              height={400}
-              loading="eager"
-              className="object-contain rounded-md"
-            />
-          )}
-          <div className="flex gap-2 md:flex-1">
-            <div className="flex flex-col items-start gap-4">
-              <p>名前：</p>
-              <p>開催日：</p>
-              <p>開催時間：</p>
-              <p>詳細：</p>
-            </div>
-            <div className="flex flex-col items-start gap-4">
-              <p>{store.name}</p>
-              <p>{dateRange}</p>
-              <p>{timeRange}</p>
-              <p>{store.description ?? "なし"}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+        <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-4 text-sm md:text-base">
+          <p className="font-medium text-slate-700">開催日：</p>
+          <p className="min-w-0 wrap-break-word">{dateRange}</p>
+          <p className="font-medium text-slate-700">開催時間：</p>
+          <p className="min-w-0 wrap-break-word">{timeRange}</p>
+          <p className="font-medium text-slate-700">詳細：</p>
+          <p className="min-w-0 wrap-break-word">
+            {store.description ?? "なし"}
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

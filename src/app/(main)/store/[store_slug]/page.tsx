@@ -6,7 +6,6 @@ import { eq } from "drizzle-orm";
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import FoodInfo from "@/features/store/food/info";
 import ItemList from "@/features/store/food/item/list";
-import { Separator } from "@/components/ui/separator";
 
 export const dynamic = "force-dynamic";
 
@@ -51,21 +50,40 @@ export default async function StorePage(props: {
     food = foodRows[0];
   }
   return (
-    <div className="space-y-4">
-      <h1 className="text-xl font-bold">{storeRows[0].name} | 店舗ページ</h1>
-      <Separator />
-      <StoreInfo storeId={storeRows[0].id} />
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 lg:gap-8">
+      <section className="rounded-[1.75rem] border border-main-200 bg-main-50/70 p-5 md:p-7">
+        <h1 className="text-2xl font-bold text-main-950 md:text-3xl">
+          {storeRows[0].name}
+        </h1>
+        <p className="mt-3 text-sm leading-6 text-main-900/80 md:text-base">
+          店舗の基本情報と詳細を確認できます。
+        </p>
+      </section>
+
+      <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
+        <StoreInfo storeId={storeRows[0].id} />
+      </section>
+
       {storeRows[0].storeType === "ATTRACTION" && attraction && (
-        <AttractionInfo attractionId={attraction.id} />
+        <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
+          <AttractionInfo attractionId={attraction.id} />
+        </section>
       )}
       {storeRows[0].storeType === "FOOD" && food && (
-        <div className="flex flex-col gap-4 md:gap-8">
-          <FoodInfo foodId={food.id} />
-          <Separator />
-          <h2 className="text-lg font-bold">商品一覧</h2>
-          <Separator />
-          <ItemList foodId={food.id} />
-        </div>
+        <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
+          <div className="flex flex-col gap-6 md:gap-8">
+            <FoodInfo foodId={food.id} />
+            <div>
+              <h2 className="text-lg font-bold text-main-950 md:text-xl">
+                商品一覧
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-slate-700">
+                取り扱い商品の一覧です。在庫状況は在庫ページから確認できます。
+              </p>
+            </div>
+            <ItemList foodId={food.id} />
+          </div>
+        </section>
       )}
     </div>
   );

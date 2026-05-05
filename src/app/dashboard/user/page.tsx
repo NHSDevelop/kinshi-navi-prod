@@ -5,13 +5,23 @@ import Signout from "@/features/auth/signout";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { getSessionFromRequestHeaders } from "@/lib/auth-session";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function UserPage() {
   const session = await getSessionFromRequestHeaders();
   const user = session?.user;
 
   if (!user) {
-    return <CreateAnonymousUser />;
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>ユーザーログイン</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <CreateAnonymousUser />
+        </CardContent>
+      </Card>
+    );
   }
   return (
     <div className="flex flex-col gap-4">
@@ -23,7 +33,11 @@ export default async function UserPage() {
         </Button>
         {!user.isAnonymous && <Signout />}
       </div>
-      <UserInfo userId={user.id} />
+      <Card>
+        <CardContent className="pt-6">
+          <UserInfo userId={user.id} />
+        </CardContent>
+      </Card>
     </div>
   );
 }
