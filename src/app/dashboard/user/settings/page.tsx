@@ -1,4 +1,3 @@
-import { Separator } from "@/components/ui/separator";
 import DeleteAuthUser from "@/features/auth/delete";
 import { redirect } from "next/navigation";
 import { getSessionFromRequestHeaders } from "@/lib/auth-session";
@@ -26,6 +25,5 @@ export default async function UserSettingsPage() {
         </CardContent>
       </Card>
     </DashboardPageShell>
-  );
   );
 }
