@@ -21,6 +21,7 @@ import DeleteEvent from "@/features/event/delete";
 import { notFound } from "next/navigation";
 import ToActiveEvent from "@/features/event/to-active";
 import CreateRegisterLane from "@/features/store/food/register/lane/create";
+import { DashboardPageShell } from "@/components/dashboard/page-shell";
 
 export default async function AdminEventPage(props: {
   params: Promise<{ event_id: string }>;
@@ -57,89 +58,93 @@ export default async function AdminEventPage(props: {
   //TODO ToActiveEventの時にInfoが変化しないのを修正する
 
   return (
-    <div className="space-y-4 lg:space-y-8">
-      <h1 className="font-bold text-xl">イベントの管理</h1>
-      <Separator />
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg">イベントの情報</h2>
-        <Button asChild variant="card">
-          <div className="flex gap-2">
-            <AiFillEdit />
-            <Link href={`/dashboard/admin/event/${event_id}/edit-config`}>
-              設定を編集
-            </Link>
-          </div>
-        </Button>
-      </div>
+    <DashboardPageShell
+      title="イベントの管理"
+      description="イベント情報、配下の店舗、管理者一覧をまとめて操作できます。"
+    >
+      <div className="space-y-4 lg:space-y-8">
+        <Separator />
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg">イベントの情報</h2>
+          <Button asChild variant="card">
+            <div className="flex gap-2">
+              <AiFillEdit />
+              <Link href={`/dashboard/admin/event/${event_id}/edit-config`}>
+                設定を編集
+              </Link>
+            </div>
+          </Button>
+        </div>
 
-      <EventInfo eventId={event_id} />
-      <ToMainEvent eventId={event_id} isMain={eventRows[0].isMain} />
-      <ToActiveEvent eventId={event_id} isActive={eventRows[0].isActive} />
-      <Separator />
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg">イベント内の店舗の管理</h2>
-        <Button asChild variant="card">
-          <div className="flex gap-2">
-            <AiFillPlusCircle />
-            <Link href={`/dashboard/admin/event/${event_id}/create-store`}>
-              店舗を作成
-            </Link>
-          </div>
-        </Button>
-      </div>
+        <EventInfo eventId={event_id} />
+        <ToMainEvent eventId={event_id} isMain={eventRows[0].isMain} />
+        <ToActiveEvent eventId={event_id} isActive={eventRows[0].isActive} />
+        <Separator />
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg">イベント内の店舗の管理</h2>
+          <Button asChild variant="card">
+            <div className="flex gap-2">
+              <AiFillPlusCircle />
+              <Link href={`/dashboard/admin/event/${event_id}/create-store`}>
+                店舗を作成
+              </Link>
+            </div>
+          </Button>
+        </div>
 
-      {storeRows.length > 0 ? (
-        <StoreSelectLink
-          href="/dashboard/admin/store"
-          stores={storeRows}
-          context="店舗の管理ページへ"
-        />
-      ) : (
-        <p>イベント内の店舗が存在しません。</p>
-      )}
+        {storeRows.length > 0 ? (
+          <StoreSelectLink
+            href="/dashboard/admin/store"
+            stores={storeRows}
+            context="店舗の管理ページへ"
+          />
+        ) : (
+          <p>イベント内の店舗が存在しません。</p>
+        )}
 
-      <Separator />
-      <p className="text-lg">イベント内の店舗の管理者を招待</p>
-      {storeRows.length > 0 ? (
-        <StoreSelectLink
-          href={`/dashboard/admin/event/${event_id}/issue-invite`}
-          stores={storeRows}
-          context="招待リンクを発行"
-        />
-      ) : (
-        <p>イベント内の店舗が存在しません。</p>
-      )}
-      <Separator />
-      <p className="text-lg">模擬店とレジレーンの紐づけ</p>
-      <CreateRegisterLane eventId={event_id} />
-      <Separator />
-      <p className="text-lg">イベントの管理者一覧</p>
-      {adminRows.length > 0 ? (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>名前</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {adminRows.map((admin) => (
-              <TableRow key={admin.id}>
-                <TableCell>{admin.name}</TableCell>
+        <Separator />
+        <p className="text-lg">イベント内の店舗の管理者を招待</p>
+        {storeRows.length > 0 ? (
+          <StoreSelectLink
+            href={`/dashboard/admin/event/${event_id}/issue-invite`}
+            stores={storeRows}
+            context="招待リンクを発行"
+          />
+        ) : (
+          <p>イベント内の店舗が存在しません。</p>
+        )}
+        <Separator />
+        <p className="text-lg">模擬店とレジレーンの紐づけ</p>
+        <CreateRegisterLane eventId={event_id} />
+        <Separator />
+        <p className="text-lg">イベントの管理者一覧</p>
+        {adminRows.length > 0 ? (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>名前</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      ) : (
-        <NotFoundPrompt context="該当する管理者" />
-      )}
-      <Separator />
-      <Button asChild variant="card">
-        <Link href={`/dashboard/admin/event/${event_id}/vote-result`}>
-          投票結果を見る
-        </Link>
-      </Button>
-      <Separator />
-      <DeleteEvent eventId={event_id} pushUrl="/dashboard" />
-    </div>
+            </TableHeader>
+            <TableBody>
+              {adminRows.map((admin) => (
+                <TableRow key={admin.id}>
+                  <TableCell>{admin.name}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
+          <NotFoundPrompt context="該当する管理者" />
+        )}
+        <Separator />
+        <Button asChild variant="card">
+          <Link href={`/dashboard/admin/event/${event_id}/vote-result`}>
+            投票結果を見る
+          </Link>
+        </Button>
+        <Separator />
+        <DeleteEvent eventId={event_id} pushUrl="/dashboard" />
+      </div>
+    </DashboardPageShell>
   );
 }

@@ -2,9 +2,9 @@ import { redirect } from "next/navigation";
 import { and, eq } from "drizzle-orm";
 import { getSessionFromRequestHeaders } from "@/lib/auth-session";
 import { getDb } from "@/lib/db/drizzle";
-import { admins, stores } from "@/lib/db/schema";
+import { admins, staffs, stores } from "@/lib/db/schema";
 
-export default async function AdminStoreLayout({
+export default async function StaffStoreLayout({
   children,
   params,
 }: {
@@ -19,6 +19,16 @@ export default async function AdminStoreLayout({
   const { store_id } = await params;
   const userId = session.user.id;
   const db = await getDb();
+
+  const staffRows = await db
+    .select({ storeId: staffs.storeId })
+    .from(staffs)
+    .where(eq(staffs.userId, userId))
+    .limit(1);
+
+  if (staffRows.length > 0 && staffRows[0].storeId === store_id) {
+    return <>{children}</>;
+  }
 
   const adminRows = await db
     .select({

@@ -12,7 +12,7 @@ export default async function SuperAdminLayout({
   const session = await getSessionFromRequestHeaders();
 
   if (!session?.user) {
-    redirect("/signin/dashboard/super-admin");
+    redirect("/signin");
   }
 
   const userId = session.user.id;
@@ -26,7 +26,7 @@ export default async function SuperAdminLayout({
     .limit(1);
 
   if (rows.length === 0) {
-    redirect("/signin/dashboard/super-admin");
+    redirect("/signin");
   }
 
   return <>{children}</>;
