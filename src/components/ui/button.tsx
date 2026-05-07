@@ -15,6 +15,8 @@ const buttonVariants = cva(
         warn: "bg-amber-300 text-gray-900 hover:bg-amber-300/90",
         danger: "bg-red-300 text-gray-900 hover:bg-red-300/90",
         success: "bg-green-300 text-gray-900 hover:bg-green-300/90",
+        ghost:
+          "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

@@ -30,7 +30,6 @@ export default async function ItemInfo({ itemId }: Props) {
                   alt={`${itemRows[0].name}の画像`}
                   width={300}
                   height={400}
-                  loading="eager"
                   className="object-contain rounded-md border-2"
                 />
               ) : (
@@ -39,7 +38,6 @@ export default async function ItemInfo({ itemId }: Props) {
                   alt={`デフォルトの画像`}
                   width={300}
                   height={400}
-                  loading="eager"
                   className="object-contain rounded-md"
                 />
               )}

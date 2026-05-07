@@ -80,7 +80,6 @@ export default function CreateStoreVoteForm({
               alt="選択中の画像"
               width={selectedImageWidth}
               height={selectedImageHeight}
-              loading="eager"
               className="object-contain rounded-md"
             />
 
@@ -127,7 +126,6 @@ export default function CreateStoreVoteForm({
                   alt={`${store.name}の画像`}
                   width={200}
                   height={300}
-                  loading="eager"
                   className="object-contain rounded-md"
                 />
               ) : (
@@ -136,7 +134,6 @@ export default function CreateStoreVoteForm({
                   alt="画像なし"
                   width={200}
                   height={300}
-                  loading="eager"
                   className="object-contain rounded-md"
                 />
               )}

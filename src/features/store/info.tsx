@@ -50,7 +50,6 @@ export default async function StoreInfo({ storeId }: StoreInfoProps) {
             alt={`${store.name}の画像`}
             width={160}
             height={220}
-            loading="eager"
             className="rounded-md border border-slate-200 object-contain"
           />
         ) : (
@@ -59,7 +58,6 @@ export default async function StoreInfo({ storeId }: StoreInfoProps) {
             alt={`デフォルト画像`}
             width={160}
             height={220}
-            loading="eager"
             className="rounded-md border border-slate-200 object-contain"
           />
         )}

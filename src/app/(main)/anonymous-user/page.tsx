@@ -6,6 +6,8 @@ import { redirect } from "next/navigation";
 import { InstallPrompt } from "@/features/push/install";
 import { HelpPrompt } from "@/components/prompt/help";
 import { getSessionFromRequestHeaders } from "@/lib/auth-session";
+import { Suspense } from "react";
+import { LoadingPrompt } from "@/components/prompt/loading-prompt";
 
 export default async function AnonymousUserPage() {
   const session = await getSessionFromRequestHeaders();
@@ -47,8 +49,10 @@ export default async function AnonymousUserPage() {
           ユーザー設定
         </h2>
         <div className="mt-4 flex flex-col gap-4">
-          <InstallPrompt />
-          <PushNotificationManager userId={user.id} />
+          <Suspense fallback={<LoadingPrompt context="ユーザー設定" />}>
+            <InstallPrompt />
+            <PushNotificationManager userId={user.id} />
+          </Suspense>
         </div>
       </section>
 
@@ -78,7 +82,9 @@ export default async function AnonymousUserPage() {
           </HelpPrompt>
         </div>
         <div className="mt-4">
-          <UserTicketList userId={user.id} />
+          <Suspense fallback={<LoadingPrompt context="取得したチケット" />}>
+            <UserTicketList userId={user.id} />
+          </Suspense>
         </div>
       </section>
 

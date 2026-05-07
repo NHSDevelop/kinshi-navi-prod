@@ -1,6 +1,8 @@
+import { LoadingPrompt } from "@/components/prompt/loading-prompt";
 import CreateAnonymousUser from "@/features/auth/anonymous/create";
 import IssueTicket from "@/features/store/attraction/ticket/issue";
 import { getSessionFromRequestHeaders } from "@/lib/auth-session";
+import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
 
@@ -40,7 +42,13 @@ export default async function TicketIssuePage() {
       </section>
       {user.isAnonymous ? (
         <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
-          <IssueTicket userId={user.id} eventId={mainEventId} isPaper={false} />
+          <Suspense fallback={<LoadingPrompt context="発行画面" />}>
+            <IssueTicket
+              userId={user.id}
+              eventId={mainEventId}
+              isPaper={false}
+            />
+          </Suspense>
         </section>
       ) : (
         <section className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-amber-900 md:p-5">

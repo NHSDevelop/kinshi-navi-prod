@@ -124,7 +124,6 @@ export default function UpdateItemForm({ item }: Props) {
                           sizes="(max-width: 768px) 100vw, 640px"
                           unoptimized
                           className="object-contain"
-                          loading="eager"
                         />
                       </div>
                     ) : (

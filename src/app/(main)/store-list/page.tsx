@@ -1,4 +1,6 @@
+import { LoadingPrompt } from "@/components/prompt/loading-prompt";
 import StoreList from "@/features/store/list";
+import { Suspense } from "react";
 
 export default async function StoreListPage() {
   return (
@@ -8,11 +10,13 @@ export default async function StoreListPage() {
           店舗一覧
         </h1>
         <p className="mt-3 text-sm leading-6 text-main-900/80 md:text-base">
-          企画と模擬店をまとめて確認できます。気になる店舗の詳細ページへ進んでください。
+          企画と模擬店をまとめて確認できます。店舗名をクリックすると、詳細を確認できます。
         </p>
       </section>
       <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
-        <StoreList />
+        <Suspense fallback={<LoadingPrompt context="店舗の一覧" />}>
+          <StoreList />
+        </Suspense>
       </section>
     </div>
   );

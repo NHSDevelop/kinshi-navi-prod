@@ -1,5 +1,7 @@
 import ItemStockStatus from "@/features/store/food/item/stock-status";
 import { RoutePollingRefresh } from "@/components/polling/route-polling-refresh";
+import { Suspense } from "react";
+import { LoadingPrompt } from "@/components/prompt/loading-prompt";
 
 export default async function FoodStockStatusPage() {
   const mainEventId = process.env.MAIN_EVENT_ID as string;
@@ -16,7 +18,9 @@ export default async function FoodStockStatusPage() {
         </p>
       </section>
       <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
-        <ItemStockStatus eventId={mainEventId} />
+        <Suspense fallback={<LoadingPrompt context="在庫状況" />}>
+          <ItemStockStatus eventId={mainEventId} />
+        </Suspense>
       </section>
     </div>
   );

@@ -92,7 +92,6 @@ export default function StoreList() {
               <TableHead>店舗名</TableHead>
               <TableHead>店舗の種類</TableHead>
               <TableHead>状態</TableHead>
-              <TableHead>店舗ページ</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -103,7 +102,7 @@ export default function StoreList() {
               return (
                 <TableRow key={store.id}>
                   <TableCell className="font-semibold md:text-lg">
-                    {store.name}
+                    <Link href={`/store/${store.slug}`}>{store.name}</Link>
                   </TableCell>
                   <TableCell>
                     <Badge className="text-sm">{storeType}</Badge>
@@ -118,11 +117,6 @@ export default function StoreList() {
                         停止中
                       </Badge>
                     )}
-                  </TableCell>
-                  <TableCell>
-                    <Button asChild variant="card">
-                      <Link href={`/store/${store.slug}`}>店舗ページ</Link>
-                    </Button>
                   </TableCell>
                 </TableRow>
               );
