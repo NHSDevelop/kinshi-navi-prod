@@ -19,6 +19,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    if (imageFileData.size > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        { message: "ファイルサイズが大きすぎます。5MB以下にしてください。" },
+        { status: 400 },
+      );
+    }
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (!allowedTypes.includes(imageFileData.type)) {
+      return NextResponse.json(
+        { message: "許可されていないファイル形式です。" },
+        { status: 400 },
+      );
+    }
+
     const imageFileDataArrayBuffer = await imageFileData.arrayBuffer();
     const imageFileDataBuffer = Buffer.from(imageFileDataArrayBuffer);
 
@@ -77,13 +93,11 @@ export async function POST(req: NextRequest) {
       url: mainUrl,
       srcset,
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error uploading file:", error);
     return NextResponse.json(
       {
         message: "アップロードに失敗しました。",
-        error: error.message,
       },
       { status: 500 },
     );
