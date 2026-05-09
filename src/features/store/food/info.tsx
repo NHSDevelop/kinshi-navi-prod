@@ -9,7 +9,7 @@ interface FoodInfoProps {
 export default async function FoodInfo({ foodId }: FoodInfoProps) {
   const db = await getDb();
   const rows = await db
-    .select()
+    .select({ id: foods.id, storeId: foods.storeId })
     .from(foods)
     .where(eq(foods.id, foodId))
     .limit(1);

@@ -1,21 +1,23 @@
 "use server";
 
-import { registerLogs, stockLogs, items } from "@/lib/db/schema";
+import { registerLogs, stockLogs, items, registerLanes } from "@/lib/db/schema";
 import z from "zod";
 import { getDb } from "@/lib/db/drizzle";
-import { eq, sql } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 
 const CreateRegisterLogSchema = z.object({
   foodId: z.string().min(1, "必須項目です"),
   totalAmount: z.coerce.number().int("整数である必要があります"),
   amountPaid: z.coerce.number().int("整数である必要があります"),
   meta: z.string().optional(),
+  laneId: z.string().min(1, "必須項目です"),
 });
 
 const ProcessRegisterAndStockSchema = z.object({
   foodId: z.string().min(1, "必須項目です"),
   totalAmount: z.coerce.number().int("整数である必要があります"),
   amountPaid: z.coerce.number().int("整数である必要があります"),
+  laneId: z.string().min(1, "必須項目です"),
 });
 
 export type ZodErrors = {
@@ -23,6 +25,7 @@ export type ZodErrors = {
   totalAmount?: string[];
   amountPaid?: string[];
   meta?: string[];
+  laneId?: string[];
 } | null;
 
 export type RegisterLogState = {
@@ -30,6 +33,7 @@ export type RegisterLogState = {
   totalAmount: string;
   amountPaid: string;
   meta: string;
+  laneId: string;
   zodErrors: ZodErrors;
   message: string | null;
   success: boolean;
@@ -39,6 +43,7 @@ export type RegisterAndStockState = {
   quantities: Record<string, number>;
   totalAmount: number;
   amountPaid: string;
+  laneId: string;
   zodErrors: {
     quantities?: Record<string, string[]>;
     totalAmount?: string[];
@@ -57,6 +62,7 @@ export async function createRegisterLog(
     totalAmount: formData.get("totalAmount") as string,
     amountPaid: formData.get("amountPaid") as string,
     meta: formData.get("meta") as string | undefined,
+    laneId: formData.get("laneId") as string,
   });
 
   if (!validationResult.success) {
@@ -65,21 +71,57 @@ export async function createRegisterLog(
       totalAmount: formData.get("totalAmount") as string,
       amountPaid: formData.get("amountPaid") as string,
       meta: formData.get("meta") as string,
+      laneId: formData.get("laneId") as string,
       zodErrors: validationResult.error.flatten().fieldErrors,
       message: "入力形式が正しくありません",
       success: false,
     };
   }
 
-  const { foodId, totalAmount, amountPaid, meta } = validationResult.data;
+  const { foodId, totalAmount, amountPaid, meta, laneId } =
+    validationResult.data;
   const db = await getDb();
 
   try {
+    const laneRows = await db
+      .select({ id: registerLanes.id, foodId: registerLanes.foodId })
+      .from(registerLanes)
+      .where(eq(registerLanes.id, laneId))
+      .limit(1);
+    const lane = laneRows[0];
+
+    if (!lane || !lane.foodId) {
+      return {
+        foodId: formData.get("foodId") as string,
+        totalAmount: formData.get("totalAmount") as string,
+        amountPaid: formData.get("amountPaid") as string,
+        meta: formData.get("meta") as string,
+        laneId: formData.get("laneId") as string,
+        zodErrors: null,
+        message: "このレーンには模擬店が紐づいていません",
+        success: false,
+      };
+    }
+
+    if (lane.foodId !== foodId) {
+      return {
+        foodId: formData.get("foodId") as string,
+        totalAmount: formData.get("totalAmount") as string,
+        amountPaid: formData.get("amountPaid") as string,
+        meta: formData.get("meta") as string,
+        laneId: formData.get("laneId") as string,
+        zodErrors: null,
+        message: "レーンと模擬店の紐づけが一致しません",
+        success: false,
+      };
+    }
+
     await db.insert(registerLogs).values({
       foodId,
       totalAmount,
       amountPaid,
       meta,
+      laneId,
     });
 
     return {
@@ -90,6 +132,7 @@ export async function createRegisterLog(
       zodErrors: null,
       message: "会計が完了しました。",
       success: true,
+      laneId: "",
     };
   } catch (error) {
     console.log(error);
@@ -98,6 +141,7 @@ export async function createRegisterLog(
       totalAmount: formData.get("totalAmount") as string,
       amountPaid: formData.get("amountPaid") as string,
       meta: formData.get("meta") as string,
+      laneId: formData.get("laneId") as string,
       zodErrors: null,
       message: "サーバーエラーが発生しました",
       success: false,
@@ -113,6 +157,7 @@ export async function processRegisterAndStock(
     foodId: formData.get("foodId") as string,
     totalAmount: formData.get("totalAmount") as string,
     amountPaid: formData.get("amountPaid") as string,
+    laneId: formData.get("laneId") as string,
   });
 
   if (!validationResult.success) {
@@ -120,6 +165,7 @@ export async function processRegisterAndStock(
       quantities: prevState.quantities,
       totalAmount: prevState.totalAmount,
       amountPaid: formData.get("amountPaid") as string,
+      laneId: formData.get("laneId") as string,
       zodErrors: validationResult.error.flatten()
         .fieldErrors as RegisterAndStockState["zodErrors"],
       message: "入力形式が正しくありません",
@@ -127,10 +173,41 @@ export async function processRegisterAndStock(
     };
   }
 
-  const { foodId, totalAmount, amountPaid } = validationResult.data;
+  const { foodId, totalAmount, amountPaid, laneId } = validationResult.data;
   const db = await getDb();
 
   try {
+    const laneRows = await db
+      .select({ id: registerLanes.id, foodId: registerLanes.foodId })
+      .from(registerLanes)
+      .where(eq(registerLanes.id, laneId))
+      .limit(1);
+    const lane = laneRows[0];
+
+    if (!lane || !lane.foodId) {
+      return {
+        quantities: prevState.quantities,
+        totalAmount: prevState.totalAmount,
+        amountPaid: formData.get("amountPaid") as string,
+        laneId: formData.get("laneId") as string,
+        zodErrors: null,
+        message: "このレーンには模擬店が紐づいていません",
+        success: false,
+      };
+    }
+
+    if (lane.foodId !== foodId) {
+      return {
+        quantities: prevState.quantities,
+        totalAmount: prevState.totalAmount,
+        amountPaid: formData.get("amountPaid") as string,
+        laneId: formData.get("laneId") as string,
+        zodErrors: null,
+        message: "レーンと模擬店の紐づけが一致しません",
+        success: false,
+      };
+    }
+
     // Parse quantities from formData (format: quantity_<itemId>)
     const quantitiesToRecord: Record<string, number> = {};
     formData.forEach((value, key) => {
@@ -152,18 +229,22 @@ export async function processRegisterAndStock(
       }),
     );
 
-    for (const record of stockLogRecords) {
-      await db.insert(stockLogs).values(record);
+    if (stockLogRecords.length > 0) {
+      await db.insert(stockLogs).values(stockLogRecords);
     }
 
-    // Update items stock
-    for (const [itemId, qty] of Object.entries(quantitiesToRecord)) {
+    // Update items stock in a single query
+    const itemIds = Object.keys(quantitiesToRecord);
+    if (itemIds.length > 0) {
+      const updateCases = itemIds.map((itemId) => {
+        const qty = quantitiesToRecord[itemId];
+        return sql`WHEN ${itemId} THEN ${sql`${items.stock} - ${qty}`}`;
+      });
+      const updatedStock = sql`CASE ${items.id} ${sql.join(updateCases, sql` `)} ELSE ${items.stock} END`;
       await db
         .update(items)
-        .set({
-          stock: sql`${items.stock} - ${qty}`,
-        })
-        .where(eq(items.id, itemId));
+        .set({ stock: updatedStock })
+        .where(inArray(items.id, itemIds));
     }
 
     // Record register log
@@ -171,6 +252,7 @@ export async function processRegisterAndStock(
       foodId,
       totalAmount,
       amountPaid,
+      laneId,
       meta: `販売${Object.values(quantitiesToRecord).reduce((a, b) => a + b, 0)}個`,
     });
 
@@ -178,6 +260,7 @@ export async function processRegisterAndStock(
       quantities: {},
       totalAmount: 0,
       amountPaid: "",
+      laneId: "",
       zodErrors: null,
       message: "会計・在庫変動が完了しました。",
       success: true,
@@ -188,6 +271,7 @@ export async function processRegisterAndStock(
       quantities: prevState.quantities,
       totalAmount: prevState.totalAmount,
       amountPaid: formData.get("amountPaid") as string,
+      laneId: formData.get("laneId") as string,
       zodErrors: null,
       message: "サーバーエラーが発生しました",
       success: false,

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
 import { getDb } from "@/lib/db/drizzle";
@@ -6,14 +5,18 @@ import {
   attractions,
   foods,
   Store,
+  items,
+  registerLogs,
   stores,
+  stockLogs,
+  tickets,
   type StoreType,
 } from "@/lib/db/schema";
 import { FormState } from "@/lib/type";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import z from "zod";
-import { getEventBySlug } from "../event/action";
 import { slugSchema } from "@/lib/schemas/store";
+import { unstable_cache, revalidatePath } from "next/cache";
 
 export type ZodErrors = {
   slug?: string[];
@@ -29,8 +32,22 @@ export type StoreState = {
   success?: boolean;
 };
 
+// ISR 対象ページを無効化する関数
+function invalidateStorePages(storeId?: string) {
+  if (storeId) {
+    revalidatePath(`/dashboard/staff/store/${storeId}`);
+    revalidatePath(`/dashboard/admin/store/${storeId}`);
+    revalidatePath(`/dashboard/staff/store/${storeId}/item-list`);
+    revalidatePath(`/dashboard/staff/store/${storeId}/call-ticket`);
+    revalidatePath(`/dashboard/admin/store/${storeId}/create-item`);
+  }
+  revalidatePath("/attraction/waiting-status");
+  revalidatePath("/food/stock-status");
+}
+
 export type UpdateStoreConfigZodErrors = {
   name?: string[];
+  imageUrl?: string[];
   startedAtDate?: string[];
   startedAtTime?: string[];
   finishedAtDate?: string[];
@@ -40,6 +57,7 @@ export type UpdateStoreConfigZodErrors = {
 
 export type UpdateStoreConfigState = {
   name?: string;
+  imageUrl?: string;
   startedAtDate?: string;
   startedAtTime?: string;
   finishedAtDate?: string;
@@ -80,7 +98,10 @@ export async function createStore(
   const eventId = formData.get("eventId") as string;
   const db = await getDb();
 
-  const storeRows = await db.select().from(stores).where(eq(stores.slug, slug));
+  const storeRows = await db
+    .select({ id: stores.id })
+    .from(stores)
+    .where(eq(stores.slug, slug));
   if (storeRows.length > 0) {
     return {
       zodErrors: null,
@@ -118,6 +139,7 @@ export async function createStore(
         break;
     }
 
+    invalidateStorePages(createdStore.id);
     return {
       zodErrors: null,
       message: "操作が完了しました。",
@@ -135,6 +157,7 @@ export async function createStore(
 
 const storeConfigSchema = z.object({
   name: z.string().min(1, "必須項目です"),
+  imageUrl: z.string().url("画像URLの形式が正しくありません").nullable(),
   isActive: z.boolean(),
   startedAtDate: z.date().nullable(),
   startedAtTime: z
@@ -156,6 +179,9 @@ export async function updateStoreConfig(
   const isActiveRaw = formData.get("isActive");
   const validationResult = storeConfigSchema.safeParse({
     name: formData.get("name"),
+    imageUrl: formData.get("imageUrl")
+      ? (formData.get("imageUrl") as string)
+      : null,
     isActive: isActiveRaw === "true" || isActiveRaw === "on",
     startedAtDate: formData.get("startedAtDate")
       ? new Date(formData.get("startedAtDate") as string)
@@ -174,9 +200,9 @@ export async function updateStoreConfig(
       : null,
   });
   if (!validationResult.success) {
-    console.log(validationResult.error);
     return {
       name: (formData.get("name") as string) || "",
+      imageUrl: (formData.get("imageUrl") as string) || "",
       startedAtDate: (formData.get("startedAtDate") as string) || "",
       startedAtTime: (formData.get("startedAtTime") as string) || "",
       finishedAtDate: (formData.get("finishedAtDate") as string) || "",
@@ -190,6 +216,7 @@ export async function updateStoreConfig(
   }
   const {
     name,
+    imageUrl,
     isActive,
     startedAtDate,
     startedAtTime,
@@ -205,6 +232,7 @@ export async function updateStoreConfig(
       .update(stores)
       .set({
         name: name,
+        imageUrl: imageUrl,
         isActive: isActive,
         startedAtDate: startedAtDate,
         startedAtTime: startedAtTime,
@@ -214,6 +242,7 @@ export async function updateStoreConfig(
         updatedAt: new Date(),
       })
       .where(eq(stores.id, storeId));
+    invalidateStorePages(storeId);
     return {
       zodErrors: null,
       success: true,
@@ -230,38 +259,51 @@ export async function updateStoreConfig(
   }
 }
 
-export async function getStoresByFormByEventSlug(
-  _prevState: FormState<Store[]>,
-  formData: FormData,
-): Promise<FormState<Store[]>> {
-  const eventSlug = formData.get("eventSlug") as string;
-  const storeType = formData.get("storeType") as StoreType | "all";
-
-  try {
-    const event = await getEventBySlug(eventSlug);
-    if (!event) {
-      return {
-        success: false,
-        message: null,
-        error: "サーバーエラーが発生しました",
-      };
-    }
+// キャッシュ対象のコア処理
+const getCachedStoresInMainEvent = unstable_cache(
+  async (eventId: string, storeType: StoreType | "all" | null) => {
     const db = await getDb();
+
+    // DB WHERE で storeType フィルタリング
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const whereConditions: Array<any> = [eq(stores.eventId, eventId)];
+    if (storeType && storeType !== "all") {
+      whereConditions.push(eq(stores.storeType, storeType));
+    }
 
     const storeRows = await db
       .select()
       .from(stores)
-      .where(eq(stores.eventId, event.id));
-    const filteredStoreRows =
-      !storeType || storeType === "all"
-        ? storeRows
-        : storeRows.filter((store) => store.storeType === storeType);
+      .where(and(...whereConditions));
     storeRows.sort((a, b) => a.name.localeCompare(b.name, "ja"));
+    return storeRows;
+  },
+  ["stores-in-main-event"],
+  {
+    revalidate: 60,
+    tags: ["stores-in-main-event"],
+  },
+);
+
+export async function getStoresInMainEvent(
+  _prevState: FormState<Store[]>,
+  formData: FormData,
+): Promise<FormState<Store[]>> {
+  const storeType = formData.get("storeType") as StoreType | "all";
+
+  try {
+    const mainEventId = process.env.MAIN_EVENT_ID as string;
+
+    // キャッシュ版を呼び出し
+    const storeRows = await getCachedStoresInMainEvent(
+      mainEventId,
+      storeType || "all",
+    );
     return {
       success: true,
       message: null,
       error: null,
-      data: filteredStoreRows,
+      data: storeRows,
     };
   } catch (error) {
     console.log(error);
@@ -288,5 +330,121 @@ export async function getStoreIdByStoreSlug(
   } catch (error) {
     console.log(error);
     return null;
+  }
+}
+
+export async function deleteStore(prevState: unknown, formData: FormData) {
+  const storeId = formData.get("storeId") as string;
+  try {
+    const db = await getDb();
+
+    const attractionRows = await db
+      .select({ id: attractions.id })
+      .from(attractions)
+      .where(eq(attractions.storeId, storeId))
+      .limit(1);
+    if (attractionRows.length > 0) {
+      const ticketRows = await db
+        .select({ id: tickets.id })
+        .from(tickets)
+        .innerJoin(attractions, eq(tickets.attractionId, attractions.id))
+        .where(eq(attractions.storeId, storeId))
+        .limit(1);
+      if (ticketRows.length > 0) {
+        return {
+          success: false,
+          error: "チケットが存在するため店舗を削除できません。",
+        };
+      }
+    }
+
+    const foodRows = await db
+      .select({ id: foods.id })
+      .from(foods)
+      .where(eq(foods.storeId, storeId))
+      .limit(1);
+    if (foodRows.length > 0) {
+      const itemRows = await db
+        .select({ id: items.id })
+        .from(items)
+        .innerJoin(foods, eq(items.foodId, foods.id))
+        .where(eq(foods.storeId, storeId))
+        .limit(1);
+      if (itemRows.length > 0) {
+        const stockLogRows = await db
+          .select({ id: stockLogs.id })
+          .from(stockLogs)
+          .innerJoin(items, eq(stockLogs.itemId, items.id))
+          .innerJoin(foods, eq(items.foodId, foods.id))
+          .where(eq(foods.storeId, storeId))
+          .limit(1);
+        if (stockLogRows.length > 0) {
+          return {
+            success: false,
+            error: "在庫ログが存在するため店舗を削除できません。",
+          };
+        }
+      }
+
+      const registerLogRows = await db
+        .select({ id: registerLogs.id })
+        .from(registerLogs)
+        .innerJoin(foods, eq(registerLogs.foodId, foods.id))
+        .where(eq(foods.storeId, storeId))
+        .limit(1);
+      if (registerLogRows.length > 0) {
+        return {
+          success: false,
+          error: "会計ログが存在するため店舗を削除できません。",
+        };
+      }
+    }
+
+    await db.delete(stores).where(eq(stores.id, storeId));
+    invalidateStorePages();
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      success: false,
+      error: "サーバーエラーが発生しました",
+    };
+  }
+}
+
+export async function toActiveStore(prevState: unknown, formData: FormData) {
+  try {
+    const db = await getDb();
+    const storeId = formData.get("storeId") as string;
+    const storeRows = await db
+      .select()
+      .from(stores)
+      .where(eq(stores.id, storeId))
+      .limit(1);
+    const store = storeRows[0];
+    if (!store) {
+      return {
+        success: false,
+        message: "該当する店舗が存在しません",
+      };
+    }
+    await db
+      .update(stores)
+      .set({ isActive: !store.isActive })
+      .where(eq(stores.id, storeId));
+    invalidateStorePages(storeId);
+    return {
+      success: true,
+      message: "操作が完了しました。",
+      isActive: !store.isActive,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      success: false,
+      message: "サーバーエラーが発生しました",
+    };
   }
 }

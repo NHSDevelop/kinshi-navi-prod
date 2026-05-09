@@ -4,7 +4,6 @@ import { roleValues, inviteTargetRoleValues } from "@/lib/db/schema";
 export const createInviteSchema = z.object({
   issuerScope: z.enum(roleValues),
   targetScope: z.enum(inviteTargetRoleValues),
-  organizationId: z.string().optional(),
   eventId: z.string().optional(),
   storeId: z.string().optional(),
   expiresInHours: z.coerce

@@ -20,7 +20,6 @@ import { AiFillCheckCircle } from "react-icons/ai";
 interface IssueInviteLinkProps {
   issuerScope: Role;
   targetScope: InviteTargetRole;
-  organizationId?: string;
   eventId?: string;
   storeId?: string;
 }
@@ -28,7 +27,6 @@ interface IssueInviteLinkProps {
 export default function IssueInviteLink({
   issuerScope,
   targetScope,
-  organizationId,
   eventId,
   storeId,
 }: IssueInviteLinkProps) {
@@ -50,13 +48,6 @@ export default function IssueInviteLink({
           <FieldContent>
             <input type="hidden" name="issuerScope" value={issuerScope} />
             <input type="hidden" name="targetScope" value={targetScope} />
-            {organizationId && (
-              <input
-                type="hidden"
-                name="organizationId"
-                value={organizationId}
-              />
-            )}
             {eventId && <input type="hidden" name="eventId" value={eventId} />}
             {storeId && <input type="hidden" name="storeId" value={storeId} />}
             <Field>

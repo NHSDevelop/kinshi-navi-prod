@@ -1,36 +1,48 @@
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
-import { Separator } from "@/components/ui/separator";
-import { getDbAsync } from "@/lib/db/drizzle";
+import { getDb } from "@/lib/db/drizzle";
 import { systemInfos } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+
+export const revalidate = 3600;
 
 export default async function SystemInfoPage(props: {
   params: Promise<{ systemInfo_id: string }>;
 }) {
   const { systemInfo_id } = await props.params;
-  const db = await getDbAsync();
+  const db = await getDb();
   const systemInfoRows = await db
-    .select()
+    .select({
+      id: systemInfos.id,
+      title: systemInfos.title,
+      meta: systemInfos.meta,
+      createdAt: systemInfos.createdAt,
+    })
     .from(systemInfos)
     .where(eq(systemInfos.id, systemInfo_id))
     .limit(1);
   return (
-    <div>
+    <div className="mx-auto w-full max-w-4xl">
       {systemInfoRows.length > 0 ? (
-        <>
-          <div className="flex gap-4 justify-between items-baseline mb-4">
-            <h1 className="font-bold text-xl">
-              {systemInfoRows[0].title} | お知らせ
-            </h1>
-            <div className="flex items-center gap-3">
-              <p>{systemInfoRows[0].createdAt.toLocaleDateString()}</p>
+        <section className="rounded-[1.75rem] border border-main-200 bg-white p-6 shadow-sm md:p-8">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold tracking-[0.18em] text-main-900/70 uppercase">
+                News
+              </p>
+              <h1 className="mt-2 text-xl font-bold text-main-950 md:text-2xl">
+                {systemInfoRows[0].title}
+              </h1>
+            </div>
+            <div className="rounded-full border border-main-200 bg-main-50 px-3 py-1 text-sm text-main-900">
+              {systemInfoRows[0].createdAt.toLocaleDateString()}
             </div>
           </div>
-          <Separator />
-          <div className="space-y-4 lg:space-y-8 mt-4 mb:mt-8">
-            <p>{systemInfoRows[0].meta}</p>
+          <div className="mt-6 rounded-2xl border border-main-100 bg-main-50/40 p-4 md:p-5">
+            <p className="whitespace-pre-wrap text-sm leading-7 text-slate-800 md:text-base">
+              {systemInfoRows[0].meta}
+            </p>
           </div>
-        </>
+        </section>
       ) : (
         <NotFoundPrompt context="該当するお知らせ" />
       )}

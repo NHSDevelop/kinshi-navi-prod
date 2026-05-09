@@ -1,18 +1,19 @@
 import { CreateItem } from "@/features/store/food/item/create";
-import { getDbAsync } from "@/lib/db/drizzle";
+import { getDb } from "@/lib/db/drizzle";
 import { foods } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { Separator } from "@/components/ui/separator";
-
+// Item情報は1日に1回程度変わるため、ISR 1時間でキャッシュ
+export const revalidate = 3600;
 export default async function CreateFoodItemPage(props: {
   params: Promise<{ store_id: string }>;
 }) {
   const { store_id } = await props.params;
 
-  const db = await getDbAsync();
+  const db = await getDb();
 
   const foodRows = await db
-    .select()
+    .select({ id: foods.id, storeId: foods.storeId })
     .from(foods)
     .where(eq(foods.storeId, store_id))
     .limit(1);

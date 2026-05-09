@@ -1,7 +1,7 @@
 import { getDb } from "@/lib/db/drizzle";
-import { foods, items } from "@/lib/db/schema";
+import { foods, items, registerLanes } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import FoodRegisterForm from "../register-form";
+import FoodRegisterForm from "./register-form";
 
 interface CreateRegisterProps {
   storeId: string;
@@ -10,7 +10,7 @@ interface CreateRegisterProps {
 export default async function CreateRegister({ storeId }: CreateRegisterProps) {
   const db = await getDb();
   const foodRows = await db
-    .select()
+    .select({ id: foods.id })
     .from(foods)
     .where(eq(foods.storeId, storeId))
     .limit(1);
@@ -21,7 +21,17 @@ export default async function CreateRegister({ storeId }: CreateRegisterProps) {
   }
 
   const itemList = await db
-    .select()
+    .select({
+      id: items.id,
+      name: items.name,
+      createdAt: items.createdAt,
+      updatedAt: items.updatedAt,
+      imageUrl: items.imageUrl,
+      description: items.description,
+      stock: items.stock,
+      price: items.price,
+      foodId: items.foodId,
+    })
     .from(items)
     .where(eq(items.foodId, food.id));
 
@@ -29,5 +39,14 @@ export default async function CreateRegister({ storeId }: CreateRegisterProps) {
     return <p>商品が存在しません。</p>;
   }
 
-  return <FoodRegisterForm foodId={food.id} items={itemList} />;
+  const laneRows = await db
+    .select()
+    .from(registerLanes)
+    .where(eq(registerLanes.foodId, food.id));
+
+  if (laneRows.length === 0) {
+    return <p>レジレーンが存在しません。</p>;
+  }
+
+  return <FoodRegisterForm items={itemList} lanes={laneRows} />;
 }

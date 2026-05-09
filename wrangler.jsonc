@@ -1,7 +1,8 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "main": ".open-next/worker.js",
-  "name": "gakusai-hub",
+  "name": "kinshi-navi",
+  "account_id": "ed8cb8c6686433c7b0ad9c1febb6d856",
   "compatibility_date": "2025-09-27",
   "compatibility_flags": ["nodejs_compat"],
   "assets": {
@@ -11,12 +12,36 @@
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "gakusai-hub",
+      "service": "kinshi-navi",
     },
   ],
   "images": {
     "binding": "IMAGES",
   },
+  "r2_buckets": [
+    {
+      "binding": "IMG_BUCKET",
+      "bucket_name": "kinshi-navi-img",
+    },
+    {
+      "binding": "NEXT_INC_CACHE_R2_BUCKET",
+      "bucket_name": "kinshi-navi-cache",
+    },
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "NEXT_CACHE_DO_QUEUE",
+        "class_name": "DOQueueHandler",
+      },
+    ],
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["DOQueueHandler"],
+    },
+  ],
   "observability": {
     "logs": {
       "enabled": true,
@@ -29,10 +54,15 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "gakusai-hub-prod",
-      "database_id": "5a647b9c-1379-439e-ade9-0f98279bdffa",
+      "database_name": "kinshi-navi-prod",
+      "database_id": "1fd0c0bd-ccbc-42a2-aab3-fb222c8abb14",
       "migrations_dir": "drizzle/migrations",
       "remote": false,
+    },
+    {
+      "binding": "NEXT_TAG_CACHE_D1",
+      "database_id": "60787eb3-52e8-44ce-8f0f-5eb7bfdc6cc6",
+      "database_name": "kinshi-navi-d1-cache",
     },
   ],
 }

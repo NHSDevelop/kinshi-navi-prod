@@ -1,6 +1,5 @@
 "use server";
 
-import { auth } from "@/lib/auth";
 import { getDb } from "@/lib/db/drizzle";
 import {
   admins,
@@ -9,7 +8,6 @@ import {
   inviteTargetRoleValues,
   staffs,
   stores,
-  organizations,
   events,
 } from "@/lib/db/schema";
 import {
@@ -17,8 +15,8 @@ import {
   generateInviteToken,
   hashInviteToken,
 } from "@/features/auth/invite/lib";
+import { getSessionFromRequestHeaders } from "@/lib/auth-session";
 import { eq } from "drizzle-orm";
-import { headers } from "next/headers";
 import z from "zod";
 import { redirect } from "next/navigation";
 
@@ -29,7 +27,6 @@ const createInviteSchema = z.object({
   targetScope: z.enum(inviteTargetRoleValues, {
     error: "有効なユーザーロールを選択してください",
   }),
-  organizationId: z.string().optional(),
   eventId: z.string().optional(),
   storeId: z.string().optional(),
   maxUses: z.coerce
@@ -40,20 +37,17 @@ const createInviteSchema = z.object({
     .default(1),
 });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function createInvite(prevState: unknown, formData: FormData) {
   try {
     const validationResult = createInviteSchema.safeParse({
       issuerScope: formData.get("issuerScope") as string,
       targetScope: formData.get("targetScope") as string,
-      organizationId: (formData.get("organizationId") as string) || undefined,
       eventId: (formData.get("eventId") as string) || undefined,
       storeId: (formData.get("storeId") as string) || undefined,
       maxUses: formData.get("maxUses") as string,
     });
 
     if (validationResult.error) {
-      console.log(validationResult.error);
       return {
         success: false,
         message: null,
@@ -61,7 +55,7 @@ export async function createInvite(prevState: unknown, formData: FormData) {
       };
     }
 
-    const session = await auth.api.getSession({ headers: await headers() });
+    const session = await getSessionFromRequestHeaders();
     if (!session?.user) {
       return {
         success: false,
@@ -75,7 +69,6 @@ export async function createInvite(prevState: unknown, formData: FormData) {
       .select({
         id: admins.id,
         role: admins.role,
-        organizationId: admins.organizationId,
         eventId: admins.eventId,
         storeId: admins.storeId,
       })
@@ -93,7 +86,7 @@ export async function createInvite(prevState: unknown, formData: FormData) {
 
     // TODO 権限チェック
     const issuerAdmin = issuerRows[0];
-    const { issuerScope, targetScope, organizationId, eventId, storeId } =
+    const { issuerScope, targetScope, eventId, storeId } =
       validationResult.data;
 
     const rawToken = generateInviteToken();
@@ -105,7 +98,6 @@ export async function createInvite(prevState: unknown, formData: FormData) {
       issuerAdminId: issuerAdmin.id,
       issuerScope,
       targetScope,
-      organizationId,
       eventId,
       storeId,
       expiresAt,
@@ -132,7 +124,7 @@ export async function createInvite(prevState: unknown, formData: FormData) {
 }
 
 export async function acceptInvite(token: string) {
-  const session = await auth.api.getSession({ headers: await headers() });
+  const session = await getSessionFromRequestHeaders();
   if (!session?.user) {
     redirect(`/signin?token=${token}`);
   }
@@ -228,31 +220,8 @@ export async function acceptInvite(token: string) {
             "すでに管理者として登録されています。別の種類の管理者として新たに登録することはできません。",
         };
       }
-      if (invite.targetScope === "ORGANIZATION_ADMIN") {
-        if (!invite.organizationId) {
-          return {
-            success: false,
-            message: "招待リンクに組織情報が紐づいていません",
-          };
-        }
-        const organizationRows = await db
-          .select()
-          .from(organizations)
-          .where(eq(organizations.id, invite.organizationId))
-          .limit(1);
-        if (organizationRows.length === 0) {
-          return {
-            success: false,
-            message: "招待リンクに紐づく組織が見つかりません",
-          };
-        }
-        await db.insert(admins).values({
-          userId: session.user.id,
-          role: "ORGANIZATION_ADMIN",
-          organizationId: invite.organizationId,
-        });
-        return { success: true };
-      } else if (invite.targetScope === "EVENT_ADMIN") {
+
+      if (invite.targetScope === "EVENT_ADMIN") {
         if (!invite.eventId) {
           return {
             success: false,
