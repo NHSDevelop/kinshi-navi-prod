@@ -20,7 +20,6 @@ export type StockLogState = {
   success?: boolean;
 };
 
-//TODO stockが負になるときの実装する
 export default async function createStockLog(
   prevState: unknown,
   formData: FormData,

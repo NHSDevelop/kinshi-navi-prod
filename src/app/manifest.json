@@ -1,6 +1,6 @@
 {
-  "name": "Gakusai Hub",
-  "short_name": "Gakusai Hub",
+  "name": "Kinshi Navi",
+  "short_name": "K-Navi",
   "id": "/",
   "start_url": "/",
   "scope": "/",
@@ -18,7 +18,7 @@
       "purpose": "any maskable"
     }
   ],
-  "theme_color": "#79a1d4",
-  "background_color": "#ffffff",
+  "theme_color": "#fff3d1",
+  "background_color": "#fafafa",
   "display": "standalone"
 }

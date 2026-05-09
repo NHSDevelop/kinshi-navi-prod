@@ -15,12 +15,20 @@ import { eq } from "drizzle-orm";
 
 interface ItemStockStatusProps {
   eventId: string;
+  page?: number;
+  pageSize?: number;
 }
+
+const DEFAULT_PAGE_SIZE = 50;
 
 export default async function ItemStockStatus({
   eventId,
+  page = 1,
+  pageSize = DEFAULT_PAGE_SIZE,
 }: ItemStockStatusProps) {
   const db = await getDb();
+
+  const offset = (page - 1) * pageSize;
 
   const itemRows = await db
     .select({
@@ -35,7 +43,9 @@ export default async function ItemStockStatus({
     .innerJoin(foods, eq(foods.id, items.foodId))
     .innerJoin(stores, eq(stores.id, foods.storeId))
     .where(eq(stores.eventId, eventId))
-    .orderBy(stores.name, items.name);
+    .orderBy(stores.name, items.name)
+    .limit(pageSize)
+    .offset(offset);
 
   if (itemRows.length === 0) {
     return <NotFoundPrompt context="商品" />;

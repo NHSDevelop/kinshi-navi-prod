@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useState } from "react";
 import { updateStoreConfig } from "./action";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,13 +17,13 @@ import { ErrorPrompt } from "@/components/prompt/error-prompt";
 import { MessagePrompt } from "@/components/prompt/message-prompt";
 import { Store } from "@/lib/db/schema";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { ja } from "date-fns/locale";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { UpdateStoreConfigState } from "./action";
+import Image from "next/image";
 
 interface updateStoreConfigFormProps {
   store: Store; //isActiveを取得するためStore型
@@ -31,6 +31,7 @@ interface updateStoreConfigFormProps {
 
 const INITIAL_STATE: UpdateStoreConfigState = {
   name: "",
+  imageUrl: "",
   startedAtDate: "",
   startedAtTime: "",
   finishedAtDate: "",
@@ -50,8 +51,6 @@ export default function UpdateStoreConfigForm({
     updateStoreConfig,
     INITIAL_STATE,
   );
-  const [checked, setChecked] = useState(store.isActive);
-  const isActiveRef = useRef<HTMLInputElement>(null);
   const [startedAtDate, setStartedAtDate] = useState<Date | null>(
     store.startedAtDate ? new Date(store.startedAtDate) : null,
   );
@@ -64,6 +63,47 @@ export default function UpdateStoreConfigForm({
   const [finishedAtTime, setFinishedAtTime] = useState<string>(
     store.finishedAtTime || "",
   );
+  const [imageUrl, setImageUrl] = useState<string>(store.imageUrl ?? "");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const handleImageUpload = async (file: File | null) => {
+    if (!file) return;
+
+    setUploadError(null);
+    setIsUploadingImage(true);
+
+    try {
+      const data = new FormData();
+      data.append("imageFileData", file);
+
+      const response = await fetch("/api/uploads/image", {
+        method: "POST",
+        body: data,
+      });
+
+      const result = (await response.json()) as {
+        url?: string;
+        error?: string;
+        message?: string;
+      };
+      if (!response.ok || !result.url) {
+        throw new Error(
+          result.error ?? result.message ?? "画像のアップロードに失敗しました",
+        );
+      }
+
+      setImageUrl(result.url);
+    } catch (error) {
+      setUploadError(
+        error instanceof Error
+          ? error.message
+          : "画像のアップロードに失敗しました",
+      );
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
 
   useEffect(() => {
     if (state?.success) {
@@ -93,28 +133,54 @@ export default function UpdateStoreConfigForm({
                   <FieldError message={state.zodErrors?.name?.[0]} />
                 </Field>
                 <Field>
-                  <div className="flex flex-row items-center gap-2 w-fit">
-                    <FieldLabel htmlFor="isActive" className="mb-0">
-                      開催中か
-                    </FieldLabel>
-                    <Checkbox
-                      checked={checked}
-                      onCheckedChange={(value) => {
-                        const next = value === true;
-                        setChecked(next);
-                        if (isActiveRef.current) {
-                          isActiveRef.current.value = next ? "true" : "false";
-                        }
+                  <FieldLabel>店舗画像</FieldLabel>
+                  <div className="space-y-3">
+                    {imageUrl ? (
+                      <div className="relative h-52 w-full max-w-xl overflow-hidden rounded-md border bg-muted">
+                        <Image
+                          src={imageUrl}
+                          alt="店舗画像プレビュー"
+                          fill
+                          sizes="(max-width: 768px) 100vw, 640px"
+                          unoptimized
+                          className="object-contain"
+                        />
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        画像が未設定です
+                      </p>
+                    )}
+
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      disabled={isPending || isUploadingImage}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0] ?? null;
+                        void handleImageUpload(file);
                       }}
-                      id="isActive"
                     />
+
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={isPending || isUploadingImage || !imageUrl}
+                        onClick={() => setImageUrl("")}
+                      >
+                        画像を削除
+                      </Button>
+                      {isUploadingImage && (
+                        <p className="text-sm text-muted-foreground">
+                          アップロード中...
+                        </p>
+                      )}
+                    </div>
+
+                    {uploadError && <ErrorPrompt error={uploadError} />}
+                    <FieldError message={state.zodErrors?.imageUrl?.[0]} />
                   </div>
-                  <input
-                    ref={isActiveRef}
-                    type="hidden"
-                    name="isActive"
-                    value={checked ? "true" : "false"}
-                  />
                 </Field>
                 <Field>
                   <FieldLabel>開催日</FieldLabel>
@@ -207,6 +273,7 @@ export default function UpdateStoreConfigForm({
             </FieldSet>
             <FieldSeparator />
             <input type="hidden" name="storeId" value={store.id} />
+            <input type="hidden" name="imageUrl" value={imageUrl} />
           </FieldGroup>
           <Button
             type="submit"

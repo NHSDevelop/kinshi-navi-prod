@@ -1,89 +1,76 @@
 import Link from "next/link";
-import { getDbAsync } from "@/lib/db/drizzle";
-import { admins, staffs } from "@/lib/db/schema";
-import { eq, and } from "drizzle-orm";
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
+import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DashboardPageShell } from "@/components/dashboard/page-shell";
+import { getDb } from "@/lib/db/drizzle";
+import { admins, staffs } from "@/lib/db/schema";
+import { and, eq } from "drizzle-orm";
+import { getSessionFromRequestHeaders } from "@/lib/auth-session";
 
-//TODO 組織一覧も追加する
-export default async function DashBordHomePage() {
-  const session = await auth.api.getSession({ headers: await headers() });
+export default async function DashBoardPage() {
+  const session = await getSessionFromRequestHeaders();
 
-  if (!session?.user) {
+  if (!session?.user || session.user.isAnonymous) {
     redirect("/signin");
   }
 
+  const db = await getDb();
   const userId = session.user.id;
 
-  const db = await getDbAsync();
-
-  const superAdminRows = await db
-    .select()
+  const superAdminRow = await db
+    .select({ userId: admins.userId })
     .from(admins)
     .where(and(eq(admins.userId, userId), eq(admins.role, "SUPER_ADMIN")))
     .limit(1);
 
-  const adminRows = await db
-    .select()
+  if (superAdminRow.length > 0) {
+    redirect("/dashboard/super-admin");
+  }
+
+  const adminRow = await db
+    .select({
+      role: admins.role,
+      eventId: admins.eventId,
+      storeId: admins.storeId,
+    })
     .from(admins)
     .where(eq(admins.userId, userId))
     .limit(1);
 
-  const staffRows = await db
-    .select()
+  if (adminRow.length > 0) {
+    if (adminRow[0].role === "EVENT_ADMIN" && adminRow[0].eventId) {
+      redirect(`/dashboard/admin/event/${adminRow[0].eventId}`);
+    }
+
+    if (adminRow[0].role === "STORE_ADMIN" && adminRow[0].storeId) {
+      redirect(`/dashboard/admin/store/${adminRow[0].storeId}`);
+    }
+  }
+
+  const staffRow = await db
+    .select({ storeId: staffs.storeId })
     .from(staffs)
     .where(eq(staffs.userId, userId))
     .limit(1);
 
+  if (staffRow.length > 0 && staffRow[0].storeId) {
+    redirect(`/dashboard/staff/store/${staffRow[0].storeId}`);
+  }
+
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="text-lg md:text-xl font-bold">ダッシュボードトップ</h1>
-      <Separator />
-      <div className="flex gap-4">
-        {superAdminRows.length > 0 && (
-          <Button asChild variant="card">
-            <Link href="/dashboard/super-admin">システム管理画面</Link>
-          </Button>
-        )}
-        {adminRows.length > 0 && (
-          <>
-            {adminRows[0].role === "ORGANIZATION_ADMIN" &&
-              adminRows[0].organizationId && (
-                <Button asChild variant="card">
-                  <Link
-                    href={`/dashboard/admin/organization/${adminRows[0].organizationId}`}
-                  >
-                    組織管理画面
-                  </Link>
-                </Button>
-              )}
-            {adminRows[0].role === "EVENT_ADMIN" && adminRows[0].eventId && (
-              <Button asChild variant="card">
-                <Link href={`/dashboard/admin/event/${adminRows[0].eventId}`}>
-                  イベント管理画面
-                </Link>
-              </Button>
-            )}
-            {adminRows[0].role === "STORE_ADMIN" && adminRows[0].storeId && (
-              <Button asChild variant="card">
-                <Link href={`/dashboard/admin/store/${adminRows[0].storeId}`}>
-                  システム管理画面
-                </Link>
-              </Button>
-            )}
-          </>
-        )}
-        {staffRows.length > 0 && staffRows[0].storeId && (
-          <Button asChild variant="card">
-            <Link href={`/dashboard/staff/store/${staffRows[0].storeId}`}>
-              スタッフ画面
-            </Link>
-          </Button>
-        )}
-      </div>
-    </div>
+    <DashboardPageShell
+      title="ダッシュボードトップ"
+      description="Kinshi Navi の管理者ダッシュボードです。権限に応じて各管理画面へ移動します。"
+    >
+      <Card className="border-main-200/80 shadow-sm">
+        <CardHeader>
+          <CardTitle>ユーザー権限の確認</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <NotFoundPrompt context="ユーザーに紐づいた権限" />
+        </CardContent>
+      </Card>
+    </DashboardPageShell>
   );
 }

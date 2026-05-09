@@ -1,27 +1,16 @@
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { getDbAsync } from "@/lib/db/drizzle";
-import { users } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { getSessionFromRequestHeaders } from "@/lib/auth-session";
+import { cache } from "react";
 
-export async function getCurrentUser() {
-  const db = await getDbAsync();
-
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+const getCurrentUserCached = cache(async () => {
+  const session = await getSessionFromRequestHeaders();
 
   if (!session?.user) {
     return null;
   }
 
-  const rows = await db
-    .select()
-    .from(users)
-    .where(eq(users.id, session.user.id))
-    .limit(1);
+  return session.user;
+});
 
-  const user = rows[0] ?? null;
-
-  return user;
+export async function getCurrentUser() {
+  return getCurrentUserCached();
 }

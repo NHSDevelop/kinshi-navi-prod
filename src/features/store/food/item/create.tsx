@@ -15,6 +15,7 @@ import { FieldError } from "@/components/ui/field-error";
 import { Input } from "@/components/ui/input";
 import { MessagePrompt } from "@/components/prompt/message-prompt";
 import { ErrorPrompt } from "@/components/prompt/error-prompt";
+import { useRouter } from "next/navigation";
 
 interface CreateItemProps {
   foodId: string;
@@ -22,7 +23,6 @@ interface CreateItemProps {
 
 const INITIAL_STATE: ItemState = {
   name: "",
-  stock: "",
   price: "",
   zodErrors: null,
   message: null,
@@ -34,6 +34,7 @@ export function CreateItem({ foodId }: CreateItemProps) {
     createItem,
     INITIAL_STATE,
   );
+  const router = useRouter();
   return (
     <Card>
       <CardHeader>
@@ -52,17 +53,6 @@ export function CreateItem({ foodId }: CreateItemProps) {
                   defaultValue={state.name}
                 />
                 <FieldError message={state.zodErrors?.name?.[0]} />
-              </Field>
-              <Field>
-                <FieldLabel>在庫数</FieldLabel>
-                <Input
-                  name="stock"
-                  type="number"
-                  required
-                  disabled={isPending}
-                  defaultValue={state.stock}
-                />
-                <FieldError message={state.zodErrors?.stock?.[0]} />
               </Field>
               <Field>
                 <FieldLabel>価格（円）</FieldLabel>
@@ -96,7 +86,7 @@ export function CreateItem({ foodId }: CreateItemProps) {
         {state?.success && (
           <Button
             onClick={() => {
-              window.location.reload();
+              router.refresh();
             }}
           >
             別の商品を登録

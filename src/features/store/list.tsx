@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, startTransition } from "react";
-import { getStoresByFormByEventSlug } from "./action";
+import { getStoresInMainEvent } from "./action";
 import { Field } from "@/components/ui/field";
 import {
   Select,
@@ -27,10 +27,6 @@ import {
 } from "@/components/ui/table";
 import Link from "next/link";
 
-interface StoreListProps {
-  eventSlug: string;
-}
-
 const initialState: FormState<Store[]> = {
   success: false,
   message: null,
@@ -38,32 +34,30 @@ const initialState: FormState<Store[]> = {
   data: [],
 };
 
-export default function StoreList({ eventSlug }: StoreListProps) {
+export default function StoreList() {
   const hasFetchedInitial = useRef(false);
   const [state, formAction, isPending] = useActionState<
     FormState<Store[]>,
     FormData
-  >(getStoresByFormByEventSlug, initialState);
+  >(getStoresInMainEvent, initialState);
 
   useEffect(() => {
     if (hasFetchedInitial.current) return;
     hasFetchedInitial.current = true;
 
     const formData = new FormData();
-    formData.set("eventSlug", eventSlug);
     formData.set("storeType", "all");
 
     startTransition(() => {
       formAction(formData);
     });
-  }, [eventSlug, formAction]);
+  }, [formAction]);
 
   return (
     <div className="space-y-4 lg:space-y-8">
       <div className="space-y-4 lg:space-y-8">
         <p className="text-lg font-bold">店舗を絞り込む</p>
         <form action={formAction} className="flex gap-4">
-          <input type="hidden" name="eventSlug" value={eventSlug} />
           <Field>
             <Select name="storeType" disabled={isPending}>
               <SelectTrigger>
@@ -98,7 +92,6 @@ export default function StoreList({ eventSlug }: StoreListProps) {
               <TableHead>店舗名</TableHead>
               <TableHead>店舗の種類</TableHead>
               <TableHead>状態</TableHead>
-              <TableHead>店舗ページ</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -109,7 +102,7 @@ export default function StoreList({ eventSlug }: StoreListProps) {
               return (
                 <TableRow key={store.id}>
                   <TableCell className="font-semibold md:text-lg">
-                    {store.name}
+                    <Link href={`/store/${store.slug}`}>{store.name}</Link>
                   </TableCell>
                   <TableCell>
                     <Badge className="text-sm">{storeType}</Badge>
@@ -124,13 +117,6 @@ export default function StoreList({ eventSlug }: StoreListProps) {
                         停止中
                       </Badge>
                     )}
-                  </TableCell>
-                  <TableCell>
-                    <Button asChild variant="card">
-                      <Link href={`/event/${eventSlug}/store/${store.slug}`}>
-                        店舗ページ
-                      </Link>
-                    </Button>
                   </TableCell>
                 </TableRow>
               );

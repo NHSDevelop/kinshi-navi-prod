@@ -1,6 +1,7 @@
 import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { uniqueIndex } from "drizzle-orm/sqlite-core";
 
 export const storeTypeValues = ["ATTRACTION", "FOOD"] as const;
 export type StoreType = (typeof storeTypeValues)[number];
@@ -18,7 +19,6 @@ export type StockChangedReason = (typeof stockChangedReasonValues)[number];
 
 export const roleValues = [
   "SUPER_ADMIN",
-  "ORGANIZATION_ADMIN",
   "EVENT_ADMIN",
   "STORE_ADMIN",
   "STAFF",
@@ -26,15 +26,11 @@ export const roleValues = [
 export type Role = (typeof roleValues)[number];
 
 export const inviteTargetRoleValues = [
-  "ORGANIZATION_ADMIN",
   "EVENT_ADMIN",
   "STORE_ADMIN",
   "STAFF",
 ] as const;
 export type InviteTargetRole = (typeof inviteTargetRoleValues)[number];
-
-export const organizationPlanValues = ["FREE"] as const;
-export type OrganizationPlan = (typeof inviteTargetRoleValues)[number];
 
 export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
@@ -91,39 +87,19 @@ export const verifications = sqliteTable("verifications", {
   updatedAt: integer("updatedAt", { mode: "timestamp_ms" }),
 });
 
-export const organizations = sqliteTable("organizations", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => createId()),
-  slug: text("slug").notNull(),
-  name: text("name").notNull(),
-  description: text("description"),
-  plan: text("plan", { enum: organizationPlanValues }).default("FREE"),
-  createdAt: integer("createdAt", { mode: "timestamp_ms" })
-    .notNull()
-    .$defaultFn(() => new Date()),
-  updatedAt: integer("updatedAt", { mode: "timestamp_ms" })
-    .notNull()
-    .$defaultFn(() => new Date())
-    .$onUpdateFn(() => new Date()),
-});
-export type Organization = typeof organizations.$inferSelect;
-
 export const events = sqliteTable("events", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => createId()),
-  slug: text("slug").notNull(),
   name: text("name").notNull(),
+  imageUrl: text("imageUrl"),
   isActive: integer("isActive", { mode: "boolean" }).notNull().default(false),
+  isMain: integer("isMain", { mode: "boolean" }).notNull().default(false),
   startedAtDate: integer("startedAtDate", { mode: "timestamp_ms" }),
   startedAtTime: text("startedAtTime"),
   finishedAtDate: integer("finishedAtDate", { mode: "timestamp_ms" }),
   finishedAtTime: text("finishedAtTime"),
   description: text("description"),
-  organizationId: text("organizationId")
-    .references(() => organizations.id)
-    .notNull(),
   createdAt: integer("createdAt", { mode: "timestamp_ms" })
     .notNull()
     .$defaultFn(() => new Date()),
@@ -141,6 +117,7 @@ export const stores = sqliteTable("stores", {
     .$defaultFn(() => createId()),
   slug: text("slug").notNull(),
   name: text("name").notNull(),
+  imageUrl: text("imageUrl"),
   isActive: integer("isActive", { mode: "boolean" }).notNull().default(false),
   startedAtDate: integer("startedAtDate", { mode: "timestamp_ms" }),
   startedAtTime: text("startedAtTime"),
@@ -164,7 +141,7 @@ export const stores = sqliteTable("stores", {
 
 export type Store = typeof stores.$inferSelect;
 
-export const attractions = sqliteTable("attracions", {
+export const attractions = sqliteTable("attractions", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => createId()),
@@ -239,6 +216,7 @@ export const items = sqliteTable("items", {
   name: text("name").notNull(),
   stock: integer("stock").notNull().default(0),
   price: integer("price").notNull(),
+  imageUrl: text("imageUrl"),
   foodId: text("foodId")
     .notNull()
     .references(() => foods.id, { onDelete: "cascade" }),
@@ -275,10 +253,43 @@ export const stockLogs = sqliteTable("stock_logs", {
 
 export type StockLog = typeof stockLogs.$inferSelect;
 
+export const registerLanes = sqliteTable(
+  "register_lanes",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => createId()),
+    eventId: text("eventId")
+      .notNull()
+      .references(() => events.id, { onDelete: "cascade" }),
+    foodId: text("foodId").references(() => foods.id, { onDelete: "set null" }),
+    laneNumber: integer("laneNumber").notNull(),
+    name: text("name"),
+    isActive: integer("isActive", { mode: "boolean" }).notNull().default(true),
+    createdAt: integer("createdAt", { mode: "timestamp_ms" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+    updatedAt: integer("updatedAt", { mode: "timestamp_ms" })
+      .notNull()
+      .$defaultFn(() => new Date())
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => ({
+    eventIdLaneNumberUnique: uniqueIndex(
+      "register_lanes_event_id_lane_number_unique",
+    ).on(table.eventId, table.laneNumber),
+  }),
+);
+
+export type RegisterLane = typeof registerLanes.$inferSelect;
+
 export const registerLogs = sqliteTable("register_logs", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => createId()),
+  laneId: text("laneId")
+    .notNull()
+    .references(() => registerLanes.id),
   foodId: text("foodId")
     .notNull()
     .references(() => foods.id),
@@ -325,7 +336,6 @@ export const admins = sqliteTable("admins", {
     .unique()
     .references(() => users.id, { onDelete: "cascade" }),
   role: text("role", { enum: roleValues }).$type<Role>().notNull(),
-  organizationId: text("organizationId").references(() => organizations.id),
   eventId: text("eventId").references(() => events.id),
   storeId: text("storeId").references(() => stores.id),
   createdAt: integer("createdAt", { mode: "timestamp_ms" })
@@ -373,9 +383,6 @@ export const invites = sqliteTable("invites", {
   targetScope: text("targetScope", { enum: inviteTargetRoleValues })
     .$type<InviteTargetRole>()
     .notNull(),
-  organizationId: text("organizationId").references(() => organizations.id, {
-    onDelete: "cascade",
-  }),
   eventId: text("eventId").references(() => events.id, {
     onDelete: "cascade",
   }),
@@ -418,6 +425,41 @@ export const systemInfos = sqliteTable("system_infos", {
 
 export type SystemInfo = typeof systemInfos.$inferSelect;
 
+export const storeVotes = sqliteTable(
+  "store_votes",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => createId()),
+    storeId: text("storeId")
+      .notNull()
+      .references(() => stores.id, { onDelete: "cascade" }),
+    storeType: text("storeType", { enum: storeTypeValues })
+      .$type<StoreType>()
+      .notNull(),
+    eventId: text("eventId")
+      .notNull()
+      .references(() => events.id, { onDelete: "cascade" }),
+    userId: text("userId").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    createdAt: integer("createdAt", { mode: "timestamp_ms" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+    updatedAt: integer("updatedAt", { mode: "timestamp_ms" })
+      .notNull()
+      .$defaultFn(() => new Date())
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => ({
+    userStoreTypeUnique: uniqueIndex(
+      "store_votes_user_id_store_type_unique",
+    ).on(table.userId, table.storeType, table.eventId),
+  }),
+);
+
+export type StoreVote = typeof storeVotes.$inferSelect;
+
 export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(sessions),
   accounts: many(accounts),
@@ -425,6 +467,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   staffs: many(staffs),
   tickets: many(tickets),
   pushSubscriptions: many(pushSubscriptions),
+  storeVotes: many(storeVotes),
 }));
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
@@ -451,17 +494,6 @@ export const pushSubscriptionsRelations = relations(
   }),
 );
 
-export const eventsRelations = relations(events, ({ one }) => ({
-  organization: one(organizations, {
-    fields: [events.organizationId],
-    references: [organizations.id],
-  }),
-}));
-
-export const organizationsRelations = relations(organizations, ({ many }) => ({
-  events: many(events),
-}));
-
 export const storesRelations = relations(stores, ({ one, many }) => ({
   event: one(events, {
     fields: [stores.eventId],
@@ -477,6 +509,22 @@ export const storesRelations = relations(stores, ({ one, many }) => ({
   }),
   admins: many(admins),
   staffs: many(staffs),
+  storeVotes: many(storeVotes),
+}));
+
+export const storeVotesRelations = relations(storeVotes, ({ one }) => ({
+  user: one(users, {
+    fields: [storeVotes.userId],
+    references: [users.id],
+  }),
+  store: one(stores, {
+    fields: [storeVotes.storeId],
+    references: [stores.id],
+  }),
+  event: one(events, {
+    fields: [storeVotes.eventId],
+    references: [events.id],
+  }),
 }));
 
 export const attractionsRelations = relations(attractions, ({ one, many }) => ({
@@ -493,6 +541,7 @@ export const foodsRelations = relations(foods, ({ one, many }) => ({
     references: [stores.id],
   }),
   items: many(items),
+  registerLanes: many(registerLanes),
 }));
 
 export const ticketsRelations = relations(tickets, ({ one }) => ({
@@ -526,10 +575,6 @@ export const adminsRelations = relations(admins, ({ one }) => ({
     fields: [admins.userId],
     references: [users.id],
   }),
-  organization: one(organizations, {
-    fields: [admins.organizationId],
-    references: [organizations.id],
-  }),
   event: one(events, {
     fields: [admins.eventId],
     references: [events.id],
@@ -544,10 +589,6 @@ export const invitesRelations = relations(invites, ({ one }) => ({
   issuerAdmin: one(admins, {
     fields: [invites.issuerAdminId],
     references: [admins.id],
-  }),
-  organization: one(organizations, {
-    fields: [invites.organizationId],
-    references: [organizations.id],
   }),
   event: one(events, {
     fields: [invites.eventId],
@@ -571,5 +612,31 @@ export const staffsRelations = relations(staffs, ({ one }) => ({
   store: one(stores, {
     fields: [staffs.storeId],
     references: [stores.id],
+  }),
+}));
+
+export const registerLanesRelations = relations(
+  registerLanes,
+  ({ one, many }) => ({
+    event: one(events, {
+      fields: [registerLanes.eventId],
+      references: [events.id],
+    }),
+    store: one(foods, {
+      fields: [registerLanes.foodId],
+      references: [foods.id],
+    }),
+    registerLogs: many(registerLogs),
+  }),
+);
+
+export const registerLogsRelations = relations(registerLogs, ({ one }) => ({
+  lane: one(registerLanes, {
+    fields: [registerLogs.laneId],
+    references: [registerLanes.id],
+  }),
+  food: one(foods, {
+    fields: [registerLogs.foodId],
+    references: [foods.id],
   }),
 }));

@@ -74,8 +74,8 @@ export function TicketCard({ ticket, statusLabel }: TicketCardProps) {
         <p className="text-sm text-text-01">人数:{ticket.numberOfPeople}名</p>
         <Separator />
       </CardHeader>
-      <CardContent className="flex flex-col gap-y-4">
-        <div className="flex flex-row gap-x-4 pb-8 justify-start items-baseline">
+      <CardContent className="flex flex-col gap-4">
+        <div className="flex flex-row gap-x-4  justify-start items-baseline">
           <p className="text-2xl">No.{ticket.index}</p>
           {ticket.status === "CALLED" ? (
             <Badge variant="warn" className="text-lg">
@@ -87,27 +87,14 @@ export function TicketCard({ ticket, statusLabel }: TicketCardProps) {
             </Badge>
           )}
         </div>
-        {ticket.status === "ISSUED" && (
-          <ul className="w-auto space-y-2">
-            <li className="text-sm">
-              チケットが「呼び出し中」になったら、企画の開催場所までお越しください。
-            </li>
-            <li className="text-sm">
-              チケットが呼び出されたかどうかは、このページ以外にも「イベントページ」→「企画の待機状況」からご覧になることができます。
-            </li>
-            <li className="text-sm">
-              プッシュ通知を購読していると、チケットが呼び出されたときに通知を受け取ることができます。
-            </li>
-          </ul>
-        )}
         {ticket.status === "CALLED" && (
           <div className="flex justify-center">
             <QRCode text={ticket.id} className="max-w-64" />
           </div>
         )}
       </CardContent>
-      <Separator />
       <CardFooter className="flex flex-col gap-4 items-start">
+        <Separator />
         <div className="text-sm text-text-01">
           <p>
             発券日時：

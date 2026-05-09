@@ -6,6 +6,9 @@ initOpenNextCloudflareForDev();
 
 const nextConfig: NextConfig = {
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
+  images: {
+    remotePatterns: [new URL("https://img.kinshi-navi.com/**")],
+  },
 };
 
 const withMDX = createMDX({

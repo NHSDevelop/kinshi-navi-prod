@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getDb } from "@/lib/db/drizzle";
 import { attractions } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -21,14 +20,15 @@ export default async function AttractionInfo({
     return <p>企画が存在しません。</p>;
   }
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>企画の情報</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p>一組当たりのプレイ時間:{attraction.playTime}分</p>
-        <p>一組当たりの最大人数:{attraction.peopleCapacity}人</p>
-      </CardContent>
-    </Card>
+    <div className="flex gap-2 md:flex-1">
+      <div className="flex flex-col items-start gap-4">
+        <p>一組当たりのプレイ時間：</p>
+        <p>一組当たりの最大人数：</p>
+      </div>
+      <div className="flex flex-col items-start gap-4">
+        <p>{attraction.playTime}分</p>
+        <p>{attraction.peopleCapacity}人</p>
+      </div>
+    </div>
   );
 }

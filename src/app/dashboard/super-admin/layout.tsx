@@ -1,24 +1,23 @@
-import { getDbAsync } from "@/lib/db/drizzle";
+import { getDb } from "@/lib/db/drizzle";
 import { admins } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { getSessionFromRequestHeaders } from "@/lib/auth-session";
 
 export default async function SuperAdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth.api.getSession({ headers: await headers() });
+  const session = await getSessionFromRequestHeaders();
 
   if (!session?.user) {
-    redirect("/signin/dashboard/super-admin");
+    redirect("/signin");
   }
 
   const userId = session.user.id;
 
-  const db = await getDbAsync();
+  const db = await getDb();
 
   const rows = await db
     .select({ userId: admins.userId })
@@ -27,7 +26,7 @@ export default async function SuperAdminLayout({
     .limit(1);
 
   if (rows.length === 0) {
-    redirect("/signin/dashboard/super-admin");
+    redirect("/signin");
   }
 
   return <>{children}</>;

@@ -2,11 +2,12 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Link from "next/link";
 import { PwaClient } from "@/features/push/pwa-client";
+import { GoogleTagManager, GoogleAnalytics } from "@next/third-parties/google";
 
 const SITE_DESCRIPTION =
-  "Gakusai Hubは、学校の文化祭向けの総合Webサービス。インストール不要、教育機関なら無料で利用可能。チケット機能、商品管理機能、運営管理機能など、豊富な機能で文化祭を簡単サポート。";
-const siteUrl = "https://gakusai-hub.jp";
-const SITE_NAME = "Gakusai Hub";
+  "Kinshi Naviは長野県長野高等学校の文化祭、「金鵄祭」の公式Webアプリです。";
+const siteUrl = "https://kinshi-navi.com/";
+const SITE_NAME = "Kinshi Navi";
 
 export const metadata: Metadata = {
   metadataBase: siteUrl,
@@ -80,6 +81,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
+      <meta name="apple-mobile-web-app-title" content="K-Navi" />
+      <GoogleTagManager gtmId="G-VYFHW582FS" />
+      <GoogleAnalytics gaId="G-VYFHW582FS" />
       <body className="font-sans antialiased min-h-screen flex flex-col">
         <PwaClient />
         <main>{children}</main>
@@ -89,70 +93,50 @@ export default function RootLayout({
               <div className="mb-6 md:mb-0">
                 <Link href="/" className="flex items-center">
                   <span className="text-heading self-center text-2xl font-semibold whitespace-nowrap">
-                    Gakusai Hub
+                    Kinshi Navi
                   </span>
                 </Link>
               </div>
               <div className="flex gap-8 md:gap-16  me-4">
                 <div>
-                  <h2 className="mb-6 md:text-lg font-semibold text-heading uppercase">
-                    サイトマップ
-                  </h2>
-                  <ul className="flex flex-col font-medium gap-2">
-                    <li>
-                      <Link href={"/"} className="text-sm md:text-base">
-                        サイトトップ
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
-                <div>
-                  <h2 className="mb-6 md:text-lg font-semibold text-heading uppercase">
+                  <h2 className="mb-6 text-sm md:text-lg font-semibold text-heading uppercase">
                     ガイド
                   </h2>
                   <ul className="flex flex-col font-medium gap-2">
                     <li>
-                      <Link href={"/help"} className="text-sm md:text-base">
+                      <Link href={"/help"} className="text-xs md:text-base">
                         使い方ガイド
                       </Link>
                     </li>
                     <li>
-                      <Link href={"/terms"} className="text-sm md:text-base">
+                      <Link href={"/terms"} className="text-xs md:text-base">
                         利用規約
                       </Link>
                     </li>
                     <li>
-                      <Link href={"/policy"} className="text-sm md:text-base">
+                      <Link href={"/policy"} className="text-xs md:text-base">
                         プライバシーポリシー
                       </Link>
                     </li>
                   </ul>
                 </div>
                 <div>
-                  <h2 className="mb-6 md:text-lg font-semibold text-heading uppercase">
+                  <h2 className="mb-6 text-sm md:text-lg font-semibold text-heading uppercase">
                     管理者の方へ
                   </h2>
                   <ul className="flex flex-col font-medium gap-2">
                     <li>
                       <Link
                         href={"/dashboard"}
-                        className="text-sm md:text-base"
+                        className="text-xs md:text-base"
                       >
                         管理者ページ
                       </Link>
                     </li>
                     <li>
                       <Link
-                        href={"/application-form"}
-                        className="text-sm md:text-base"
-                      >
-                        利用申し込み
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
                         href={"/help/admin"}
-                        className="text-sm md:text-base"
+                        className="text-xs md:text-base"
                       >
                         管理者向けガイド
                       </Link>
@@ -164,7 +148,7 @@ export default function RootLayout({
             <hr className="my-6 border-default sm:mx-auto lg:my-8" />
             <div className="sm:flex sm:items-center sm:justify-between">
               <span className="text-sm text-body sm:text-center">
-                © 2026 Gakusai Hub
+                © 2026 Kinshi Navi
               </span>
               <div className="flex mt-4 sm:justify-center sm:mt-0"></div>
             </div>
