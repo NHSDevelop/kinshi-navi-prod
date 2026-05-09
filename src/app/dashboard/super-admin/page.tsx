@@ -7,8 +7,11 @@ import Link from "next/link";
 import { AiFillPlusCircle } from "react-icons/ai";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
+import { requireSuperAdminUser } from "@/lib/auth-guard";
 
 export default async function SuperAdminHomePage() {
+  await requireSuperAdminUser();
+
   const db = await getDb();
 
   const eventRows = await db

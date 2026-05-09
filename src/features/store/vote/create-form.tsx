@@ -16,16 +16,11 @@ import { MessagePrompt } from "@/components/prompt/message-prompt";
 import { ErrorPrompt } from "@/components/prompt/error-prompt";
 
 type Props = {
-  userId: string;
   stores: Store[];
   storeType: StoreType;
 };
 
-export default function CreateStoreVoteForm({
-  userId,
-  stores,
-  storeType,
-}: Props) {
+export default function CreateStoreVoteForm({ stores, storeType }: Props) {
   const [state, formAction, isPending] = useActionState(createStoreVote, null);
   const [chosenStoreId, setChosenStoreId] = useState<string>("");
   const [chosenStoreName, setChosenStorename] = useState<string>("");
@@ -71,7 +66,6 @@ export default function CreateStoreVoteForm({
             action={formAction}
             className="flex flex-col justify-center items-center gap-2"
           >
-            <input type="hidden" name="userId" value={userId} />
             <input type="hidden" name="storeType" value={storeType} />
             <input type="hidden" name="storeId" value={chosenStoreId} />
 

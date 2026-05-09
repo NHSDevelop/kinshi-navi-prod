@@ -22,11 +22,13 @@ import { notFound } from "next/navigation";
 import ToActiveEvent from "@/features/event/to-active";
 import CreateRegisterLane from "@/features/store/food/register/lane/create";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
+import { requireEventAdminUser } from "@/lib/auth-guard";
 
 export default async function AdminEventPage(props: {
   params: Promise<{ event_id: string }>;
 }) {
   const { event_id } = await props.params;
+  await requireEventAdminUser(event_id);
 
   const db = await getDb();
   const eventRows = await db

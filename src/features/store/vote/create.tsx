@@ -32,11 +32,5 @@ export default async function CreateStoreVote({ storeType }: Props) {
   if (storeRows.length === 0) {
     return <NotFoundPrompt context="店舗" />;
   }
-  return (
-    <CreateStoreVoteForm
-      stores={storeRows}
-      storeType={storeType}
-      userId={user.id}
-    />
-  );
+  return <CreateStoreVoteForm stores={storeRows} storeType={storeType} />;
 }

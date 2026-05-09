@@ -1,8 +1,11 @@
 import IssueInviteLink from "@/features/auth/invite/issue-link";
+import { requireSuperAdminUser } from "@/lib/auth-guard";
 
 export default async function IssueEventAdminInvitePage(props: {
   params: Promise<{ event_id: string }>;
 }) {
+  await requireSuperAdminUser();
+
   const { event_id } = await props.params;
 
   return (

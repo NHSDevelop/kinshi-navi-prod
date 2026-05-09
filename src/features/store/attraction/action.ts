@@ -1,5 +1,6 @@
 "use server";
 
+import { canStaffOrManageStore, getAuthenticatedUser } from "@/lib/auth-guard";
 import { getDb } from "@/lib/db/drizzle";
 import { attractions } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -7,7 +8,21 @@ import z from "zod";
 import { revalidatePath } from "next/cache";
 
 export async function createAttraction(prevState: unknown, formData: FormData) {
+  const user = await getAuthenticatedUser();
+  if (!user) {
+    return {
+      success: false,
+      message: "ログインが必要です。",
+    };
+  }
+
   const storeId = formData.get("storeId") as string;
+  if (!(await canStaffOrManageStore(user.id, storeId))) {
+    return {
+      success: false,
+      message: "権限がありません。",
+    };
+  }
 
   try {
     const db = await getDb();
@@ -63,6 +78,17 @@ export async function updateAttractionConfig(
   prevState: unknown,
   formData: FormData,
 ): Promise<AttractionConfigState> {
+  const user = await getAuthenticatedUser();
+  if (!user) {
+    return {
+      playTime: (formData.get("playTime") as string) || "",
+      peopleCapacity: (formData.get("peopleCapacity") as string) || "",
+      zodErrors: null,
+      message: "ログインが必要です。",
+      success: false,
+    };
+  }
+
   const validationResult = updateAttractionConfigSchema.safeParse({
     playTime: formData.get("playTime"),
     peopleCapacity: formData.get("peopleCapacity"),
@@ -95,6 +121,14 @@ export async function updateAttractionConfig(
         zodErrors: null,
         success: false,
         message: "企画が存在しません。",
+      };
+    }
+
+    if (!(await canStaffOrManageStore(user.id, attraction.storeId))) {
+      return {
+        zodErrors: null,
+        success: false,
+        message: "権限がありません。",
       };
     }
 

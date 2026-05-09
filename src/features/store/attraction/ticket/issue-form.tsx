@@ -34,7 +34,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface IssueTicketFormProps {
   stores: Store[];
-  userId: string;
   isPaper: boolean;
   storeId?: string;
 }
@@ -48,13 +47,12 @@ const INITIAL_STATE: TicketState = {
 
 export function IssueTicketForm({
   stores,
-  userId,
   isPaper,
   storeId,
 }: IssueTicketFormProps) {
-  const createTicketWithUser = createTicket.bind(null, userId, isPaper);
+  const createTicketWithPaperMode = createTicket.bind(null, isPaper);
   const [state, formAction, isPending] = useActionState(
-    createTicketWithUser,
+    createTicketWithPaperMode,
     INITIAL_STATE,
   );
   const [numberOfPeople, setNumberOfPeople] = useState<number>(1);

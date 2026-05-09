@@ -1,5 +1,10 @@
 "use server";
 
+import {
+  canManageEvent,
+  canManageStore,
+  getAuthenticatedUser,
+} from "@/lib/auth-guard";
 import { getDb } from "@/lib/db/drizzle";
 import {
   attractions,
@@ -78,6 +83,15 @@ export async function createStore(
   prevState: unknown,
   formData: FormData,
 ): Promise<StoreState> {
+  const user = await getAuthenticatedUser();
+  if (!user) {
+    return {
+      zodErrors: null,
+      message: "ログインが必要です",
+      success: false,
+    };
+  }
+
   const validationResult = RegisterSchema.safeParse({
     slug: formData.get("slug"),
     name: formData.get("name"),
@@ -96,6 +110,14 @@ export async function createStore(
   const { slug, name } = validationResult.data;
   const storeType = formData.get("storeType") as StoreType;
   const eventId = formData.get("eventId") as string;
+  if (!(await canManageEvent(user.id, eventId))) {
+    return {
+      zodErrors: null,
+      message: "権限がありません。",
+      success: false,
+    };
+  }
+
   const db = await getDb();
 
   const storeRows = await db
@@ -176,6 +198,16 @@ export async function updateStoreConfig(
   prevState: unknown,
   formData: FormData,
 ): Promise<UpdateStoreConfigState> {
+  const user = await getAuthenticatedUser();
+  if (!user) {
+    return {
+      zodErrors: null,
+      success: false,
+      message: null,
+      error: "ログインが必要です",
+    };
+  }
+
   const isActiveRaw = formData.get("isActive");
   const validationResult = storeConfigSchema.safeParse({
     name: formData.get("name"),
@@ -226,6 +258,15 @@ export async function updateStoreConfig(
   } = validationResult.data;
 
   const storeId = formData.get("storeId") as string;
+  if (!(await canManageStore(user.id, storeId))) {
+    return {
+      zodErrors: null,
+      success: false,
+      message: null,
+      error: "権限がありません",
+    };
+  }
+
   const db = await getDb();
   try {
     await db
@@ -334,7 +375,22 @@ export async function getStoreIdByStoreSlug(
 }
 
 export async function deleteStore(prevState: unknown, formData: FormData) {
+  const user = await getAuthenticatedUser();
+  if (!user) {
+    return {
+      success: false,
+      error: "ログインが必要です",
+    };
+  }
+
   const storeId = formData.get("storeId") as string;
+  if (!(await canManageStore(user.id, storeId))) {
+    return {
+      success: false,
+      error: "権限がありません。",
+    };
+  }
+
   try {
     const db = await getDb();
 
@@ -416,8 +472,23 @@ export async function deleteStore(prevState: unknown, formData: FormData) {
 
 export async function toActiveStore(prevState: unknown, formData: FormData) {
   try {
+    const user = await getAuthenticatedUser();
+    if (!user) {
+      return {
+        success: false,
+        message: "ログインが必要です",
+      };
+    }
+
     const db = await getDb();
     const storeId = formData.get("storeId") as string;
+    if (!(await canManageStore(user.id, storeId))) {
+      return {
+        success: false,
+        message: "権限がありません。",
+      };
+    }
+
     const storeRows = await db
       .select()
       .from(stores)

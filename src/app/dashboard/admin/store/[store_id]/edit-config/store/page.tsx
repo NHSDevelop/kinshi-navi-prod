@@ -1,9 +1,11 @@
 import UpdateStoreConfig from "@/features/store/update";
+import { requireStoreAdminUser } from "@/lib/auth-guard";
 
 export default async function EditStoreConfigPage(props: {
   params: Promise<{ store_id: string }>;
 }) {
   const { store_id } = await props.params;
+  await requireStoreAdminUser(store_id);
 
   return (
     <div className="space-y-4 lg:space-y-8">

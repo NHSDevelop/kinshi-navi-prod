@@ -1,4 +1,8 @@
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import {
+  canUseManagementActions,
+  getAuthenticatedUser,
+} from "@/lib/auth-guard";
 import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
 
@@ -7,6 +11,25 @@ const WEBP_QUALITY = 75;
 
 export async function POST(req: NextRequest) {
   try {
+    const user = await getAuthenticatedUser();
+    if (!user || user.isAnonymous) {
+      return NextResponse.json(
+        {
+          message: "ログインが必要です。",
+        },
+        { status: 401 },
+      );
+    }
+
+    if (!(await canUseManagementActions(user.id))) {
+      return NextResponse.json(
+        {
+          message: "権限がありません。",
+        },
+        { status: 403 },
+      );
+    }
+
     const formData = await req.formData();
     const imageFileData = formData.get("imageFileData");
 

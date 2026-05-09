@@ -1,5 +1,6 @@
 "use server";
 
+import { getAuthenticatedUser } from "@/lib/auth-guard";
 import { getDb } from "@/lib/db/drizzle";
 import {
   storeTypeValues,
@@ -17,6 +18,14 @@ function isStoreType(value: unknown): value is StoreType {
 
 export async function createStoreVote(prevState: unknown, formData: FormData) {
   try {
+    const user = await getAuthenticatedUser();
+    if (!user) {
+      return {
+        success: false,
+        message: "ログインが必要です。",
+      };
+    }
+
     const db = await getDb();
     const mainEventId = process.env.MAIN_EVENT_ID as string;
     if (!mainEventId) {
@@ -26,7 +35,6 @@ export async function createStoreVote(prevState: unknown, formData: FormData) {
       };
     }
 
-    const userId = formData.get("userId") as string;
     const storeId = formData.get("storeId") as string;
     const storeType = formData.get("storeType");
 
@@ -61,7 +69,7 @@ export async function createStoreVote(prevState: unknown, formData: FormData) {
       .from(storeVotes)
       .where(
         and(
-          eq(storeVotes.userId, userId),
+          eq(storeVotes.userId, user.id),
           eq(storeVotes.storeType, storeType),
           eq(storeVotes.eventId, mainEventId),
         ),
@@ -75,7 +83,7 @@ export async function createStoreVote(prevState: unknown, formData: FormData) {
       };
     }
     await db.insert(storeVotes).values({
-      userId: userId,
+      userId: user.id,
       storeId: storeId,
       storeType: storeType,
       eventId: mainEventId,

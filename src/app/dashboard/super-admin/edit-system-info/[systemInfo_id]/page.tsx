@@ -1,8 +1,11 @@
 import UpdateSystemInfo from "@/features/system-info/update";
+import { requireSuperAdminUser } from "@/lib/auth-guard";
 
 export default async function EditSystemInfoPage(props: {
   params: Promise<{ systemInfo_id: string }>;
 }) {
+  await requireSuperAdminUser();
+
   const { systemInfo_id } = await props.params;
 
   return (

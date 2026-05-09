@@ -1,7 +1,5 @@
 import Link from "next/link";
 import { AiOutlineUser } from "react-icons/ai";
-import { getSessionFromRequestHeaders } from "@/lib/auth-session";
-import { redirect } from "next/navigation";
 import { QuickActionsSidebar } from "@/components/navigation/quick-actions-sidebar";
 import type { QuickAction } from "@/components/navigation/quick-actions";
 import {
@@ -24,12 +22,6 @@ export default async function DashBoardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getSessionFromRequestHeaders();
-
-  if (!session?.user || session.user.isAnonymous) {
-    redirect("/signin");
-  }
-
   return (
     <SidebarProvider defaultOpen>
       <QuickActionsSidebar actions={dashboardQuickActions} />

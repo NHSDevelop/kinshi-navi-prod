@@ -1,5 +1,6 @@
 "use server";
 
+import { canSuperAdmin, getAuthenticatedUser } from "@/lib/auth-guard";
 import { getDb } from "@/lib/db/drizzle";
 import { systemInfos } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -31,12 +32,28 @@ export type UpdateSystemInfoState = {
 
 export async function createSystemInfo(prevState: unknown, formData: FormData) {
   try {
+    const user = await getAuthenticatedUser();
+    if (!user) {
+      return {
+        success: false,
+        message: null,
+        error: "ログインが必要です",
+      };
+    }
+
+    if (!(await canSuperAdmin(user.id))) {
+      return {
+        success: false,
+        message: null,
+        error: "権限がありません",
+      };
+    }
+
     const validationResult = systemInfoInputSchema.safeParse({
       meta: formData.get("meta") as string,
       title: formData.get("title") as string,
     });
-    //TODO 仮実装
-    if (validationResult.error) {
+    if (!validationResult.success) {
       return {
         success: false,
         message: null,
@@ -69,6 +86,25 @@ export async function updateSystemInfo(
   formData: FormData,
 ): Promise<UpdateSystemInfoState> {
   try {
+    const user = await getAuthenticatedUser();
+    if (!user) {
+      return {
+        zodErrors: null,
+        success: false,
+        message: null,
+        error: "ログインが必要です",
+      };
+    }
+
+    if (!(await canSuperAdmin(user.id))) {
+      return {
+        zodErrors: null,
+        success: false,
+        message: null,
+        error: "権限がありません",
+      };
+    }
+
     const validationResult = updateSystemInfoInputSchema.safeParse({
       systemInfoId: formData.get("systemInfoId") as string,
       meta: formData.get("meta") as string,

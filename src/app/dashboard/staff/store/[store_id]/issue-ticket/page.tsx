@@ -1,21 +1,18 @@
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import IssueTicket from "@/features/store/attraction/ticket/issue";
 import { getDb } from "@/lib/db/drizzle";
-import { getSessionFromRequestHeaders } from "@/lib/auth-session";
 import { attractions, stores } from "@/lib/db/schema";
+import { requireStaffOrManageStoreUser } from "@/lib/auth-guard";
 
 import { eq } from "drizzle-orm";
 
 export default async function StaffIssueTicketPage(props: {
   params: Promise<{ store_id: string }>;
 }) {
-  const db = await getDb();
-  const session = await getSessionFromRequestHeaders();
-  const user = session?.user;
-  if (!user) {
-    return <NotFoundPrompt context="ユーザー" />;
-  }
   const { store_id } = await props.params;
+  await requireStaffOrManageStoreUser(store_id);
+  const db = await getDb();
+
   const storeRows = await db
     .select({ eventId: stores.eventId })
     .from(stores)
@@ -23,7 +20,7 @@ export default async function StaffIssueTicketPage(props: {
     .limit(1);
 
   if (storeRows.length === 0) {
-    return <NotFoundPrompt context="店舗" />;
+    return <NotFoundPrompt context="ユーザー" />;
   }
   const attractionRows = await db
     .select()
@@ -39,7 +36,6 @@ export default async function StaffIssueTicketPage(props: {
       <h1 className="font-bold text-xl">スタッフ用チケット発券ページ</h1>
       <p>端末を持たない方へのチケットを発行します。</p>
       <IssueTicket
-        userId={user.id}
         eventId={storeRows[0].eventId}
         isPaper={true}
         storeId={store_id}

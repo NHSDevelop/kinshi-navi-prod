@@ -1,5 +1,6 @@
 "use server";
 
+import { canSuperAdmin, getAuthenticatedUser } from "@/lib/auth-guard";
 import { getDb } from "@/lib/db/drizzle";
 import { admins, Event, events, stores } from "@/lib/db/schema";
 import z from "zod";
@@ -50,6 +51,23 @@ export async function createEvent(
   formData: FormData,
 ): Promise<EventState> {
   try {
+    const user = await getAuthenticatedUser();
+    if (!user) {
+      return {
+        zodErrors: null,
+        message: "ログインが必要です。",
+        success: false,
+      };
+    }
+
+    if (!(await canSuperAdmin(user.id))) {
+      return {
+        zodErrors: null,
+        message: "権限がありません。",
+        success: false,
+      };
+    }
+
     const name = formData.get("name") as string;
 
     const validationResult = CreateEventSchema.safeParse({
@@ -140,6 +158,15 @@ export async function updateEventConfig(
       error: "入力形式が正しくありません",
     };
   }
+  const user = await getAuthenticatedUser();
+  if (!user) {
+    return {
+      zodErrors: null,
+      success: false,
+      message: "ログインが必要です。",
+      error: "権限がありません",
+    };
+  }
   const {
     name,
     startedAtDate,
@@ -150,6 +177,15 @@ export async function updateEventConfig(
   } = validationResult.data;
 
   const eventId = formData.get("eventId") as string;
+  if (!(await canSuperAdmin(user.id))) {
+    return {
+      zodErrors: null,
+      success: false,
+      message: "権限がありません。",
+      error: "権限がありません",
+    };
+  }
+
   const db = await getDb();
   try {
     await db
@@ -185,6 +221,21 @@ export async function updateEventConfig(
 
 export async function toActiveEvent(prevState: unknown, formData: FormData) {
   try {
+    const user = await getAuthenticatedUser();
+    if (!user) {
+      return {
+        success: false,
+        message: "ログインが必要です。",
+      };
+    }
+
+    if (!(await canSuperAdmin(user.id))) {
+      return {
+        success: false,
+        message: "権限がありません。",
+      };
+    }
+
     const db = await getDb();
     const eventId = formData.get("eventId") as string;
     const eventRows = await db

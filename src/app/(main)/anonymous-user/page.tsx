@@ -51,7 +51,7 @@ export default async function AnonymousUserPage() {
         <div className="mt-4 flex flex-col gap-4">
           <Suspense fallback={<LoadingPrompt context="ユーザー設定" />}>
             <InstallPrompt />
-            <PushNotificationManager userId={user.id} />
+            <PushNotificationManager />
           </Suspense>
         </div>
       </section>

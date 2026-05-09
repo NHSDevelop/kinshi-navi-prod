@@ -6,13 +6,11 @@ import { IssueTicketForm } from "./issue-form";
 interface IssueTicketProps {
   eventId: string;
   storeId?: string;
-  userId: string;
   isPaper: boolean;
 }
 
 export default async function IssueTicket({
   eventId,
-  userId,
   isPaper,
   storeId,
 }: IssueTicketProps) {
@@ -29,11 +27,6 @@ export default async function IssueTicket({
   }
 
   return (
-    <IssueTicketForm
-      userId={userId}
-      stores={storeList}
-      isPaper={isPaper}
-      storeId={storeId}
-    />
+    <IssueTicketForm stores={storeList} isPaper={isPaper} storeId={storeId} />
   );
 }

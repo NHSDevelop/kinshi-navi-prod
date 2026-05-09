@@ -2,8 +2,11 @@ import { Separator } from "@/components/ui/separator";
 import CreateSystemInfo from "@/features/system-info/create";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
+import { requireSuperAdminUser } from "@/lib/auth-guard";
 
 export default async function SuperAdminCreateSystemInfoPage() {
+  await requireSuperAdminUser();
+
   return (
     <DashboardPageShell
       title="お知らせを作成"

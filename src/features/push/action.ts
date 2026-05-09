@@ -1,5 +1,6 @@
 "use server";
 
+import { getAuthenticatedUser } from "@/lib/auth-guard";
 import { getDb } from "@/lib/db/drizzle";
 import { pushSubscriptions } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -17,19 +18,29 @@ export type PushSubscriptionJSONInput = {
   expirationTime?: number | null;
 };
 
-export async function getUserSubscription(userId: string) {
+export async function getUserSubscription() {
+  const user = await getAuthenticatedUser();
+  if (!user || user.isAnonymous) {
+    return [];
+  }
+
   const db = await getDb();
   return await db
     .select()
     .from(pushSubscriptions)
-    .where(eq(pushSubscriptions.userId, userId));
+    .where(eq(pushSubscriptions.userId, user.id));
 }
 
-export async function subscribeUser(
-  sub: PushSubscriptionJSONInput,
-  userId: string,
-) {
+export async function subscribeUser(sub: PushSubscriptionJSONInput) {
   try {
+    const user = await getAuthenticatedUser();
+    if (!user || user.isAnonymous) {
+      return {
+        success: false,
+        message: "ログインが必要です。",
+      };
+    }
+
     const db = await getDb();
     await db
       .insert(pushSubscriptions)
@@ -37,7 +48,7 @@ export async function subscribeUser(
         endpoint: sub.endpoint,
         p256dh: sub.keys.p256dh,
         auth: sub.keys.auth,
-        userId: userId,
+        userId: user.id,
       })
       .onConflictDoUpdate({
         target: pushSubscriptions.userId,
@@ -61,12 +72,20 @@ export async function subscribeUser(
   }
 }
 
-export async function unsubscribeUser(userId: string) {
+export async function unsubscribeUser() {
   try {
+    const user = await getAuthenticatedUser();
+    if (!user || user.isAnonymous) {
+      return {
+        success: false,
+        message: "ログインが必要です。",
+      };
+    }
+
     const db = await getDb();
     await db
       .delete(pushSubscriptions)
-      .where(eq(pushSubscriptions.userId, userId));
+      .where(eq(pushSubscriptions.userId, user.id));
     return {
       success: true,
       message: "操作が完了しました。",

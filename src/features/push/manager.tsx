@@ -25,13 +25,7 @@ function urlBase64ToUint8Array(base64String: string) {
   return outputArray;
 }
 
-interface PushNotificationManagerProps {
-  userId: string;
-}
-
-export function PushNotificationManager({
-  userId,
-}: PushNotificationManagerProps) {
+export function PushNotificationManager() {
   const [isSupported, setIsSupported] = useState(false);
   const [subscription, setSubscription] = useState<PushSubscription | null>(
     null,
@@ -60,7 +54,7 @@ export function PushNotificationManager({
       const client_sub = await registration.pushManager.getSubscription();
 
       if (client_sub) {
-        const db_sub = await getUserSubscription(userId);
+        const db_sub = await getUserSubscription();
         if (db_sub.length === 0) {
           await client_sub.unsubscribe();
           setSubscription(null);
@@ -103,7 +97,7 @@ export function PushNotificationManager({
       });
 
       const serializedSub = JSON.parse(JSON.stringify(sub));
-      await subscribeUser(serializedSub, userId);
+      await subscribeUser(serializedSub);
       setSubscription(sub);
     } catch (error) {
       console.error("購読エラー:", error);
@@ -116,7 +110,7 @@ export function PushNotificationManager({
     setIsLoading(true);
     try {
       await subscription?.unsubscribe();
-      await unsubscribeUser(userId);
+      await unsubscribeUser();
       setSubscription(null);
     } catch (error) {
       console.error("解除エラー:", error);

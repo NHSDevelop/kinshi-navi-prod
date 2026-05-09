@@ -5,6 +5,7 @@ import { RoutePollingRefresh } from "@/components/polling/route-polling-refresh"
 import { getDb } from "@/lib/db/drizzle";
 import { attractions, tickets } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { requireStaffOrManageStoreUser } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +13,7 @@ export default async function ShowAttractionStatusPage(props: {
   params: Promise<{ store_id: string }>;
 }) {
   const { store_id } = await props.params;
+  await requireStaffOrManageStoreUser(store_id);
   const db = await getDb();
   const attractionRows = await db
     .select()

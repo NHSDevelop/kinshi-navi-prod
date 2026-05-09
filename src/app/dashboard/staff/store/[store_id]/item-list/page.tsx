@@ -4,6 +4,7 @@ import ItemList from "@/features/store/food/item/list";
 import { getDb } from "@/lib/db/drizzle";
 import { foods } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { requireStaffOrManageStoreUser } from "@/lib/auth-guard";
 
 // Item情報は1日に1回程度変わるため、ISR 1時間でキャッシュ
 export const revalidate = 3600;
@@ -12,6 +13,7 @@ export default async function ItemListPage(props: {
   params: Promise<{ store_id: string }>;
 }) {
   const { store_id } = await props.params;
+  await requireStaffOrManageStoreUser(store_id);
 
   const db = await getDb();
   const foodRows = await db

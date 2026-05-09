@@ -1,5 +1,6 @@
 "use server";
 
+import { canStaffOrManageStore, getAuthenticatedUser } from "@/lib/auth-guard";
 import { z } from "zod";
 import {
   attractions,
@@ -40,12 +41,47 @@ export type CallTicketState = {
   success?: boolean;
 };
 
+async function getStoreIdByAttractionId(attractionId: string) {
+  const db = await getDb();
+  const attractionRows = await db
+    .select({ storeId: attractions.storeId })
+    .from(attractions)
+    .where(eq(attractions.id, attractionId))
+    .limit(1);
+
+  return attractionRows[0]?.storeId ?? null;
+}
+
+async function canManageAttraction(attractionId: string) {
+  const user = await getAuthenticatedUser();
+  if (!user) {
+    return null;
+  }
+
+  const storeId = await getStoreIdByAttractionId(attractionId);
+  if (!storeId) {
+    return null;
+  }
+
+  const allowed = await canStaffOrManageStore(user.id, storeId);
+  return allowed ? { user, storeId } : null;
+}
+
 export async function createTicket(
-  userId: string,
   isPaper: boolean,
   prevState: unknown,
   formData: FormData,
 ): Promise<TicketState> {
+  const user = await getAuthenticatedUser();
+  if (!user) {
+    return {
+      numberOfPeople: (formData.get("numberOfPeople") as string) || "",
+      zodErrors: null,
+      message: "ログインが必要です。",
+      success: false,
+    };
+  }
+
   const validationResult = RegisterSchema.safeParse({
     numberOfPeople: formData.get("numberOfPeople"),
   });
@@ -84,7 +120,7 @@ export async function createTicket(
       .from(tickets)
       .where(
         and(
-          eq(tickets.userId, userId),
+          eq(tickets.userId, user.id),
           eq(tickets.status, "ISSUED"),
           eq(tickets.isPaper, false),
         ),
@@ -110,7 +146,7 @@ export async function createTicket(
       numberOfPeople: numberOfPeople,
       status: "ISSUED",
       attractionId: attraction.id,
-      userId: userId,
+      userId: user.id,
       isPaper: isPaper,
     });
 
@@ -141,6 +177,16 @@ export async function callFirstTicket(
   prevState: unknown,
   formData: FormData,
 ): Promise<CallTicketState> {
+  const access = await canManageAttraction(attractionId);
+  if (!access) {
+    return {
+      count: (formData.get("count") as string) || "",
+      zodErrors: null,
+      message: "権限がありません。",
+      success: false,
+    };
+  }
+
   const validationResult = CallFirstTicketSchema.safeParse({
     count: formData.get("count"),
   });
@@ -264,6 +310,11 @@ export async function callFirstTicket(
 
 export async function completeTicket(ticketId: string) {
   try {
+    const user = await getAuthenticatedUser();
+    if (!user) {
+      return { success: false as const, message: "ログインが必要です" };
+    }
+
     const db = await getDb();
     const fetchedRows = await db
       .select()
@@ -274,6 +325,17 @@ export async function completeTicket(ticketId: string) {
 
     if (!fetchedTicket) {
       return { success: false as const, message: "チケットが存在しません" };
+    }
+
+    const storeRows = await db
+      .select({ storeId: attractions.storeId })
+      .from(attractions)
+      .innerJoin(stores, eq(attractions.storeId, stores.id))
+      .where(eq(attractions.id, fetchedTicket.attractionId))
+      .limit(1);
+    const storeId = storeRows[0]?.storeId;
+    if (!storeId || !(await canStaffOrManageStore(user.id, storeId))) {
+      return { success: false as const, message: "権限がありません" };
     }
 
     if (fetchedTicket.status != "CALLED") {
@@ -315,7 +377,34 @@ export async function completeTicket(ticketId: string) {
 
 export async function cancelTicket(ticketId: string) {
   try {
+    const user = await getAuthenticatedUser();
+    if (!user) {
+      return { success: false as const, message: "ログインが必要です" };
+    }
+
     const db = await getDb();
+    const fetchedRows = await db
+      .select()
+      .from(tickets)
+      .where(eq(tickets.id, ticketId))
+      .limit(1);
+    const fetchedTicket = fetchedRows[0];
+
+    if (!fetchedTicket) {
+      return { success: false as const, message: "チケットが存在しません" };
+    }
+
+    const storeRows = await db
+      .select({ storeId: attractions.storeId })
+      .from(attractions)
+      .innerJoin(stores, eq(attractions.storeId, stores.id))
+      .where(eq(attractions.id, fetchedTicket.attractionId))
+      .limit(1);
+    const storeId = storeRows[0]?.storeId;
+    if (!storeId || !(await canStaffOrManageStore(user.id, storeId))) {
+      return { success: false as const, message: "権限がありません" };
+    }
+
     await db
       .update(tickets)
       .set({ status: "CANCELED" })
@@ -338,6 +427,15 @@ export async function fetchTicketsByStatus(
   storeId: string,
   status: TicketStatus | null,
 ) {
+  const user = await getAuthenticatedUser();
+  if (!user || !(await canStaffOrManageStore(user.id, storeId))) {
+    return {
+      success: false,
+      message: "権限がありません。",
+      error: null,
+    };
+  }
+
   const db = await getDb();
   try {
     const attractionRows = await db
@@ -385,6 +483,11 @@ export async function completePaperTicket(
 ) {
   const ticketId = formData.get("ticketId") as string;
   try {
+    const user = await getAuthenticatedUser();
+    if (!user) {
+      return { success: false as const, message: "ログインが必要です" };
+    }
+
     const db = await getDb();
     const fetchedRows = await db
       .select()
@@ -395,6 +498,17 @@ export async function completePaperTicket(
 
     if (!fetchedTicket) {
       return { success: false as const, message: "チケットが存在しません" };
+    }
+
+    const storeRows = await db
+      .select({ storeId: attractions.storeId })
+      .from(attractions)
+      .innerJoin(stores, eq(attractions.storeId, stores.id))
+      .where(eq(attractions.id, fetchedTicket.attractionId))
+      .limit(1);
+    const storeId = storeRows[0]?.storeId;
+    if (!storeId || !(await canStaffOrManageStore(user.id, storeId))) {
+      return { success: false as const, message: "権限がありません" };
     }
 
     if (fetchedTicket.status != "CALLED") {

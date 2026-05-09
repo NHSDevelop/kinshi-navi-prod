@@ -6,12 +6,14 @@ import { attractions } from "@/lib/db/schema";
 
 import { eq } from "drizzle-orm";
 import Link from "next/link";
+import { requireStaffOrManageStoreUser } from "@/lib/auth-guard";
 
 export default async function CallTicketPage(props: {
   params: Promise<{ store_id: string }>;
 }) {
-  const db = await getDb();
   const { store_id } = await props.params;
+  await requireStaffOrManageStoreUser(store_id);
+  const db = await getDb();
   const attractionRows = await db
     .select()
     .from(attractions)
