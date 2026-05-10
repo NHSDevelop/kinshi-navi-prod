@@ -1,3 +1,7 @@
+import { LoadingPrompt } from "@/components/prompt/loading-prompt";
+import { SystemInfoList } from "@/features/system-info/list";
+import { Suspense } from "react";
+
 export default async function EventTopPage() {
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6 pb-10 lg:gap-8">
@@ -18,6 +22,14 @@ export default async function EventTopPage() {
             </p>
           </div>
         </div>
+      </section>
+      <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
+        <h2 className="text-lg font-bold text-main-950 md:text-xl mb-4">
+          運営からのお知らせ
+        </h2>
+        <Suspense fallback={<LoadingPrompt context="お知らせ" />}>
+          <SystemInfoList />
+        </Suspense>
       </section>
     </div>
   );

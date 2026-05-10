@@ -1,4 +1,6 @@
+import { LoadingPrompt } from "@/components/prompt/loading-prompt";
 import CreateStoreVote from "@/features/store/vote/create";
+import { Suspense } from "react";
 
 export default function FoodVotePage() {
   return (
@@ -8,11 +10,13 @@ export default function FoodVotePage() {
           模擬店の投票
         </h1>
         <p className="mt-3 text-sm leading-6 text-main-900/80 md:text-base">
-          食べてよかった模擬店に投票できます。人気ランキングの集計に利用されます。
+          クラス販売の投票フォームです。気に入った企画に投票してください。
         </p>
       </section>
       <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
-        <CreateStoreVote storeType="FOOD" />
+        <Suspense fallback={<LoadingPrompt context="投票画面" />}>
+          <CreateStoreVote storeType="FOOD" />
+        </Suspense>
       </section>
     </div>
   );

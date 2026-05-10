@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 import { GoShare } from "react-icons/go";
 import { AiOutlinePlusSquare } from "react-icons/ai";
@@ -69,48 +68,32 @@ export function InstallPrompt() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>PWAのインストール</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {deferredPrompt && (
-          <>
-            <p className="text-sm text-muted-foreground">
-              ホーム画面に追加して、アプリのように素早く起動できます。
-            </p>
-            <p className="text-sm text-muted-foreground">
-              インストールは数十秒で終わり、プッシュ通知を受け取れるようになります。
-            </p>
-            <p className="text-sm text-muted-foreground">
-              インストールする際、チケットなどのデータはブラウザから受け継がれませんのでご注意ください。
-            </p>
-            <div className="flex items-center gap-2">
-              <Button onClick={handleInstall} disabled={isInstalling}>
-                {isInstalling ? "確認中..." : "インストールする"}
-              </Button>
-            </div>
-          </>
-        )}
-        {isIOS && !deferredPrompt && (
-          <div className="flex">
-            <p className="text-sm md:text-base">
-              お使いのデバイスにアプリをインストールするには、
-            </p>
-            <GoShare />
-            <p className="text-sm md:text-base">から</p>
-            <AiOutlinePlusSquare />
-            <p className="text-sm md:text-base">
-              「ホーム画面に追加」を押してください。
-            </p>
-          </div>
-        )}
-        {!isIOS && !deferredPrompt && (
-          <p className="text-sm text-muted-foreground">
-            このブラウザではインストール可能になるとボタンが表示されます。
+    <div className="space-y-4">
+      {deferredPrompt && (
+        <div className="flex items-center gap-2">
+          <Button onClick={handleInstall} disabled={isInstalling}>
+            {isInstalling ? "確認中..." : "インストールする"}
+          </Button>
+        </div>
+      )}
+      {isIOS && !deferredPrompt && (
+        <div className="flex">
+          <p className="text-sm md:text-base">
+            お使いのデバイスにアプリをインストールするには、
           </p>
-        )}
-      </CardContent>
-    </Card>
+          <GoShare />
+          <p className="text-sm md:text-base">から</p>
+          <AiOutlinePlusSquare />
+          <p className="text-sm md:text-base">
+            「ホーム画面に追加」を押してください。
+          </p>
+        </div>
+      )}
+      {!isIOS && !deferredPrompt && (
+        <p className="text-sm text-muted-foreground">
+          このブラウザではインストール可能になるとボタンが表示されます。
+        </p>
+      )}
+    </div>
   );
 }
