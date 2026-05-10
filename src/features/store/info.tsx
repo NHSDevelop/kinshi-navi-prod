@@ -59,6 +59,7 @@ export default async function StoreInfo({ storeId }: StoreInfoProps) {
             width={160}
             height={220}
             className="rounded-md border border-slate-200 object-contain"
+            loading="eager"
           />
         )}
       </div>

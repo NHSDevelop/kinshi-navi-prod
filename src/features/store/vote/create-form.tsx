@@ -129,6 +129,7 @@ export default function CreateStoreVoteForm({ stores, storeType }: Props) {
                   width={200}
                   height={300}
                   className="object-contain rounded-md"
+                  loading="eager"
                 />
               )}
             </button>

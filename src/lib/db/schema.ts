@@ -32,6 +32,10 @@ export const inviteTargetRoleValues = [
 ] as const;
 export type InviteTargetRole = (typeof inviteTargetRoleValues)[number];
 
+export const foodTagValues = ["CLASS_BOOTH", "CONCIL_BOOTH", "OTHER"] as const;
+
+export type FoodTag = (typeof foodTagValues)[number];
+
 export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
   name: text("name"),
@@ -170,6 +174,7 @@ export const foods = sqliteTable("foods", {
     .notNull()
     .unique()
     .references(() => stores.id, { onDelete: "cascade" }),
+  tag: text("tag", { enum: foodTagValues }).default("OTHER"),
   createdAt: integer("createdAt", { mode: "timestamp_ms" })
     .notNull()
     .$defaultFn(() => new Date()),

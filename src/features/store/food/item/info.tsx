@@ -39,6 +39,7 @@ export default async function ItemInfo({ itemId }: Props) {
                   width={300}
                   height={400}
                   className="object-contain rounded-md"
+                  loading="eager"
                 />
               )}
               <div className="flex gap-2 md:flex-1">

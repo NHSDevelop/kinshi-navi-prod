@@ -23,3 +23,9 @@ export type FormState<T = unknown> = {
   error?: string | null;
   data?: T;
 };
+
+export const FOOD_TAG_MAP = {
+  CLASS_BOOTH: { label: "クラス販売" },
+  CONCIL_BOOTH: { label: "生徒会販売" },
+  OTHER: { label: "その他" },
+};
