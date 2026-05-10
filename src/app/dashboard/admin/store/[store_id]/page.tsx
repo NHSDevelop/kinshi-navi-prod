@@ -106,7 +106,7 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
             </Button>
           </CardHeader>
           <CardContent>
-            <StoreInfo storeId={store_id} />
+            <StoreInfo storeId={store_id} isShowCanVoted />
           </CardContent>
         </Card>
         <ToActiveStore

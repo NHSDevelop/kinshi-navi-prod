@@ -1,0 +1,1 @@
+ALTER TABLE `stores` ADD `can_voted` integer DEFAULT true NOT NULL;

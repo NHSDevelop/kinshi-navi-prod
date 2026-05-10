@@ -61,7 +61,7 @@ export default async function StorePage(props: {
       </section>
 
       <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
-        <StoreInfo storeId={storeRows[0].id} />
+        <StoreInfo storeId={storeRows[0].id} isShowCanVoted={false} />
       </section>
 
       {storeRows[0].storeType === "ATTRACTION" && attraction && (

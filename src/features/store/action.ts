@@ -38,13 +38,17 @@ export type StoreState = {
 };
 
 // ISR 対象ページを無効化する関数
-function invalidateStorePages(storeId?: string) {
+function invalidateStorePages(storeId?: string, storeSlug?: string) {
   if (storeId) {
     revalidatePath(`/dashboard/staff/store/${storeId}`);
     revalidatePath(`/dashboard/admin/store/${storeId}`);
     revalidatePath(`/dashboard/staff/store/${storeId}/item-list`);
     revalidatePath(`/dashboard/staff/store/${storeId}/call-ticket`);
     revalidatePath(`/dashboard/admin/store/${storeId}/create-item`);
+    revalidatePath(`/dashboard/admin/store/${storeId}/edit-config/store`);
+  }
+  if (storeSlug) {
+    revalidatePath(`/store/${storeSlug}`);
   }
   revalidatePath("/attraction/waiting-status");
   revalidatePath("/food/stock-status");
@@ -58,6 +62,7 @@ export type UpdateStoreConfigZodErrors = {
   finishedAtDate?: string[];
   finishedAtTime?: string[];
   description?: string[];
+  canVoted?: string[];
 } | null;
 
 export type UpdateStoreConfigState = {
@@ -68,6 +73,7 @@ export type UpdateStoreConfigState = {
   finishedAtDate?: string;
   finishedAtTime?: string;
   description?: string;
+  canVoted?: boolean;
   zodErrors?: UpdateStoreConfigZodErrors;
   message?: string | null;
   error?: string | null;
@@ -141,7 +147,11 @@ export async function createStore(
         storeType: storeType,
         eventId: eventId,
       })
-      .returning({ id: stores.id, storeType: stores.storeType });
+      .returning({
+        id: stores.id,
+        storeType: stores.storeType,
+        slug: stores.slug,
+      });
 
     const createdStore = createdStoreRows[0];
     if (!createdStore) {
@@ -161,7 +171,7 @@ export async function createStore(
         break;
     }
 
-    invalidateStorePages(createdStore.id);
+    invalidateStorePages(createdStore.id, createdStore.slug);
     return {
       zodErrors: null,
       message: "操作が完了しました。",
@@ -192,6 +202,9 @@ const storeConfigSchema = z.object({
     .regex(/^\d{2}:\d{2}$/, "HH:mm形式で入力してください")
     .nullable(),
   description: z.string().nullable(),
+  canVoted: z
+    .enum(["true", "false"])
+    .transform((val: "true" | "false") => val === "true"),
 });
 
 export async function updateStoreConfig(
@@ -230,6 +243,7 @@ export async function updateStoreConfig(
     description: formData.get("description")
       ? (formData.get("description") as string)
       : null,
+    canVoted: formData.get("canVoted") as string,
   });
   if (!validationResult.success) {
     return {
@@ -240,6 +254,7 @@ export async function updateStoreConfig(
       finishedAtDate: (formData.get("finishedAtDate") as string) || "",
       finishedAtTime: (formData.get("finishedAtTime") as string) || "",
       description: (formData.get("description") as string) || "",
+      canVoted: (formData.get("canVoted") as string) === "true",
       zodErrors: validationResult.error.flatten().fieldErrors,
       success: false,
       message: null,
@@ -255,6 +270,7 @@ export async function updateStoreConfig(
     finishedAtDate,
     finishedAtTime,
     description,
+    canVoted,
   } = validationResult.data;
 
   const storeId = formData.get("storeId") as string;
@@ -280,6 +296,7 @@ export async function updateStoreConfig(
         finishedAtDate: finishedAtDate,
         finishedAtTime: finishedAtTime,
         description: description,
+        canVoted: canVoted,
         updatedAt: new Date(),
       })
       .where(eq(stores.id, storeId));
@@ -505,7 +522,7 @@ export async function toActiveStore(prevState: unknown, formData: FormData) {
       .update(stores)
       .set({ isActive: !store.isActive })
       .where(eq(stores.id, storeId));
-    invalidateStorePages(storeId);
+    invalidateStorePages(storeId, store.slug);
     return {
       success: true,
       message: "操作が完了しました。",

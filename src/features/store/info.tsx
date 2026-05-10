@@ -9,9 +9,13 @@ import Image from "next/image";
 
 interface StoreInfoProps {
   storeId: string;
+  isShowCanVoted: boolean;
 }
 
-export default async function StoreInfo({ storeId }: StoreInfoProps) {
+export default async function StoreInfo({
+  storeId,
+  isShowCanVoted,
+}: StoreInfoProps) {
   const db = await getDb();
   const rows = await db
     .select()
@@ -88,6 +92,14 @@ export default async function StoreInfo({ storeId }: StoreInfoProps) {
           <p className="min-w-0 wrap-break-word">
             {store.description ?? "なし"}
           </p>
+          {isShowCanVoted && (
+            <>
+              <p className="font-medium text-slate-700">投票可能か：</p>
+              <p className="min-w-0 wrap-break-word">
+                {store.canVoted ? "はい" : "いいえ"}
+              </p>
+            </>
+          )}
         </div>
       </div>
     </div>

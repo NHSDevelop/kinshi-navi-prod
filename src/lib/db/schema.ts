@@ -134,6 +134,7 @@ export const stores = sqliteTable("stores", {
   eventId: text("eventId")
     .references(() => events.id)
     .notNull(),
+  canVoted: integer("can_voted", { mode: "boolean" }).notNull().default(true),
   createdAt: integer("createdAt", { mode: "timestamp_ms" })
     .notNull()
     .$defaultFn(() => new Date()),

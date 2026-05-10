@@ -25,7 +25,6 @@ export default function CreateStoreVoteForm({ stores, storeType }: Props) {
   const [chosenStoreId, setChosenStoreId] = useState<string>("");
   const [chosenStoreName, setChosenStorename] = useState<string>("");
   const [chosenStoreImageUrl, setChosenStoreImageUrl] = useState<string>("");
-  const filterdStores = stores.filter((store) => store.storeType === storeType);
 
   const handleClick = (store: Store) => {
     setChosenStoreId(store.id);
@@ -108,7 +107,7 @@ export default function CreateStoreVoteForm({ stores, storeType }: Props) {
       </Card>
 
       <Card className="w-full grid grid-cols-3 md:grid-cols-4 p-4 gap-2">
-        {filterdStores.map((store) => (
+        {stores.map((store) => (
           <div
             key={store.id}
             className="flex flex-col justify-center items-center border-2 rounded-md p-2 md:p-4"

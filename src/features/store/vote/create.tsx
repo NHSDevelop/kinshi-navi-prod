@@ -3,7 +3,7 @@ import { getDb } from "@/lib/db/drizzle";
 import { stores, StoreType } from "@/lib/db/schema";
 import CreateStoreVoteForm from "./create-form";
 import CreateAnonymousUser from "@/features/auth/anonymous/create";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { getSessionFromRequestHeaders } from "@/lib/auth-session";
 
 type Props = {
@@ -28,7 +28,13 @@ export default async function CreateStoreVote({ storeType }: Props) {
   const storeRows = await db
     .select()
     .from(stores)
-    .where(eq(stores.eventId, mainEventId));
+    .where(
+      and(
+        eq(stores.eventId, mainEventId),
+        eq(stores.canVoted, true),
+        eq(stores.storeType, storeType),
+      ),
+    );
   if (storeRows.length === 0) {
     return <NotFoundPrompt context="店舗" />;
   }

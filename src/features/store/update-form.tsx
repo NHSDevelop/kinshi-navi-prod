@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { UpdateStoreConfigState } from "./action";
 import Image from "next/image";
+import { Switch } from "@/components/ui/switch";
 
 interface updateStoreConfigFormProps {
   store: Store; //isActiveを取得するためStore型
@@ -37,6 +38,7 @@ const INITIAL_STATE: UpdateStoreConfigState = {
   finishedAtDate: "",
   finishedAtTime: "",
   description: "",
+  canVoted: true,
   zodErrors: null,
   message: null,
   error: null,
@@ -63,6 +65,7 @@ export default function UpdateStoreConfigForm({
   const [finishedAtTime, setFinishedAtTime] = useState<string>(
     store.finishedAtTime || "",
   );
+  const [canVoted, setCanVoted] = useState<boolean>(store.canVoted || true);
   const [imageUrl, setImageUrl] = useState<string>(store.imageUrl ?? "");
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -269,11 +272,25 @@ export default function UpdateStoreConfigForm({
                   />
                   <FieldError message={state.zodErrors?.description?.[0]} />
                 </Field>
+                <Field>
+                  <FieldLabel>投票可能か</FieldLabel>
+                  <Switch
+                    disabled={isPending}
+                    checked={canVoted}
+                    onCheckedChange={setCanVoted}
+                  />
+                  <FieldError message={state.zodErrors?.canVoted?.[0]} />
+                </Field>
               </FieldGroup>
             </FieldSet>
             <FieldSeparator />
             <input type="hidden" name="storeId" value={store.id} />
             <input type="hidden" name="imageUrl" value={imageUrl} />
+            <input
+              type="hidden"
+              name="canVoted"
+              value={canVoted ? "true" : "false"}
+            />
           </FieldGroup>
           <Button
             type="submit"
