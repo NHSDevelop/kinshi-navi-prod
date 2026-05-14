@@ -2,6 +2,7 @@ import AttractionTicketList from "@/features/store/attraction/ticket/attraction-
 import { getDb } from "@/lib/db/drizzle";
 import { attractions, tickets } from "@/lib/db/schema";
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
+import { DashboardPageShell } from "@/components/dashboard/page-shell";
 
 import { eq } from "drizzle-orm";
 import { Separator } from "@/components/ui/separator";
@@ -19,7 +20,14 @@ export default async function TicketListPage(props: {
     .limit(1);
 
   if (attractionRows.length === 0) {
-    return <NotFoundPrompt context="企画" />;
+    return (
+      <DashboardPageShell
+        title="チケット一覧"
+        description="企画のチケット一覧を表示します。"
+      >
+        <NotFoundPrompt context="企画" />
+      </DashboardPageShell>
+    );
   }
   const initialTickets = await db
     .select({
@@ -37,13 +45,18 @@ export default async function TicketListPage(props: {
     .where(eq(tickets.attractionId, attractionRows[0].id));
 
   return (
-    <div className="space-y-4 lg:space-y-8">
-      <h1 className="font-bold text-xl">チケットの一覧</h1>
-      <Separator />
-      <AttractionTicketList
-        storeId={store_id}
-        initialTickets={initialTickets}
-      />
-    </div>
+    <DashboardPageShell
+      title="チケット一覧"
+      description="企画のチケット一覧を表示します。"
+    >
+      <div className="space-y-4 lg:space-y-8">
+        <h1 className="font-bold text-xl">チケットの一覧</h1>
+        <Separator />
+        <AttractionTicketList
+          storeId={store_id}
+          initialTickets={initialTickets}
+        />
+      </div>
+    </DashboardPageShell>
   );
 }

@@ -28,7 +28,7 @@ export default async function StoreStaffHomePage(props: {
   const { store_id } = await props.params;
 
   const db = await getDb();
-  
+
   const [_, storeRows, staffRows] = await Promise.all([
     requireStaffOrManageStoreUser(store_id),
     db
@@ -48,6 +48,17 @@ export default async function StoreStaffHomePage(props: {
   ]);
 
   if (storeRows.length === 0) {
+    return (
+      <DashboardPageShell
+        title="スタッフ画面"
+        description="担当店舗の操作メニューとスタッフ一覧を表示します。"
+      >
+        <NotFoundPrompt context="該当する店舗" />
+      </DashboardPageShell>
+    );
+  }
+
+  return (
     <DashboardPageShell
       title={`スタッフ画面 | ${storeRows[0].name}`}
       description="担当店舗の操作メニューとスタッフ一覧を表示します。"

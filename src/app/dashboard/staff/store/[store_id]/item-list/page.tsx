@@ -3,6 +3,7 @@ import { Separator } from "@/components/ui/separator";
 import ItemList from "@/features/store/food/item/list";
 import { getDb } from "@/lib/db/drizzle";
 import { foods } from "@/lib/db/schema";
+import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import { eq } from "drizzle-orm";
 import { requireStaffOrManageStoreUser } from "@/lib/auth-guard";
 
@@ -26,13 +27,25 @@ export default async function ItemListPage(props: {
   ]);
 
   if (foodRows.length === 0) {
-    return <NotFoundPrompt context="該当する模擬店" />;
+    return (
+      <DashboardPageShell
+        title="商品一覧"
+        description="模擬店の商品の一覧を表示します。"
+      >
+        <NotFoundPrompt context="該当する模擬店" />
+      </DashboardPageShell>
+    );
   }
   return (
-    <div className="space-y-4 lg:space-y-8">
-      <h1 className="font-bold text-xl">商品の一覧</h1>
-      <Separator />
-      <ItemList foodId={foodRows[0].id} />
-    </div>
+    <DashboardPageShell
+      title="商品一覧"
+      description="模擬店の商品の一覧を表示します。"
+    >
+      <div className="space-y-4 lg:space-y-8">
+        <h1 className="font-bold text-xl">商品の一覧</h1>
+        <Separator />
+        <ItemList foodId={foodRows[0].id} />
+      </div>
+    </DashboardPageShell>
   );
 }

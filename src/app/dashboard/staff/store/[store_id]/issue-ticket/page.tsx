@@ -1,4 +1,5 @@
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
+import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import IssueTicket from "@/features/store/attraction/ticket/issue";
 import { getDb } from "@/lib/db/drizzle";
 import { attractions, stores } from "@/lib/db/schema";
@@ -28,7 +29,14 @@ export default async function StaffIssueTicketPage(props: {
   ]);
 
   if (storeRows.length === 0) {
-    return <NotFoundPrompt context="ユーザー" />;
+    return (
+      <DashboardPageShell
+        title="紙チケット発行"
+        description="端末を持たない方向けに紙チケットを発行します。"
+      >
+        <NotFoundPrompt context="ユーザー" />
+      </DashboardPageShell>
+    );
   }
   const attractionRows = await db
     .select()
@@ -36,18 +44,30 @@ export default async function StaffIssueTicketPage(props: {
     .where(eq(attractions.storeId, store_id))
     .limit(1);
   if (attractionRows.length === 0) {
-    return <NotFoundPrompt context="企画" />;
+    return (
+      <DashboardPageShell
+        title="紙チケット発行"
+        description="端末を持たない方向けに紙チケットを発行します。"
+      >
+        <NotFoundPrompt context="企画" />
+      </DashboardPageShell>
+    );
   }
 
   return (
-    <div className="space-y-4 lg:space-y-8">
-      <h1 className="font-bold text-xl">スタッフ用チケット発券ページ</h1>
-      <p>端末を持たない方へのチケットを発行します。</p>
-      <IssueTicket
-        eventId={storeRows[0].eventId}
-        isPaper={true}
-        storeId={store_id}
-      />
-    </div>
+    <DashboardPageShell
+      title="紙チケット発行"
+      description="端末を持たない方向けに紙チケットを発行します。"
+    >
+      <div className="space-y-4 lg:space-y-8">
+        <h1 className="font-bold text-xl">スタッフ用チケット発券ページ</h1>
+        <p>端末を持たない方へのチケットを発行します。</p>
+        <IssueTicket
+          eventId={storeRows[0].eventId}
+          isPaper={true}
+          storeId={store_id}
+        />
+      </div>
+    </DashboardPageShell>
   );
 }

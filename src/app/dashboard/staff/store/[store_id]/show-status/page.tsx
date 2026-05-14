@@ -4,6 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { RoutePollingRefresh } from "@/components/polling/route-polling-refresh";
 import { getDb } from "@/lib/db/drizzle";
 import { attractions, tickets } from "@/lib/db/schema";
+import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import { eq } from "drizzle-orm";
 import { requireStaffOrManageStoreUser } from "@/lib/auth-guard";
 
@@ -27,7 +28,14 @@ export default async function ShowAttractionStatusPage(props: {
 
   const attraction = attractionRows[0];
   if (!attraction) {
-    return <NotFoundPrompt context="該当する企画" />;
+    return (
+      <DashboardPageShell
+        title="待機状況"
+        description="企画の待機状況を表示します。"
+      >
+        <NotFoundPrompt context="該当する企画" />
+      </DashboardPageShell>
+    );
   }
   const ticketRows = await db
     .select()
@@ -52,52 +60,57 @@ export default async function ShowAttractionStatusPage(props: {
   const waitingMinutes = groupCount * (attraction.playTime || 0);
 
   return (
-    <div className="flex flex-col gap-6">
-      <RoutePollingRefresh intervalMs={5 * 60 * 1000} />
+    <DashboardPageShell
+      title="待機状況"
+      description="企画の待機状況を表示します。"
+    >
+      <div className="flex flex-col gap-6">
+        <RoutePollingRefresh intervalMs={5 * 60 * 1000} />
 
-      <h1 className="text-xl font-bold">企画の待機状況</h1>
-      <Separator />
+        <h1 className="text-xl font-bold">企画の待機状況</h1>
+        <Separator />
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              待ち人数
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{waitingPeople}</div>
-            <p className="text-xs text-muted-foreground mt-1">人</p>
-          </CardContent>
-        </Card>
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                待ち人数
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{waitingPeople}</div>
+              <p className="text-xs text-muted-foreground mt-1">人</p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              最新の呼び出し番号
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">
-              {latestCalledNumber !== null ? `No.${latestCalledNumber}` : "-"}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">番号</p>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                最新の呼び出し番号
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">
+                {latestCalledNumber !== null ? `No.${latestCalledNumber}` : "-"}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">番号</p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              推定待ち時間
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{waitingMinutes}</div>
-            <p className="text-xs text-muted-foreground mt-1">分</p>
-          </CardContent>
-        </Card>
-        <p>※5分ごと、または画面に戻ったときに更新します。</p>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                推定待ち時間
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{waitingMinutes}</div>
+              <p className="text-xs text-muted-foreground mt-1">分</p>
+            </CardContent>
+          </Card>
+          <p>※5分ごと、または画面に戻ったときに更新します。</p>
+        </div>
       </div>
-    </div>
+    </DashboardPageShell>
   );
 }

@@ -1,8 +1,9 @@
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { events } from "@/lib/db/schema";
+import { events, stores } from "@/lib/db/schema";
 import { getDb } from "@/lib/db/drizzle";
 import EventSelectLink from "@/features/event/components/select-link";
+import StoreSelectLink from "@/features/store/components/select-link";
 import Link from "next/link";
 import { AiFillPlusCircle } from "react-icons/ai";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,7 +13,7 @@ import { requireSuperAdminUser } from "@/lib/auth-guard";
 export default async function SuperAdminHomePage() {
   const db = await getDb();
 
-  const [_, eventRows] = await Promise.all([
+  const [_, eventRows, storeRows] = await Promise.all([
     requireSuperAdminUser(),
     db
       .select({
@@ -22,6 +23,7 @@ export default async function SuperAdminHomePage() {
         isMain: events.isMain,
       })
       .from(events),
+    db.select({ id: stores.id, name: stores.name }).from(stores),
   ]);
 
   return (
@@ -62,6 +64,17 @@ export default async function SuperAdminHomePage() {
           />
         ) : (
           <p>管理するイベントが存在しません。</p>
+        )}
+        <Separator />
+        <p className="text-lg">スタッフページへ移動</p>
+        {storeRows.length > 0 ? (
+          <StoreSelectLink
+            href="/dashboard/staff/store"
+            stores={storeRows}
+            context="スタッフページ"
+          />
+        ) : (
+          <p>管理する店舗が存在しません。</p>
         )}
         <Separator />
         <p className="text-lg">イベントの管理者を招待</p>
