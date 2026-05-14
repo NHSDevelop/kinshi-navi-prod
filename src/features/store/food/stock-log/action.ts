@@ -1,9 +1,10 @@
 "use server";
 
-import { items, stockLogs } from "@/lib/db/schema";
+import { foods, items, stockLogs } from "@/lib/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db/drizzle";
 import { createStockLogSchema } from "@/lib/schemas/food";
+import { revalidatePath } from "next/cache";
 
 export type ZodErrors = {
   itemId?: string[];
@@ -19,6 +20,28 @@ export type StockLogState = {
   message?: string | null;
   success?: boolean;
 };
+
+async function getStoreIdByItemId(itemId: string) {
+  const db = await getDb();
+  const itemRows = await db
+    .select({ storeId: foods.storeId })
+    .from(items)
+    .innerJoin(foods, eq(items.foodId, foods.id))
+    .where(eq(items.id, itemId))
+    .limit(1);
+
+  return itemRows[0]?.storeId ?? null;
+}
+
+function invalidateStockPages(storeId: string) {
+  revalidatePath(`/dashboard/staff/store/${storeId}`);
+  revalidatePath(`/dashboard/staff/store/${storeId}/register`);
+  revalidatePath(`/dashboard/staff/store/${storeId}/register-log-history`);
+  revalidatePath(`/dashboard/staff/store/${storeId}/stock-log-history`);
+  revalidatePath(`/dashboard/staff/store/${storeId}/item-list`);
+  revalidatePath(`/dashboard/admin/store/${storeId}`);
+  revalidatePath("/food/stock-status");
+}
 
 export default async function createStockLog(
   prevState: unknown,
@@ -42,8 +65,21 @@ export default async function createStockLog(
   }
 
   const { itemId, difference, meta } = validationResult.data;
-  const db = await getDb();
   try {
+    const db = await getDb();
+    const storeId = await getStoreIdByItemId(itemId);
+
+    if (!storeId) {
+      return {
+        itemId: (formData.get("itemId") as string) || "",
+        difference: (formData.get("difference") as string) || "",
+        meta: (formData.get("meta") as string) || "",
+        zodErrors: null,
+        message: "該当する模擬店が存在しません",
+        success: false,
+      };
+    }
+
     await db.insert(stockLogs).values({
       itemId: itemId,
       difference: difference,
@@ -54,6 +90,8 @@ export default async function createStockLog(
       .update(items)
       .set({ stock: sql`${items.stock} + ${difference}` })
       .where(eq(items.id, itemId));
+
+    invalidateStockPages(storeId);
 
     return {
       itemId: "",

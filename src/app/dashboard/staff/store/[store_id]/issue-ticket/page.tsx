@@ -38,11 +38,6 @@ export default async function StaffIssueTicketPage(props: {
       </DashboardPageShell>
     );
   }
-  const attractionRows = await db
-    .select()
-    .from(attractions)
-    .where(eq(attractions.storeId, store_id))
-    .limit(1);
   if (attractionRows.length === 0) {
     return (
       <DashboardPageShell

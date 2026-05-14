@@ -22,6 +22,7 @@ import {
   DialogHeader,
 } from "@/components/ui/dialog";
 import { TicketStatus } from "@/lib/db/schema";
+import { TICKET_STATUS_MAP } from "@/lib/type";
 
 interface TicketCardProps {
   ticket: {
@@ -39,10 +40,9 @@ interface TicketCardProps {
       };
     };
   };
-  statusLabel: string;
 }
 
-export function TicketCard({ ticket, statusLabel }: TicketCardProps) {
+export function TicketCard({ ticket }: TicketCardProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [isCanceled, setIsCanceled] = useState(false);
@@ -61,6 +61,10 @@ export function TicketCard({ ticket, statusLabel }: TicketCardProps) {
   if (isCanceled) {
     return null;
   }
+
+  const statusLabel =
+    TICKET_STATUS_MAP[ticket.status as keyof typeof TICKET_STATUS_MAP]?.label ??
+    ticket.status;
 
   return (
     <Card className="px-4 py-8 space-y-4">

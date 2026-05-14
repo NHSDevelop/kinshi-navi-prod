@@ -172,21 +172,14 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
               </Button>
               <Button asChild variant="card">
                 <Link
-                  href={`/dashboard/staff/store/${store_id}/stock-log-history`}
+                  href={`/dashboard/staff/store/${store_id}/register-log-history`}
                 >
-                  商品在庫の変動履歴
+                  会計・在庫履歴
                 </Link>
               </Button>
               <Button asChild variant="card">
                 <Link href={`/dashboard/staff/store/${store_id}/register`}>
                   レジページ
-                </Link>
-              </Button>
-              <Button asChild variant="card">
-                <Link
-                  href={`/dashboard/staff/store/${store_id}/register-log-history`}
-                >
-                  レジ履歴
                 </Link>
               </Button>
             </div>

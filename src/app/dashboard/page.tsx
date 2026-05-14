@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

@@ -29,7 +29,7 @@ export default async function StoreStaffHomePage(props: {
 
   const db = await getDb();
 
-  const [_, storeRows, staffRows] = await Promise.all([
+  const [, storeRows, staffRows] = await Promise.all([
     requireStaffOrManageStoreUser(store_id),
     db
       .select({ id: stores.id, name: stores.name, storeType: stores.storeType })
@@ -119,16 +119,9 @@ export default async function StoreStaffHomePage(props: {
               </Button>
               <Button asChild variant="card">
                 <Link
-                  href={`/dashboard/staff/store/${store_id}/stock-log-history`}
-                >
-                  商品在庫の変動履歴
-                </Link>
-              </Button>
-              <Button asChild variant="card">
-                <Link
                   href={`/dashboard/staff/store/${store_id}/register-log-history`}
                 >
-                  レジ履歴
+                  会計・在庫履歴
                 </Link>
               </Button>
             </div>
