@@ -26,7 +26,9 @@ export default async function AnonymousUserPage() {
           </p>
         </section>
         <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
-          <CreateAnonymousUser />
+          <Suspense fallback={<LoadingPrompt context="ユーザー作成ボタン" />}>
+            <CreateAnonymousUser />
+          </Suspense>
         </section>
       </div>
     );
@@ -138,7 +140,9 @@ export default async function AnonymousUserPage() {
 
       {user.isAnonymous && (
         <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
-          <DeleteAnonymousUser />
+          <Suspense fallback={<LoadingPrompt context="削除ボタン" />}>
+            <DeleteAnonymousUser />
+          </Suspense>
         </section>
       )}
     </div>

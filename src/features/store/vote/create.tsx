@@ -5,6 +5,8 @@ import CreateStoreVoteForm from "./create-form";
 import CreateAnonymousUser from "@/features/auth/anonymous/create";
 import { and, eq } from "drizzle-orm";
 import { getSessionFromRequestHeaders } from "@/lib/auth-session";
+import { Suspense } from "react";
+import { LoadingPrompt } from "@/components/prompt/loading-prompt";
 
 type Props = {
   storeType: StoreType;
@@ -37,7 +39,11 @@ export default async function CreateStoreVote({ storeType }: Props) {
 
   const user = session?.user;
   if (!user) {
-    return <CreateAnonymousUser />;
+    return (
+      <Suspense fallback={<LoadingPrompt context="ユーザー作成ボタン" />}>
+        <CreateAnonymousUser />
+      </Suspense>
+    );
   }
   if (user.isAnonymous === false) {
     return <p>管理者やスタッフは投票することはできません。</p>;

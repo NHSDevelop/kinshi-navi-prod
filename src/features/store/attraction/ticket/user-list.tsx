@@ -2,6 +2,7 @@ import { getDb } from "@/lib/db/drizzle";
 import { attractions, events, stores, tickets } from "@/lib/db/schema";
 import { and, asc, eq, inArray } from "drizzle-orm";
 import { TicketCard } from "./ticket";
+import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 
 interface UserTicketListProps {
   userId: string;
@@ -30,6 +31,10 @@ export default async function UserTicketList({ userId }: UserTicketListProps) {
       ),
     )
     .orderBy(asc(tickets.createdAt));
+
+  if (activeTicketRows.length === 0) {
+    return <NotFoundPrompt context="取得したチケット" />;
+  }
 
   const activeTickets = activeTicketRows.map((row) => ({
     id: row.id,

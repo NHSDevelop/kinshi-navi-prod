@@ -10,7 +10,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-main-300 text-gray-900 hover:bg-gray-300",
-        outline: "bg-sky-300 text-gray-900 hover:bg-green-300/90",
+        outline: "bg-sky-300 text-gray-900 hover:bg-sky-300/90",
         card: "bg-main-300 text-gray-900 font-bold hover:bg-main-300/90",
         warn: "bg-amber-300 text-gray-900 hover:bg-amber-300/90",
         danger: "bg-red-300 text-gray-900 hover:bg-red-300/90",
