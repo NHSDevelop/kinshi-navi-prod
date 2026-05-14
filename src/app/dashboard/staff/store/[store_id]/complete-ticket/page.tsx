@@ -12,13 +12,18 @@ export default async function CallTicketPage(props: {
   params: Promise<{ store_id: string }>;
 }) {
   const { store_id } = await props.params;
-  await requireStaffOrManageStoreUser(store_id);
+
   const db = await getDb();
-  const attractionRows = await db
-    .select()
-    .from(attractions)
-    .where(eq(attractions.storeId, store_id))
-    .limit(1);
+
+  const [_, attractionRows] = await Promise.all([
+    requireStaffOrManageStoreUser(store_id),
+    db
+      .select()
+      .from(attractions)
+      .where(eq(attractions.storeId, store_id))
+      .limit(1),
+  ]);
+
   if (attractionRows.length === 0) {
     return <p>企画が存在しません。</p>;
   }

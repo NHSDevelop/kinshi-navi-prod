@@ -44,46 +44,42 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
   const { store_id } = await params;
 
   const db = await getDb();
-  const storeRows = await db
-    .select()
-    .from(stores)
-    .where(eq(stores.id, store_id))
-    .limit(1);
+
+  const [storeRows, attractionRows, foodRows, adminRows, staffRows] =
+    await Promise.all([
+      db.select().from(stores).where(eq(stores.id, store_id)).limit(1),
+      db
+        .select()
+        .from(attractions)
+        .where(eq(attractions.storeId, store_id))
+        .limit(1),
+      db.select().from(foods).where(eq(foods.storeId, store_id)).limit(1),
+      db
+        .select({
+          id: admins.id,
+          name: users.name,
+          userId: admins.userId,
+          role: admins.role,
+        })
+        .from(admins)
+        .innerJoin(users, eq(users.id, admins.userId))
+        .where(
+          and(eq(admins.storeId, store_id), eq(admins.role, "STORE_ADMIN")),
+        ),
+      db
+        .select({
+          id: staffs.id,
+          name: users.name,
+          userId: staffs.userId,
+        })
+        .from(staffs)
+        .innerJoin(users, eq(users.id, staffs.userId))
+        .where(eq(staffs.storeId, store_id)),
+    ]);
+
   if (!storeRows[0]) {
     notFound();
   }
-
-  const attractionRows = await db
-    .select()
-    .from(attractions)
-    .where(eq(attractions.storeId, store_id))
-    .limit(1);
-  const foodRows = await db
-    .select()
-    .from(foods)
-    .where(eq(foods.storeId, store_id))
-    .limit(1);
-
-  const adminRows = await db
-    .select({
-      id: admins.id,
-      name: users.name,
-      userId: admins.userId,
-      role: admins.role,
-    })
-    .from(admins)
-    .innerJoin(users, eq(users.id, admins.userId))
-    .where(and(eq(admins.storeId, store_id), eq(admins.role, "STORE_ADMIN")));
-
-  const staffRows = await db
-    .select({
-      id: staffs.id,
-      name: users.name,
-      userId: staffs.userId,
-    })
-    .from(staffs)
-    .innerJoin(users, eq(users.id, staffs.userId))
-    .where(eq(staffs.storeId, store_id));
 
   return (
     <DashboardPageShell

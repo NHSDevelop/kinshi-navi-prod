@@ -18,25 +18,31 @@ export default async function DashBoardPage() {
   const db = await getDb();
   const userId = session.user.id;
 
-  const superAdminRow = await db
-    .select({ userId: admins.userId })
-    .from(admins)
-    .where(and(eq(admins.userId, userId), eq(admins.role, "SUPER_ADMIN")))
-    .limit(1);
+  const [superAdminRow, adminRow, staffRow] = await Promise.all([
+    db
+      .select({ userId: admins.userId })
+      .from(admins)
+      .where(and(eq(admins.userId, userId), eq(admins.role, "SUPER_ADMIN")))
+      .limit(1),
+    db
+      .select({
+        role: admins.role,
+        eventId: admins.eventId,
+        storeId: admins.storeId,
+      })
+      .from(admins)
+      .where(eq(admins.userId, userId))
+      .limit(1),
+    db
+      .select({ storeId: staffs.storeId })
+      .from(staffs)
+      .where(eq(staffs.userId, userId))
+      .limit(1),
+  ]);
 
   if (superAdminRow.length > 0) {
     redirect("/dashboard/super-admin");
   }
-
-  const adminRow = await db
-    .select({
-      role: admins.role,
-      eventId: admins.eventId,
-      storeId: admins.storeId,
-    })
-    .from(admins)
-    .where(eq(admins.userId, userId))
-    .limit(1);
 
   if (adminRow.length > 0) {
     if (adminRow[0].role === "EVENT_ADMIN" && adminRow[0].eventId) {
@@ -47,12 +53,6 @@ export default async function DashBoardPage() {
       redirect(`/dashboard/admin/store/${adminRow[0].storeId}`);
     }
   }
-
-  const staffRow = await db
-    .select({ storeId: staffs.storeId })
-    .from(staffs)
-    .where(eq(staffs.userId, userId))
-    .limit(1);
 
   if (staffRow.length > 0 && staffRow[0].storeId) {
     redirect(`/dashboard/staff/store/${staffRow[0].storeId}`);

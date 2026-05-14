@@ -34,7 +34,7 @@ export default async function ItemInfo({ itemId }: Props) {
                 />
               ) : (
                 <Image
-                  src="/images/default-image.png"
+                  src="/images/default-image.webp"
                   alt={`デフォルトの画像`}
                   width={300}
                   height={400}

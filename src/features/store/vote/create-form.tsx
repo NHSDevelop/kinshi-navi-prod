@@ -44,9 +44,9 @@ export default function CreateStoreVoteForm({ stores, storeType }: Props) {
 
   const selectedImageSrc =
     chosenStoreImageUrl === ""
-      ? "/images/choose-store.png"
+      ? "/images/choose-store.webp"
       : chosenStoreImageUrl === "default"
-        ? "/images/default-image.png"
+        ? "/images/default-image.webp"
         : chosenStoreImageUrl;
 
   const selectedImageWidth = chosenStoreImageUrl === "default" ? 200 : 300;
@@ -123,7 +123,7 @@ export default function CreateStoreVoteForm({ stores, storeType }: Props) {
                 />
               ) : (
                 <Image
-                  src="/images/default-image.png"
+                  src="/images/default-image.webp"
                   alt="画像なし"
                   width={200}
                   height={300}

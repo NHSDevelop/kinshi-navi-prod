@@ -26,29 +26,28 @@ export default async function StoreStaffHomePage(props: {
   params: Promise<{ store_id: string }>;
 }) {
   const { store_id } = await props.params;
-  await requireStaffOrManageStoreUser(store_id);
 
   const db = await getDb();
-  const storeRows = await db
-    .select({ id: stores.id, name: stores.name, storeType: stores.storeType })
-    .from(stores)
-    .where(eq(stores.id, store_id))
-    .limit(1);
+  
+  const [_, storeRows, staffRows] = await Promise.all([
+    requireStaffOrManageStoreUser(store_id),
+    db
+      .select({ id: stores.id, name: stores.name, storeType: stores.storeType })
+      .from(stores)
+      .where(eq(stores.id, store_id))
+      .limit(1),
+    db
+      .select({
+        id: staffs.id,
+        name: users.name,
+        userId: staffs.userId,
+      })
+      .from(staffs)
+      .innerJoin(users, eq(users.id, staffs.userId))
+      .where(eq(staffs.storeId, store_id)),
+  ]);
 
   if (storeRows.length === 0) {
-    return <p>店舗が存在しません。</p>;
-  }
-  const staffRows = await db
-    .select({
-      id: staffs.id,
-      name: users.name,
-      userId: staffs.userId,
-    })
-    .from(staffs)
-    .innerJoin(users, eq(users.id, staffs.userId))
-    .where(eq(staffs.storeId, store_id));
-
-  return (
     <DashboardPageShell
       title={`スタッフ画面 | ${storeRows[0].name}`}
       description="担当店舗の操作メニューとスタッフ一覧を表示します。"

@@ -11,7 +11,30 @@ type Props = {
 };
 
 export default async function CreateStoreVote({ storeType }: Props) {
-  const session = await getSessionFromRequestHeaders();
+  const mainEventId = process.env.MAIN_EVENT_ID;
+  if (!mainEventId) {
+    return <NotFoundPrompt context="メインイベント" />;
+  }
+
+  // セッション取得と店舗リストの取得を並列化
+  const dbPromise = getDb().then((db) =>
+    db
+      .select()
+      .from(stores)
+      .where(
+        and(
+          eq(stores.eventId, mainEventId),
+          eq(stores.canVoted, true),
+          eq(stores.storeType, storeType),
+        ),
+      ),
+  );
+
+  const [session, storeRows] = await Promise.all([
+    getSessionFromRequestHeaders(),
+    dbPromise,
+  ]);
+
   const user = session?.user;
   if (!user) {
     return <CreateAnonymousUser />;
@@ -19,22 +42,7 @@ export default async function CreateStoreVote({ storeType }: Props) {
   if (user.isAnonymous === false) {
     return <p>管理者やスタッフは投票することはできません。</p>;
   }
-  const mainEventId = process.env.MAIN_EVENT_ID;
-  if (!mainEventId) {
-    return <NotFoundPrompt context="メインイベント" />;
-  }
 
-  const db = await getDb();
-  const storeRows = await db
-    .select()
-    .from(stores)
-    .where(
-      and(
-        eq(stores.eventId, mainEventId),
-        eq(stores.canVoted, true),
-        eq(stores.storeType, storeType),
-      ),
-    );
   if (storeRows.length === 0) {
     return <NotFoundPrompt context="店舗" />;
   }

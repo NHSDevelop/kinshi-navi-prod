@@ -10,18 +10,20 @@ import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import { requireSuperAdminUser } from "@/lib/auth-guard";
 
 export default async function SuperAdminHomePage() {
-  await requireSuperAdminUser();
-
   const db = await getDb();
 
-  const eventRows = await db
-    .select({
-      id: events.id,
-      name: events.name,
-      isActive: events.isActive,
-      isMain: events.isMain,
-    })
-    .from(events);
+  const [_, eventRows] = await Promise.all([
+    requireSuperAdminUser(),
+    db
+      .select({
+        id: events.id,
+        name: events.name,
+        isActive: events.isActive,
+        isMain: events.isMain,
+      })
+      .from(events),
+  ]);
+
   return (
     <DashboardPageShell
       title="システムの管理"

@@ -10,15 +10,17 @@ export default async function CreateFoodItemPage(props: {
   params: Promise<{ store_id: string }>;
 }) {
   const { store_id } = await props.params;
-  await requireStoreAdminUser(store_id);
 
   const db = await getDb();
 
-  const foodRows = await db
-    .select({ id: foods.id, storeId: foods.storeId })
-    .from(foods)
-    .where(eq(foods.storeId, store_id))
-    .limit(1);
+  const [_, foodRows] = await Promise.all([
+    requireStoreAdminUser(store_id),
+    db
+      .select({ id: foods.id, storeId: foods.storeId })
+      .from(foods)
+      .where(eq(foods.storeId, store_id))
+      .limit(1),
+  ]);
 
   return (
     <div className="space-y-4 lg:space-y-8">

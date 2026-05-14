@@ -58,7 +58,7 @@ export default async function StoreInfo({
           />
         ) : (
           <Image
-            src="/images/default-image.png"
+            src="/images/default-image.webp"
             alt={`デフォルト画像`}
             width={160}
             height={220}

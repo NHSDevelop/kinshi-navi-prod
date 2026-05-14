@@ -66,8 +66,6 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
-  keywords:
-    "文化祭, イベント, 学園祭, 学校, 高校, 中学校, アプリ, Web, サービス, Webアプリ, 無料, 管理, チケット, 整理券, レジ, 会計",
 };
 
 export const viewport: Viewport = {

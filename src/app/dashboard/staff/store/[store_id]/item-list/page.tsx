@@ -13,14 +13,18 @@ export default async function ItemListPage(props: {
   params: Promise<{ store_id: string }>;
 }) {
   const { store_id } = await props.params;
-  await requireStaffOrManageStoreUser(store_id);
 
   const db = await getDb();
-  const foodRows = await db
-    .select({ id: foods.id })
-    .from(foods)
-    .where(eq(foods.storeId, store_id))
-    .limit(1);
+
+  const [_, foodRows] = await Promise.all([
+    requireStaffOrManageStoreUser(store_id),
+    db
+      .select({ id: foods.id })
+      .from(foods)
+      .where(eq(foods.storeId, store_id))
+      .limit(1),
+  ]);
+
   if (foodRows.length === 0) {
     return <NotFoundPrompt context="該当する模擬店" />;
   }

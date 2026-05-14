@@ -10,14 +10,22 @@ export default async function StaffIssueTicketPage(props: {
   params: Promise<{ store_id: string }>;
 }) {
   const { store_id } = await props.params;
-  await requireStaffOrManageStoreUser(store_id);
+
   const db = await getDb();
 
-  const storeRows = await db
-    .select({ eventId: stores.eventId })
-    .from(stores)
-    .where(eq(stores.id, store_id))
-    .limit(1);
+  const [_, storeRows, attractionRows] = await Promise.all([
+    requireStaffOrManageStoreUser(store_id),
+    db
+      .select({ eventId: stores.eventId })
+      .from(stores)
+      .where(eq(stores.id, store_id))
+      .limit(1),
+    db
+      .select()
+      .from(attractions)
+      .where(eq(attractions.storeId, store_id))
+      .limit(1),
+  ]);
 
   if (storeRows.length === 0) {
     return <NotFoundPrompt context="ユーザー" />;

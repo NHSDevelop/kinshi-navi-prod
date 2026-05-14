@@ -31,31 +31,28 @@ export default async function AdminEventPage(props: {
   await requireEventAdminUser(event_id);
 
   const db = await getDb();
-  const eventRows = await db
-    .select()
-    .from(events)
-    .where(eq(events.id, event_id))
-    .limit(1);
+
+  const [eventRows, storeRows, adminRows] = await Promise.all([
+    db.select().from(events).where(eq(events.id, event_id)).limit(1),
+    db
+      .select({ id: stores.id, name: stores.name, storeType: stores.storeType })
+      .from(stores)
+      .where(eq(stores.eventId, event_id)),
+    db
+      .select({
+        id: admins.id,
+        name: users.name,
+        userId: admins.userId,
+        role: admins.role,
+      })
+      .from(admins)
+      .innerJoin(users, eq(users.id, admins.userId))
+      .where(and(eq(admins.eventId, event_id), eq(admins.role, "EVENT_ADMIN"))),
+  ]);
 
   if (!eventRows[0]) {
     notFound();
   }
-
-  const storeRows = await db
-    .select({ id: stores.id, name: stores.name, storeType: stores.storeType })
-    .from(stores)
-    .where(eq(stores.eventId, event_id));
-
-  const adminRows = await db
-    .select({
-      id: admins.id,
-      name: users.name,
-      userId: admins.userId,
-      role: admins.role,
-    })
-    .from(admins)
-    .innerJoin(users, eq(users.id, admins.userId))
-    .where(and(eq(admins.eventId, event_id), eq(admins.role, "EVENT_ADMIN")));
 
   //TODO ToActiveEventの時にInfoが変化しないのを修正する
 

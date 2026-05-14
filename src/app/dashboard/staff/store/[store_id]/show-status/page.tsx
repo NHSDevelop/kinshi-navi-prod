@@ -13,13 +13,18 @@ export default async function ShowAttractionStatusPage(props: {
   params: Promise<{ store_id: string }>;
 }) {
   const { store_id } = await props.params;
-  await requireStaffOrManageStoreUser(store_id);
+
   const db = await getDb();
-  const attractionRows = await db
-    .select()
-    .from(attractions)
-    .where(eq(attractions.storeId, store_id))
-    .limit(1);
+
+  const [_, attractionRows] = await Promise.all([
+    requireStaffOrManageStoreUser(store_id),
+    db
+      .select()
+      .from(attractions)
+      .where(eq(attractions.storeId, store_id))
+      .limit(1),
+  ]);
+
   const attraction = attractionRows[0];
   if (!attraction) {
     return <NotFoundPrompt context="該当する企画" />;
