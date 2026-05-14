@@ -4,6 +4,7 @@ import { canSuperAdmin, getAuthenticatedUser } from "@/lib/auth-guard";
 import { getDb } from "@/lib/db/drizzle";
 import { systemInfos } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 import z from "zod";
 
 const systemInfoInputSchema = z.object({
@@ -29,6 +30,13 @@ export type UpdateSystemInfoState = {
   message?: string | null;
   error?: string | null;
 };
+
+function revaliedateSystemInfoPages(systemInfoId?: string) {
+  revalidatePath(`/`);
+  if (systemInfoId) {
+    revalidatePath(`/system-info/${systemInfoId}/`);
+  }
+}
 
 export async function createSystemInfo(prevState: unknown, formData: FormData) {
   try {
@@ -67,6 +75,8 @@ export async function createSystemInfo(prevState: unknown, formData: FormData) {
       title: title,
       meta: meta,
     });
+    revaliedateSystemInfoPages();
+
     return {
       success: true,
       message: "システムのお知らせの作成が完了しました",
@@ -132,6 +142,8 @@ export async function updateSystemInfo(
         meta,
       })
       .where(eq(systemInfos.id, systemInfoId));
+
+    revaliedateSystemInfoPages(systemInfoId);
 
     return {
       zodErrors: null,

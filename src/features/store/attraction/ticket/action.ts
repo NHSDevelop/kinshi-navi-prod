@@ -13,6 +13,7 @@ import {
 import { and, asc, eq, gt, inArray, lte, sql } from "drizzle-orm";
 import { sendPushNotification } from "@/features/push/action";
 import { getDb } from "@/lib/db/drizzle";
+import { revalidatePath } from "next/cache";
 
 const RegisterSchema = z.object({
   numberOfPeople: z.coerce
@@ -65,6 +66,16 @@ async function canManageAttraction(attractionId: string) {
 
   const allowed = await canStaffOrManageStore(user.id, storeId);
   return allowed ? { user, storeId } : null;
+}
+
+function invalidateTicketPages(storeId: string) {
+  revalidatePath(`/dashboard/staff/store/${storeId}`);
+  revalidatePath(`/dashboard/staff/store/${storeId}/call-ticket`);
+  revalidatePath(`/dashboard/staff/store/${storeId}/complete-ticket`);
+  revalidatePath(`/dashboard/staff/store/${storeId}/ticket-list`);
+  revalidatePath(`/dashboard/staff/store/${storeId}/show-status`);
+  revalidatePath(`/dashboard/admin/store/${storeId}`);
+  revalidatePath("/attraction/waiting-status");
 }
 
 export async function createTicket(
@@ -149,6 +160,8 @@ export async function createTicket(
       userId: user.id,
       isPaper: isPaper,
     });
+
+    invalidateTicketPages(storeId);
 
     return {
       zodErrors: null,
@@ -256,6 +269,8 @@ export async function callFirstTicket(
       .set({ status: "CALLED" })
       .where(inArray(tickets.id, ids));
 
+    invalidateTicketPages(access.storeId);
+
     const digitalTickets = issuedTickets.filter((ticket) => !ticket.isPaper);
     const userIds = Array.from(
       new Set(digitalTickets.map((ticket) => ticket.userId)),
@@ -361,6 +376,8 @@ export async function completeTicket(ticketId: string) {
         ),
       );
 
+    invalidateTicketPages(storeId);
+
     return {
       success: true,
       message: "操作が完了しました。",
@@ -409,6 +426,9 @@ export async function cancelTicket(ticketId: string) {
       .update(tickets)
       .set({ status: "CANCELED" })
       .where(eq(tickets.id, ticketId));
+
+    invalidateTicketPages(storeId);
+
     return {
       success: true,
       message: "操作が完了しました。",
@@ -533,6 +553,8 @@ export async function completePaperTicket(
           lte(tickets.index, fetchedTicket.index + 3),
         ),
       );
+
+    invalidateTicketPages(storeId);
 
     return {
       success: true,

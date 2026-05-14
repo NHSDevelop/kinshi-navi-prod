@@ -1,9 +1,37 @@
 "use server";
 
-import { registerLogs, stockLogs, items, registerLanes } from "@/lib/db/schema";
+import {
+  registerLogs,
+  stockLogs,
+  items,
+  registerLanes,
+  foods,
+} from "@/lib/db/schema";
 import z from "zod";
 import { getDb } from "@/lib/db/drizzle";
 import { eq, inArray, sql } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+
+function invalidateRegisterPages(storeId: string) {
+  revalidatePath(`/dashboard/staff/store/${storeId}`);
+  revalidatePath(`/dashboard/staff/store/${storeId}/register`);
+  revalidatePath(`/dashboard/staff/store/${storeId}/register-log-history`);
+  revalidatePath(`/dashboard/staff/store/${storeId}/stock-log-history`);
+  revalidatePath(`/dashboard/staff/store/${storeId}/item-list`);
+  revalidatePath(`/dashboard/admin/store/${storeId}`);
+  revalidatePath("/food/stock-status");
+}
+
+async function getStoreIdByFoodId(foodId: string) {
+  const db = await getDb();
+  const foodRows = await db
+    .select({ storeId: foods.storeId })
+    .from(foods)
+    .where(eq(foods.id, foodId))
+    .limit(1);
+
+  return foodRows[0]?.storeId ?? null;
+}
 
 const CreateRegisterLogSchema = z.object({
   foodId: z.string().min(1, "必須項目です"),
@@ -123,6 +151,11 @@ export async function createRegisterLog(
       meta,
       laneId,
     });
+
+    const storeId = await getStoreIdByFoodId(foodId);
+    if (storeId) {
+      invalidateRegisterPages(storeId);
+    }
 
     return {
       foodId: "",
@@ -255,6 +288,11 @@ export async function processRegisterAndStock(
       laneId,
       meta: `販売${Object.values(quantitiesToRecord).reduce((a, b) => a + b, 0)}個`,
     });
+
+    const storeId = await getStoreIdByFoodId(foodId);
+    if (storeId) {
+      invalidateRegisterPages(storeId);
+    }
 
     return {
       quantities: {},

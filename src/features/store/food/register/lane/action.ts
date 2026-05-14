@@ -5,6 +5,11 @@ import { registerLanes } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 import z from "zod";
+import { revalidatePath } from "next/cache";
+
+function invalidateRegisterLanePages(eventId: string) {
+  revalidatePath(`/dashboard/admin/event/${eventId}`);
+}
 
 const createRegisterLaneSchema = z.object({
   eventId: z.string().min(1, "必須項目です"),
@@ -80,6 +85,8 @@ export async function createRegisterLane(
 
     await db.insert(registerLanes).values(values);
 
+    invalidateRegisterLanePages(eventId);
+
     return {
       eventId,
       laneCount: "",
@@ -140,6 +147,16 @@ export async function assignRegisterLaneToFood(
       .set({ foodId })
       .where(eq(registerLanes.id, laneId));
 
+    const laneWithEventRows = await db
+      .select({ eventId: registerLanes.eventId })
+      .from(registerLanes)
+      .where(eq(registerLanes.id, laneId))
+      .limit(1);
+    const eventId = laneWithEventRows[0]?.eventId;
+    if (eventId) {
+      invalidateRegisterLanePages(eventId);
+    }
+
     return {
       message: "模擬店を紐づけました。",
       success: true,
@@ -187,6 +204,8 @@ export async function toggleRegisterLaneActive(
       .set({ isActive: !lane.isActive })
       .where(eq(registerLanes.id, laneId));
 
+    invalidateRegisterLanePages(lane.eventId);
+
     return {
       message: "レーン状態を更新しました。",
       success: true,
@@ -216,7 +235,7 @@ export async function deleteRegisterLane(
   try {
     const db = await getDb();
     const laneRows = await db
-      .select({ id: registerLanes.id })
+      .select({ id: registerLanes.id, eventId: registerLanes.eventId })
       .from(registerLanes)
       .where(eq(registerLanes.id, laneId))
       .limit(1);
@@ -229,6 +248,8 @@ export async function deleteRegisterLane(
     }
 
     await db.delete(registerLanes).where(eq(registerLanes.id, laneId));
+
+    invalidateRegisterLanePages(laneRows[0].eventId);
 
     return {
       message: "レーンを削除しました。",
