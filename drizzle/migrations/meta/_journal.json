@@ -162,6 +162,13 @@
       "when": 1778412874836,
       "tag": "0022_empty_sauron",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "6",
+      "when": 1779110459925,
+      "tag": "0023_soft_kid_colt",
+      "breakpoints": true
     }
   ]
 }

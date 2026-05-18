@@ -293,9 +293,7 @@ export const registerLogs = sqliteTable("register_logs", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => createId()),
-  laneId: text("laneId")
-    .notNull()
-    .references(() => registerLanes.id),
+  laneId: text("laneId").references(() => registerLanes.id),
   foodId: text("foodId")
     .notNull()
     .references(() => foods.id),
