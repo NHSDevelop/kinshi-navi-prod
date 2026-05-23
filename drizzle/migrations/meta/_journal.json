@@ -169,6 +169,13 @@
       "when": 1779110459925,
       "tag": "0023_soft_kid_colt",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "6",
+      "when": 1779532459574,
+      "tag": "0024_wandering_pepper_potts",
+      "breakpoints": true
     }
   ]
 }

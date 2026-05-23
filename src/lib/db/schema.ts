@@ -122,6 +122,7 @@ export const stores = sqliteTable("stores", {
   slug: text("slug").notNull(),
   name: text("name").notNull(),
   imageUrl: text("imageUrl"),
+  apparanceImageUrl: text("apparace_image_url"),
   isActive: integer("isActive", { mode: "boolean" }).notNull().default(false),
   startedAtDate: integer("startedAtDate", { mode: "timestamp_ms" }),
   startedAtTime: text("startedAtTime"),

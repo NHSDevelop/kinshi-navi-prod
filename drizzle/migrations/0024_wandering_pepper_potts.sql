@@ -1,0 +1,1 @@
+ALTER TABLE `stores` ADD `apparace_image_url` text;
