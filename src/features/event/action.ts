@@ -11,10 +11,20 @@ const MAIN_EVENT_CACHE_TAG = "main-event";
 
 export type ZodErrors = {
   name?: string[];
+  startedAtDate?: string[];
+  startedAtTime?: string[];
+  finishedAtDate?: string[];
+  finishedAtTime?: string[];
+  description?: string[];
 } | null;
 
 export type EventState = {
   name?: string;
+  startedAtDate?: string;
+  startedAtTime?: string;
+  finishedAtDate?: string;
+  finishedAtTime?: string;
+  description?: string;
   zodErrors?: ZodErrors;
   message?: string | null;
   success?: boolean;
@@ -44,6 +54,17 @@ export type UpdateEventConfigState = {
 
 const CreateEventSchema = z.object({
   name: z.string().min(1, "必須項目です"),
+  startedAtDate: z.date().nullable(),
+  startedAtTime: z
+    .string()
+    .regex(/^\d{2}:\d{2}$/, "HH:mm形式で入力してください")
+    .nullable(),
+  finishedAtDate: z.date().nullable(),
+  finishedAtTime: z
+    .string()
+    .regex(/^\d{2}:\d{2}$/, "HH:mm形式で入力してください")
+    .nullable(),
+  description: z.string().nullable(),
 });
 
 export async function createEvent(
@@ -68,26 +89,56 @@ export async function createEvent(
       };
     }
 
-    const name = formData.get("name") as string;
-
     const validationResult = CreateEventSchema.safeParse({
-      name,
+      name: formData.get("name"),
+      startedAtDate: formData.get("startedAtDate")
+        ? new Date(formData.get("startedAtDate") as string)
+        : null,
+      startedAtTime: formData.get("startedAtTime")
+        ? (formData.get("startedAtTime") as string)
+        : null,
+      finishedAtDate: formData.get("finishedAtDate")
+        ? new Date(formData.get("finishedAtDate") as string)
+        : null,
+      finishedAtTime: formData.get("finishedAtTime")
+        ? (formData.get("finishedAtTime") as string)
+        : null,
+      description: formData.get("description")
+        ? (formData.get("description") as string)
+        : null,
     });
 
     if (!validationResult.success) {
       return {
-        name,
+        name: (formData.get("name") as string) || "",
+        startedAtDate: (formData.get("startedAtDate") as string) || "",
+        startedAtTime: (formData.get("startedAtTime") as string) || "",
+        finishedAtDate: (formData.get("finishedAtDate") as string) || "",
+        finishedAtTime: (formData.get("finishedAtTime") as string) || "",
+        description: (formData.get("description") as string) || "",
         zodErrors: validationResult.error.flatten().fieldErrors,
         message: "入力形式が正しくありません。",
         success: false,
       };
     }
 
-    const { name: validatedName } = validationResult.data;
+    const {
+      name: validatedName,
+      startedAtDate,
+      startedAtTime,
+      finishedAtDate,
+      finishedAtTime,
+      description,
+    } = validationResult.data;
     const db = await getDb();
 
     await db.insert(events).values({
       name: validatedName,
+      startedAtDate: startedAtDate,
+      startedAtTime: startedAtTime,
+      finishedAtDate: finishedAtDate,
+      finishedAtTime: finishedAtTime,
+      description: description,
     });
 
     revalidateTag(MAIN_EVENT_CACHE_TAG, "max");

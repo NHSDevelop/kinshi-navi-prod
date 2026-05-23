@@ -15,6 +15,7 @@ import {
   stores,
   stockLogs,
   tickets,
+  storeTypeValues,
   type StoreType,
 } from "@/lib/db/schema";
 import { FormState } from "@/lib/type";
@@ -26,12 +27,29 @@ import { unstable_cache, revalidatePath } from "next/cache";
 export type ZodErrors = {
   slug?: string[];
   name?: string[];
+  storeType?: string[];
+  imageUrl?: string[];
+  apparanceImageUrl?: string[];
+  startedAtDate?: string[];
+  startedAtTime?: string[];
+  finishedAtDate?: string[];
+  finishedAtTime?: string[];
+  description?: string[];
+  canVoted?: string[];
 } | null;
 
 export type StoreState = {
   slug?: string;
   name?: string;
   storeType?: string;
+  imageUrl?: string;
+  apparanceImageUrl?: string;
+  startedAtDate?: string;
+  startedAtTime?: string;
+  finishedAtDate?: string;
+  finishedAtTime?: string;
+  description?: string;
+  canVoted?: boolean;
   zodErrors: ZodErrors;
   message?: string | null;
   success?: boolean;
@@ -82,9 +100,29 @@ export type UpdateStoreConfigState = {
   success?: boolean;
 };
 
-const RegisterSchema = z.object({
+const CreateStoreSchema = z.object({
   slug: slugSchema,
   name: z.string().min(1, "必須項目です"),
+  storeType: z.enum(storeTypeValues),
+  imageUrl: z.string().url("画像URLの形式が正しくありません").nullable(),
+  apparanceImageUrl: z
+    .string()
+    .url("画像URLの形式が正しくありません")
+    .nullable(),
+  startedAtDate: z.date().nullable(),
+  startedAtTime: z
+    .string()
+    .regex(/^\d{2}:\d{2}$/, "HH:mm形式で入力してください")
+    .nullable(),
+  finishedAtDate: z.date().nullable(),
+  finishedAtTime: z
+    .string()
+    .regex(/^\d{2}:\d{2}$/, "HH:mm形式で入力してください")
+    .nullable(),
+  description: z.string().nullable(),
+  canVoted: z
+    .enum(["true", "false"])
+    .transform((val: "true" | "false") => val === "true"),
 });
 
 export async function createStore(
@@ -100,23 +138,66 @@ export async function createStore(
     };
   }
 
-  const validationResult = RegisterSchema.safeParse({
+  const validationResult = CreateStoreSchema.safeParse({
     slug: formData.get("slug"),
     name: formData.get("name"),
+    storeType: formData.get("storeType"),
+    imageUrl: formData.get("imageUrl")
+      ? (formData.get("imageUrl") as string)
+      : null,
+    apparanceImageUrl: formData.get("apparanceImageUrl")
+      ? (formData.get("apparanceImageUrl") as string)
+      : null,
+    startedAtDate: formData.get("startedAtDate")
+      ? new Date(formData.get("startedAtDate") as string)
+      : null,
+    startedAtTime: formData.get("startedAtTime")
+      ? (formData.get("startedAtTime") as string)
+      : null,
+    finishedAtDate: formData.get("finishedAtDate")
+      ? new Date(formData.get("finishedAtDate") as string)
+      : null,
+    finishedAtTime: formData.get("finishedAtTime")
+      ? (formData.get("finishedAtTime") as string)
+      : null,
+    description: formData.get("description")
+      ? (formData.get("description") as string)
+      : null,
+    canVoted: formData.get("canVoted") as string,
   });
 
   if (!validationResult.success) {
     return {
       slug: (formData.get("slug") as string) || "",
       name: (formData.get("name") as string) || "",
+      storeType: (formData.get("storeType") as string) || "",
+      imageUrl: (formData.get("imageUrl") as string) || "",
+      apparanceImageUrl: (formData.get("apparanceImageUrl") as string) || "",
+      startedAtDate: (formData.get("startedAtDate") as string) || "",
+      startedAtTime: (formData.get("startedAtTime") as string) || "",
+      finishedAtDate: (formData.get("finishedAtDate") as string) || "",
+      finishedAtTime: (formData.get("finishedAtTime") as string) || "",
+      description: (formData.get("description") as string) || "",
+      canVoted: (formData.get("canVoted") as string) === "true",
       zodErrors: validationResult.error.flatten().fieldErrors,
       message: "入力形式が正しくありません",
       success: false,
     };
   }
 
-  const { slug, name } = validationResult.data;
-  const storeType = formData.get("storeType") as StoreType;
+  const {
+    slug,
+    name,
+    storeType,
+    imageUrl,
+    apparanceImageUrl,
+    startedAtDate,
+    startedAtTime,
+    finishedAtDate,
+    finishedAtTime,
+    description,
+    canVoted,
+  } = validationResult.data;
   const eventId = formData.get("eventId") as string;
   if (!(await canManageEvent(user.id, eventId))) {
     return {
@@ -148,6 +229,14 @@ export async function createStore(
         name: name,
         storeType: storeType,
         eventId: eventId,
+        imageUrl: imageUrl,
+        apparanceImageUrl: apparanceImageUrl,
+        startedAtDate: startedAtDate,
+        startedAtTime: startedAtTime,
+        finishedAtDate: finishedAtDate,
+        finishedAtTime: finishedAtTime,
+        description: description,
+        canVoted: canVoted,
       })
       .returning({
         id: stores.id,
