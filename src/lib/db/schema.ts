@@ -32,6 +32,10 @@ export const inviteTargetRoleValues = [
 ] as const;
 export type InviteTargetRole = (typeof inviteTargetRoleValues)[number];
 
+export const foodTagValues = ["CLASS_BOOTH", "CONCIL_BOOTH", "OTHER"] as const;
+
+export type FoodTag = (typeof foodTagValues)[number];
+
 export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
   name: text("name"),
@@ -118,6 +122,7 @@ export const stores = sqliteTable("stores", {
   slug: text("slug").notNull(),
   name: text("name").notNull(),
   imageUrl: text("imageUrl"),
+  apparanceImageUrl: text("apparace_image_url"),
   isActive: integer("isActive", { mode: "boolean" }).notNull().default(false),
   startedAtDate: integer("startedAtDate", { mode: "timestamp_ms" }),
   startedAtTime: text("startedAtTime"),
@@ -130,6 +135,7 @@ export const stores = sqliteTable("stores", {
   eventId: text("eventId")
     .references(() => events.id)
     .notNull(),
+  canVoted: integer("can_voted", { mode: "boolean" }).notNull().default(true),
   createdAt: integer("createdAt", { mode: "timestamp_ms" })
     .notNull()
     .$defaultFn(() => new Date()),
@@ -170,6 +176,7 @@ export const foods = sqliteTable("foods", {
     .notNull()
     .unique()
     .references(() => stores.id, { onDelete: "cascade" }),
+  tag: text("tag", { enum: foodTagValues }).default("OTHER"),
   createdAt: integer("createdAt", { mode: "timestamp_ms" })
     .notNull()
     .$defaultFn(() => new Date()),
@@ -287,9 +294,7 @@ export const registerLogs = sqliteTable("register_logs", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => createId()),
-  laneId: text("laneId")
-    .notNull()
-    .references(() => registerLanes.id),
+  laneId: text("laneId").references(() => registerLanes.id),
   foodId: text("foodId")
     .notNull()
     .references(() => foods.id),
@@ -424,6 +429,31 @@ export const systemInfos = sqliteTable("system_infos", {
 });
 
 export type SystemInfo = typeof systemInfos.$inferSelect;
+
+export const pdfDocuments = sqliteTable("pdf_documents", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => createId()),
+  title: text("title").notNull(),
+  description: text("description"),
+  fileUrl: text("fileUrl").notNull(),
+  fileKey: text("fileKey").notNull().unique(),
+  fileName: text("fileName").notNull(),
+  mimeType: text("mimeType").notNull(),
+  fileSize: integer("fileSize").notNull(),
+  isPublished: integer("isPublished", { mode: "boolean" })
+    .notNull()
+    .default(true),
+  createdAt: integer("createdAt", { mode: "timestamp_ms" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer("updatedAt", { mode: "timestamp_ms" })
+    .notNull()
+    .$defaultFn(() => new Date())
+    .$onUpdateFn(() => new Date()),
+});
+
+export type PdfDocument = typeof pdfDocuments.$inferSelect;
 
 export const storeVotes = sqliteTable(
   "store_votes",

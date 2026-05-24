@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { getSessionFromRequestHeaders } from "@/lib/auth-session";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
+import { Suspense } from "react";
+import { LoadingPrompt } from "@/components/prompt/loading-prompt";
 
 export default async function UserPage() {
   const session = await getSessionFromRequestHeaders();
@@ -23,7 +25,11 @@ export default async function UserPage() {
             <CardTitle>ユーザーログイン</CardTitle>
           </CardHeader>
           <CardContent>
-            <CreateAnonymousUser />
+            <Suspense
+              fallback={<LoadingPrompt context="ゲストユーザーの作成画面" />}
+            >
+              <CreateAnonymousUser />
+            </Suspense>
           </CardContent>
         </Card>
       </DashboardPageShell>

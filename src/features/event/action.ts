@@ -1,5 +1,6 @@
 "use server";
 
+import { canSuperAdmin, getAuthenticatedUser } from "@/lib/auth-guard";
 import { getDb } from "@/lib/db/drizzle";
 import { admins, Event, events, stores } from "@/lib/db/schema";
 import z from "zod";
@@ -10,10 +11,20 @@ const MAIN_EVENT_CACHE_TAG = "main-event";
 
 export type ZodErrors = {
   name?: string[];
+  startedAtDate?: string[];
+  startedAtTime?: string[];
+  finishedAtDate?: string[];
+  finishedAtTime?: string[];
+  description?: string[];
 } | null;
 
 export type EventState = {
   name?: string;
+  startedAtDate?: string;
+  startedAtTime?: string;
+  finishedAtDate?: string;
+  finishedAtTime?: string;
+  description?: string;
   zodErrors?: ZodErrors;
   message?: string | null;
   success?: boolean;
@@ -43,6 +54,17 @@ export type UpdateEventConfigState = {
 
 const CreateEventSchema = z.object({
   name: z.string().min(1, "必須項目です"),
+  startedAtDate: z.date().nullable(),
+  startedAtTime: z
+    .string()
+    .regex(/^\d{2}:\d{2}$/, "HH:mm形式で入力してください")
+    .nullable(),
+  finishedAtDate: z.date().nullable(),
+  finishedAtTime: z
+    .string()
+    .regex(/^\d{2}:\d{2}$/, "HH:mm形式で入力してください")
+    .nullable(),
+  description: z.string().nullable(),
 });
 
 export async function createEvent(
@@ -50,26 +72,73 @@ export async function createEvent(
   formData: FormData,
 ): Promise<EventState> {
   try {
-    const name = formData.get("name") as string;
+    const user = await getAuthenticatedUser();
+    if (!user) {
+      return {
+        zodErrors: null,
+        message: "ログインが必要です。",
+        success: false,
+      };
+    }
+
+    if (!(await canSuperAdmin(user.id))) {
+      return {
+        zodErrors: null,
+        message: "権限がありません。",
+        success: false,
+      };
+    }
 
     const validationResult = CreateEventSchema.safeParse({
-      name,
+      name: formData.get("name"),
+      startedAtDate: formData.get("startedAtDate")
+        ? new Date(formData.get("startedAtDate") as string)
+        : null,
+      startedAtTime: formData.get("startedAtTime")
+        ? (formData.get("startedAtTime") as string)
+        : null,
+      finishedAtDate: formData.get("finishedAtDate")
+        ? new Date(formData.get("finishedAtDate") as string)
+        : null,
+      finishedAtTime: formData.get("finishedAtTime")
+        ? (formData.get("finishedAtTime") as string)
+        : null,
+      description: formData.get("description")
+        ? (formData.get("description") as string)
+        : null,
     });
 
     if (!validationResult.success) {
       return {
-        name,
+        name: (formData.get("name") as string) || "",
+        startedAtDate: (formData.get("startedAtDate") as string) || "",
+        startedAtTime: (formData.get("startedAtTime") as string) || "",
+        finishedAtDate: (formData.get("finishedAtDate") as string) || "",
+        finishedAtTime: (formData.get("finishedAtTime") as string) || "",
+        description: (formData.get("description") as string) || "",
         zodErrors: validationResult.error.flatten().fieldErrors,
         message: "入力形式が正しくありません。",
         success: false,
       };
     }
 
-    const { name: validatedName } = validationResult.data;
+    const {
+      name: validatedName,
+      startedAtDate,
+      startedAtTime,
+      finishedAtDate,
+      finishedAtTime,
+      description,
+    } = validationResult.data;
     const db = await getDb();
 
     await db.insert(events).values({
       name: validatedName,
+      startedAtDate: startedAtDate,
+      startedAtTime: startedAtTime,
+      finishedAtDate: finishedAtDate,
+      finishedAtTime: finishedAtTime,
+      description: description,
     });
 
     revalidateTag(MAIN_EVENT_CACHE_TAG, "max");
@@ -140,6 +209,15 @@ export async function updateEventConfig(
       error: "入力形式が正しくありません",
     };
   }
+  const user = await getAuthenticatedUser();
+  if (!user) {
+    return {
+      zodErrors: null,
+      success: false,
+      message: "ログインが必要です。",
+      error: "権限がありません",
+    };
+  }
   const {
     name,
     startedAtDate,
@@ -150,6 +228,15 @@ export async function updateEventConfig(
   } = validationResult.data;
 
   const eventId = formData.get("eventId") as string;
+  if (!(await canSuperAdmin(user.id))) {
+    return {
+      zodErrors: null,
+      success: false,
+      message: "権限がありません。",
+      error: "権限がありません",
+    };
+  }
+
   const db = await getDb();
   try {
     await db
@@ -185,6 +272,21 @@ export async function updateEventConfig(
 
 export async function toActiveEvent(prevState: unknown, formData: FormData) {
   try {
+    const user = await getAuthenticatedUser();
+    if (!user) {
+      return {
+        success: false,
+        message: "ログインが必要です。",
+      };
+    }
+
+    if (!(await canSuperAdmin(user.id))) {
+      return {
+        success: false,
+        message: "権限がありません。",
+      };
+    }
+
     const db = await getDb();
     const eventId = formData.get("eventId") as string;
     const eventRows = await db

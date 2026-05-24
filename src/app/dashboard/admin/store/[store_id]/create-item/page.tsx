@@ -3,6 +3,7 @@ import { getDb } from "@/lib/db/drizzle";
 import { foods } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { Separator } from "@/components/ui/separator";
+import { requireStoreAdminUser } from "@/lib/auth-guard";
 // Item情報は1日に1回程度変わるため、ISR 1時間でキャッシュ
 export const revalidate = 3600;
 export default async function CreateFoodItemPage(props: {
@@ -12,11 +13,14 @@ export default async function CreateFoodItemPage(props: {
 
   const db = await getDb();
 
-  const foodRows = await db
-    .select({ id: foods.id, storeId: foods.storeId })
-    .from(foods)
-    .where(eq(foods.storeId, store_id))
-    .limit(1);
+  const [_, foodRows] = await Promise.all([
+    requireStoreAdminUser(store_id),
+    db
+      .select({ id: foods.id, storeId: foods.storeId })
+      .from(foods)
+      .where(eq(foods.storeId, store_id))
+      .limit(1),
+  ]);
 
   return (
     <div className="space-y-4 lg:space-y-8">

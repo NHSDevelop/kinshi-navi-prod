@@ -4,13 +4,6 @@
 import { useState, useEffect, useRef } from "react";
 import { getUserSubscription, subscribeUser, unsubscribeUser } from "./action";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -25,13 +18,7 @@ function urlBase64ToUint8Array(base64String: string) {
   return outputArray;
 }
 
-interface PushNotificationManagerProps {
-  userId: string;
-}
-
-export function PushNotificationManager({
-  userId,
-}: PushNotificationManagerProps) {
+export function PushNotificationManager() {
   const [isSupported, setIsSupported] = useState(false);
   const [subscription, setSubscription] = useState<PushSubscription | null>(
     null,
@@ -60,7 +47,7 @@ export function PushNotificationManager({
       const client_sub = await registration.pushManager.getSubscription();
 
       if (client_sub) {
-        const db_sub = await getUserSubscription(userId);
+        const db_sub = await getUserSubscription();
         if (db_sub.length === 0) {
           await client_sub.unsubscribe();
           setSubscription(null);
@@ -103,7 +90,7 @@ export function PushNotificationManager({
       });
 
       const serializedSub = JSON.parse(JSON.stringify(sub));
-      await subscribeUser(serializedSub, userId);
+      await subscribeUser(serializedSub);
       setSubscription(sub);
     } catch (error) {
       console.error("購読エラー:", error);
@@ -116,7 +103,7 @@ export function PushNotificationManager({
     setIsLoading(true);
     try {
       await subscription?.unsubscribe();
-      await unsubscribeUser(userId);
+      await unsubscribeUser();
       setSubscription(null);
     } catch (error) {
       console.error("解除エラー:", error);
@@ -136,34 +123,30 @@ export function PushNotificationManager({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>プッシュ通知の購読設定</CardTitle>
-        <CardDescription>
-          プッシュ通知を有効にすると、チケットの呼び出しなどの情報をリアルタイムで受け取ることができます。
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4 lg:space-y-8">
-        {subscription ? (
-          <>
-            <p>状態：プッシュ通知が有効です。</p>
-            <Button
-              variant="warn"
-              onClick={unsubscribeFromPush}
-              disabled={isLoading}
-            >
-              {isLoading ? "処理中..." : "プッシュ通知を無効にする"}
-            </Button>
-          </>
-        ) : (
-          <>
-            <p>状態：プッシュ通知が無効です。</p>
-            <Button onClick={subscribeToPush} disabled={isLoading}>
-              {isLoading ? "処理中..." : "プッシュ通知を有効にする"}
-            </Button>
-          </>
-        )}
-      </CardContent>
-    </Card>
+    <div className="space-y-4 lg:space-y-8">
+      {subscription ? (
+        <>
+          <p>状態：プッシュ通知が有効です。</p>
+          <Button
+            variant="warn"
+            onClick={unsubscribeFromPush}
+            disabled={isLoading}
+          >
+            {isLoading ? "処理中..." : "プッシュ通知を無効にする"}
+          </Button>
+        </>
+      ) : (
+        <>
+          <p>状態：プッシュ通知が無効です。</p>
+          <Button
+            onClick={subscribeToPush}
+            disabled={isLoading}
+            variant="success"
+          >
+            {isLoading ? "処理中..." : "プッシュ通知を有効にする"}
+          </Button>
+        </>
+      )}
+    </div>
   );
 }

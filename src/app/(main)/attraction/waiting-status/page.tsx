@@ -1,5 +1,9 @@
 import AttractionWaitngStatus from "@/features/store/attraction/waitng-status";
 import { RoutePollingRefresh } from "@/components/polling/route-polling-refresh";
+import { Suspense } from "react";
+import { LoadingPrompt } from "@/components/prompt/loading-prompt";
+
+export const dynamic = "force-dynamic";
 
 export default async function AttractionWaitStatusPage() {
   const eventId = process.env.MAIN_EVENT_ID as string;
@@ -16,7 +20,9 @@ export default async function AttractionWaitStatusPage() {
         </p>
       </section>
       <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
-        <AttractionWaitngStatus eventId={eventId} />
+        <Suspense fallback={<LoadingPrompt context="待機状況" />}>
+          <AttractionWaitngStatus eventId={eventId} />
+        </Suspense>
       </section>
     </div>
   );

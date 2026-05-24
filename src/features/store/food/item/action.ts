@@ -12,16 +12,22 @@ const RegisterSchema = z.object({
     .number()
     .int("整数である必要があります")
     .min(1, "必須項目です"),
+  imageUrl: z.string().url("画像URLの形式が正しくありません").nullable(),
+  description: z.string().nullable(),
 });
 
 export type ZodErrors = {
   name?: string[];
   price?: string[];
+  imageUrl?: string[];
+  description?: string[];
 } | null;
 
 export type ItemState = {
   name?: string;
   price?: string;
+  imageUrl?: string;
+  description?: string;
   zodErrors: ZodErrors;
   message?: string | null;
   success?: boolean;
@@ -52,6 +58,12 @@ export async function createItem(
   const validationResult = RegisterSchema.safeParse({
     name: formData.get("name"),
     price: formData.get("price"),
+    imageUrl: formData.get("imageUrl")
+      ? (formData.get("imageUrl") as string)
+      : null,
+    description: formData.get("description")
+      ? (formData.get("description") as string)
+      : null,
   });
 
   const foodId = formData.get("foodId") as string;
@@ -60,13 +72,15 @@ export async function createItem(
     return {
       name: (formData.get("name") as string) || "",
       price: (formData.get("price") as string) || "",
+      imageUrl: (formData.get("imageUrl") as string) || "",
+      description: (formData.get("description") as string) || "",
       zodErrors: validationResult.error.flatten().fieldErrors,
       message: "入力形式が正しくありません",
       success: false,
     };
   }
 
-  const { name, price } = validationResult.data;
+  const { name, price, imageUrl, description } = validationResult.data;
 
   try {
     const db = await getDb();
@@ -89,6 +103,8 @@ export async function createItem(
       name: name,
       foodId: foodId,
       price: price,
+      imageUrl: imageUrl,
+      description: description,
     });
 
     const storeIdRows = await db

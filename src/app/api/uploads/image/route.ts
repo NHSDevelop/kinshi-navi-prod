@@ -1,4 +1,8 @@
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import {
+  canUseManagementActions,
+  getAuthenticatedUser,
+} from "@/lib/auth-guard";
 import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
 
@@ -7,6 +11,25 @@ const WEBP_QUALITY = 75;
 
 export async function POST(req: NextRequest) {
   try {
+    const user = await getAuthenticatedUser();
+    if (!user || user.isAnonymous) {
+      return NextResponse.json(
+        {
+          message: "ログインが必要です。",
+        },
+        { status: 401 },
+      );
+    }
+
+    if (!(await canUseManagementActions(user.id))) {
+      return NextResponse.json(
+        {
+          message: "権限がありません。",
+        },
+        { status: 403 },
+      );
+    }
+
     const formData = await req.formData();
     const imageFileData = formData.get("imageFileData");
 
@@ -15,6 +38,22 @@ export async function POST(req: NextRequest) {
         {
           message: "画像ファイルが見つかりません。",
         },
+        { status: 400 },
+      );
+    }
+
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    if (imageFileData.size > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        { message: "ファイルサイズが大きすぎます。5MB以下にしてください。" },
+        { status: 400 },
+      );
+    }
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (!allowedTypes.includes(imageFileData.type)) {
+      return NextResponse.json(
+        { message: "許可されていないファイル形式です。" },
         { status: 400 },
       );
     }
@@ -77,13 +116,11 @@ export async function POST(req: NextRequest) {
       url: mainUrl,
       srcset,
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error uploading file:", error);
     return NextResponse.json(
       {
         message: "アップロードに失敗しました。",
-        error: error.message,
       },
       { status: 500 },
     );

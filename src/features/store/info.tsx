@@ -9,9 +9,13 @@ import Image from "next/image";
 
 interface StoreInfoProps {
   storeId: string;
+  isShowCanVoted: boolean;
 }
 
-export default async function StoreInfo({ storeId }: StoreInfoProps) {
+export default async function StoreInfo({
+  storeId,
+  isShowCanVoted,
+}: StoreInfoProps) {
   const db = await getDb();
   const rows = await db
     .select()
@@ -42,28 +46,70 @@ export default async function StoreInfo({ storeId }: StoreInfoProps) {
       : "未設定";
 
   return (
-    <div className="flex flex-row items-center gap-4 md:gap-8">
-      <div className="shrink-0 self-center mr-4">
-        {store.imageUrl ? (
-          <Image
-            src={store.imageUrl}
-            alt={`${store.name}の画像`}
-            width={160}
-            height={220}
-            className="rounded-md border border-slate-200 object-contain"
-          />
-        ) : (
-          <Image
-            src="/images/default-image.png"
-            alt={`デフォルト画像`}
-            width={160}
-            height={220}
-            className="rounded-md border border-slate-200 object-contain"
-          />
-        )}
+    <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
+      <div className="block md:hidden">
+        <h3 className="text-lg font-semibold text-main-950">{store.name}</h3>
+        <div className="mt-2 flex flex-wrap gap-2">
+          <Badge>{storeType}</Badge>
+          {store.isActive ? (
+            <Badge variant="success" className="text-sm">
+              開催中
+            </Badge>
+          ) : (
+            <Badge variant="danger" className="text-sm">
+              停止中
+            </Badge>
+          )}
+        </div>
       </div>
-      <div className="flex min-w-0 flex-1 flex-col gap-4">
-        <div>
+      <div className="grid min-w-0 grid-cols-1 gap-4 justify-items-center sm:grid-cols-2 sm:justify-items-stretch lg:w-[min(100%,32rem)] lg:flex-none">
+        <div className="w-full max-w-56 overflow-hidden rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:max-w-none">
+          {store.imageUrl ? (
+            <Image
+              src={store.imageUrl}
+              alt={`${store.name}のポスター画像`}
+              width={160}
+              height={220}
+              className="h-auto w-full rounded-lg object-contain"
+              sizes="(max-width: 1024px) 100vw, 160px"
+            />
+          ) : (
+            <Image
+              src="/images/default-image.webp"
+              alt="デフォルト画像"
+              width={160}
+              height={220}
+              className="h-auto w-full rounded-lg object-contain"
+              loading="eager"
+              sizes="(max-width: 1024px) 100vw, 160px"
+            />
+          )}
+        </div>
+        <div className="w-full max-w-56 overflow-hidden rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:max-w-none">
+          {store.apparanceImageUrl ? (
+            <Image
+              src={store.apparanceImageUrl}
+              alt={`${store.name}の外観画像`}
+              width={320}
+              height={220}
+              className="h-auto w-full rounded-lg object-contain"
+              sizes="(max-width: 1024px) 100vw, 320px"
+            />
+          ) : (
+            <Image
+              src="/images/default-apparance-image.webp"
+              alt="デフォルト画像"
+              width={320}
+              height={220}
+              className="h-auto w-full rounded-lg object-contain"
+              loading="eager"
+              sizes="(max-width: 1024px) 100vw, 320px"
+            />
+          )}
+        </div>
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col gap-4 lg:pt-1">
+        <div className="hidden md:block">
           <h3 className="text-lg font-semibold text-main-950">{store.name}</h3>
           <div className="mt-2 flex flex-wrap gap-2">
             <Badge>{storeType}</Badge>
@@ -87,6 +133,14 @@ export default async function StoreInfo({ storeId }: StoreInfoProps) {
           <p className="min-w-0 wrap-break-word">
             {store.description ?? "なし"}
           </p>
+          {isShowCanVoted && (
+            <>
+              <p className="font-medium text-slate-700">投票可能か：</p>
+              <p className="min-w-0 wrap-break-word">
+                {store.canVoted ? "はい" : "いいえ"}
+              </p>
+            </>
+          )}
         </div>
       </div>
     </div>

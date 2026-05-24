@@ -6,6 +6,8 @@ import { eq } from "drizzle-orm";
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import FoodInfo from "@/features/store/food/info";
 import ItemList from "@/features/store/food/item/list";
+import { Suspense } from "react";
+import { LoadingPrompt } from "@/components/prompt/loading-prompt";
 
 export const dynamic = "force-dynamic";
 
@@ -61,18 +63,24 @@ export default async function StorePage(props: {
       </section>
 
       <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
-        <StoreInfo storeId={storeRows[0].id} />
+        <Suspense fallback={<LoadingPrompt context="店舗情報" />}>
+          <StoreInfo storeId={storeRows[0].id} isShowCanVoted={false} />
+        </Suspense>
       </section>
 
       {storeRows[0].storeType === "ATTRACTION" && attraction && (
         <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
-          <AttractionInfo attractionId={attraction.id} />
+          <Suspense fallback={<LoadingPrompt context="企画情報" />}>
+            <AttractionInfo attractionId={attraction.id} />
+          </Suspense>
         </section>
       )}
       {storeRows[0].storeType === "FOOD" && food && (
         <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
           <div className="flex flex-col gap-6 md:gap-8">
-            <FoodInfo foodId={food.id} />
+            <Suspense fallback={<LoadingPrompt context="模擬店の情報" />}>
+              <FoodInfo foodId={food.id} />
+            </Suspense>
             <div>
               <h2 className="text-lg font-bold text-main-950 md:text-xl">
                 商品一覧
@@ -81,7 +89,9 @@ export default async function StorePage(props: {
                 取り扱い商品の一覧です。在庫状況は在庫ページから確認できます。
               </p>
             </div>
-            <ItemList foodId={food.id} />
+            <Suspense fallback={<LoadingPrompt context="商品一覧" />}>
+              <ItemList foodId={food.id} />
+            </Suspense>
           </div>
         </section>
       )}

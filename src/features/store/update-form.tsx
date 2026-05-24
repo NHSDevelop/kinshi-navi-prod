@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { UpdateStoreConfigState } from "./action";
 import Image from "next/image";
+import { Switch } from "@/components/ui/switch";
 
 interface updateStoreConfigFormProps {
   store: Store; //isActiveを取得するためStore型
@@ -32,11 +33,13 @@ interface updateStoreConfigFormProps {
 const INITIAL_STATE: UpdateStoreConfigState = {
   name: "",
   imageUrl: "",
+  apparanceImageUrl: "",
   startedAtDate: "",
   startedAtTime: "",
   finishedAtDate: "",
   finishedAtTime: "",
   description: "",
+  canVoted: true,
   zodErrors: null,
   message: null,
   error: null,
@@ -63,11 +66,18 @@ export default function UpdateStoreConfigForm({
   const [finishedAtTime, setFinishedAtTime] = useState<string>(
     store.finishedAtTime || "",
   );
+  const [canVoted, setCanVoted] = useState<boolean>(store.canVoted || true);
   const [imageUrl, setImageUrl] = useState<string>(store.imageUrl ?? "");
+  const [apparanceImageUrl, setApparanceImageUrl] = useState<string>(
+    store.apparanceImageUrl ?? "",
+  );
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
-  const handleImageUpload = async (file: File | null) => {
+  const handleImageUpload = async (
+    file: File | null,
+    target: "image" | "apparance" = "image",
+  ) => {
     if (!file) return;
 
     setUploadError(null);
@@ -93,7 +103,8 @@ export default function UpdateStoreConfigForm({
         );
       }
 
-      setImageUrl(result.url);
+      if (target === "image") setImageUrl(result.url);
+      else setApparanceImageUrl(result.url);
     } catch (error) {
       setUploadError(
         error instanceof Error
@@ -133,13 +144,13 @@ export default function UpdateStoreConfigForm({
                   <FieldError message={state.zodErrors?.name?.[0]} />
                 </Field>
                 <Field>
-                  <FieldLabel>店舗画像</FieldLabel>
+                  <FieldLabel>ポスター画像</FieldLabel>
                   <div className="space-y-3">
                     {imageUrl ? (
                       <div className="relative h-52 w-full max-w-xl overflow-hidden rounded-md border bg-muted">
                         <Image
                           src={imageUrl}
-                          alt="店舗画像プレビュー"
+                          alt="ポスター画像プレビュー"
                           fill
                           sizes="(max-width: 768px) 100vw, 640px"
                           unoptimized
@@ -148,7 +159,7 @@ export default function UpdateStoreConfigForm({
                       </div>
                     ) : (
                       <p className="text-sm text-muted-foreground">
-                        画像が未設定です
+                        ポスター画像が未設定です
                       </p>
                     )}
 
@@ -158,7 +169,7 @@ export default function UpdateStoreConfigForm({
                       disabled={isPending || isUploadingImage}
                       onChange={(e) => {
                         const file = e.target.files?.[0] ?? null;
-                        void handleImageUpload(file);
+                        void handleImageUpload(file, "image");
                       }}
                     />
 
@@ -180,6 +191,60 @@ export default function UpdateStoreConfigForm({
 
                     {uploadError && <ErrorPrompt error={uploadError} />}
                     <FieldError message={state.zodErrors?.imageUrl?.[0]} />
+                  </div>
+                </Field>
+                <Field>
+                  <FieldLabel>外観画像</FieldLabel>
+                  <div className="space-y-3">
+                    {apparanceImageUrl ? (
+                      <div className="relative h-52 w-full max-w-xl overflow-hidden rounded-md border bg-muted">
+                        <Image
+                          src={apparanceImageUrl}
+                          alt="外観画像プレビュー"
+                          fill
+                          sizes="(max-width: 768px) 100vw, 640px"
+                          unoptimized
+                          className="object-contain"
+                        />
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        外観画像が未設定です
+                      </p>
+                    )}
+
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      disabled={isPending || isUploadingImage}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0] ?? null;
+                        void handleImageUpload(file, "apparance");
+                      }}
+                    />
+
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={
+                          isPending || isUploadingImage || !apparanceImageUrl
+                        }
+                        onClick={() => setApparanceImageUrl("")}
+                      >
+                        画像を削除
+                      </Button>
+                      {isUploadingImage && (
+                        <p className="text-sm text-muted-foreground">
+                          アップロード中...
+                        </p>
+                      )}
+                    </div>
+
+                    {uploadError && <ErrorPrompt error={uploadError} />}
+                    <FieldError
+                      message={state.zodErrors?.apparanceImageUrl?.[0]}
+                    />
                   </div>
                 </Field>
                 <Field>
@@ -269,11 +334,30 @@ export default function UpdateStoreConfigForm({
                   />
                   <FieldError message={state.zodErrors?.description?.[0]} />
                 </Field>
+                <Field>
+                  <FieldLabel>投票可能か</FieldLabel>
+                  <Switch
+                    disabled={isPending}
+                    checked={canVoted}
+                    onCheckedChange={setCanVoted}
+                  />
+                  <FieldError message={state.zodErrors?.canVoted?.[0]} />
+                </Field>
               </FieldGroup>
             </FieldSet>
             <FieldSeparator />
             <input type="hidden" name="storeId" value={store.id} />
             <input type="hidden" name="imageUrl" value={imageUrl} />
+            <input
+              type="hidden"
+              name="apparanceImageUrl"
+              value={apparanceImageUrl}
+            />
+            <input
+              type="hidden"
+              name="canVoted"
+              value={canVoted ? "true" : "false"}
+            />
           </FieldGroup>
           <Button
             type="submit"

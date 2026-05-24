@@ -17,6 +17,7 @@ import {
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
+import { requireStaffOrManageStoreUser } from "@/lib/auth-guard";
 
 // Store情報は1日に1回程度変わるため、ISR 1時間でキャッシュ
 export const revalidate = 3600;
@@ -27,24 +28,35 @@ export default async function StoreStaffHomePage(props: {
   const { store_id } = await props.params;
 
   const db = await getDb();
-  const storeRows = await db
-    .select({ id: stores.id, name: stores.name, storeType: stores.storeType })
-    .from(stores)
-    .where(eq(stores.id, store_id))
-    .limit(1);
+
+  const [, storeRows, staffRows] = await Promise.all([
+    requireStaffOrManageStoreUser(store_id),
+    db
+      .select({ id: stores.id, name: stores.name, storeType: stores.storeType })
+      .from(stores)
+      .where(eq(stores.id, store_id))
+      .limit(1),
+    db
+      .select({
+        id: staffs.id,
+        name: users.name,
+        userId: staffs.userId,
+      })
+      .from(staffs)
+      .innerJoin(users, eq(users.id, staffs.userId))
+      .where(eq(staffs.storeId, store_id)),
+  ]);
 
   if (storeRows.length === 0) {
-    return <p>店舗が存在しません。</p>;
+    return (
+      <DashboardPageShell
+        title="スタッフ画面"
+        description="担当店舗の操作メニューとスタッフ一覧を表示します。"
+      >
+        <NotFoundPrompt context="該当する店舗" />
+      </DashboardPageShell>
+    );
   }
-  const staffRows = await db
-    .select({
-      id: staffs.id,
-      name: users.name,
-      userId: staffs.userId,
-    })
-    .from(staffs)
-    .innerJoin(users, eq(users.id, staffs.userId))
-    .where(eq(staffs.storeId, store_id));
 
   return (
     <DashboardPageShell
@@ -107,16 +119,9 @@ export default async function StoreStaffHomePage(props: {
               </Button>
               <Button asChild variant="card">
                 <Link
-                  href={`/dashboard/staff/store/${store_id}/stock-log-history`}
-                >
-                  商品在庫の変動履歴
-                </Link>
-              </Button>
-              <Button asChild variant="card">
-                <Link
                   href={`/dashboard/staff/store/${store_id}/register-log-history`}
                 >
-                  レジ履歴
+                  会計・在庫履歴
                 </Link>
               </Button>
             </div>

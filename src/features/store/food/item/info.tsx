@@ -34,11 +34,12 @@ export default async function ItemInfo({ itemId }: Props) {
                 />
               ) : (
                 <Image
-                  src="/images/default-image.png"
+                  src="/images/default-image.webp"
                   alt={`デフォルトの画像`}
                   width={300}
                   height={400}
                   className="object-contain rounded-md"
+                  loading="eager"
                 />
               )}
               <div className="flex gap-2 md:flex-1">

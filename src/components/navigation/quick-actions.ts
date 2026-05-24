@@ -19,13 +19,13 @@ export const quickActions: QuickAction[] = [
   {
     href: "/anonymous-user",
     title: "ユーザーページ",
-    description: "チケットや通知設定を確認",
+    description: "取得したチケットや通知設定を確認",
     iconName: "user",
   },
   {
     href: "/issue-ticket",
     title: "チケットを発行",
-    description: "受付用のチケットをすぐに作成",
+    description: "受付用のチケットを発行",
     iconName: "ticket",
   },
   {
@@ -49,13 +49,13 @@ export const quickActions: QuickAction[] = [
   {
     href: "/vote/attraction",
     title: "企画の人気投票",
-    description: "人気投票をその場で実施",
+    description: "クラス企画の人気投票を行う",
     iconName: "vote",
   },
   {
     href: "/vote/food",
     title: "模擬店の人気投票",
-    description: "模擬店の投票をまとめて行う",
+    description: "模擬店の人気投票を行う",
     iconName: "vote",
   },
 ];

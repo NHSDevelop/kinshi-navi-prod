@@ -24,7 +24,11 @@ export default async function TicketIssuePage() {
           </p>
         </section>
         <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
-          <CreateAnonymousUser />
+          <Suspense
+            fallback={<LoadingPrompt context="ゲストユーザーの作成画面" />}
+          >
+            <CreateAnonymousUser />
+          </Suspense>
         </section>
       </div>
     );
@@ -43,11 +47,7 @@ export default async function TicketIssuePage() {
       {user.isAnonymous ? (
         <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
           <Suspense fallback={<LoadingPrompt context="発行画面" />}>
-            <IssueTicket
-              userId={user.id}
-              eventId={mainEventId}
-              isPaper={false}
-            />
+            <IssueTicket eventId={mainEventId} isPaper={false} />
           </Suspense>
         </section>
       ) : (

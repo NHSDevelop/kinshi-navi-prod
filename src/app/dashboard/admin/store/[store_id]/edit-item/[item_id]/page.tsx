@@ -1,10 +1,12 @@
 import UpdateItem from "@/features/store/food/item/update";
 import { Separator } from "@/components/ui/separator";
+import { requireStoreAdminUser } from "@/lib/auth-guard";
 
 export default async function EditItemPage(props: {
   params: Promise<{ store_id: string; item_id: string }>;
 }) {
-  const { item_id } = await props.params;
+  const { store_id, item_id } = await props.params;
+  await requireStoreAdminUser(store_id);
 
   return (
     <div className="space-y-4 lg:space-y-8">

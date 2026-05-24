@@ -66,12 +66,10 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
-  keywords:
-    "文化祭, イベント, 学園祭, 学校, 高校, 中学校, アプリ, Web, サービス, Webアプリ, 無料, 管理, チケット, 整理券, レジ, 会計",
 };
 
 export const viewport: Viewport = {
-  themeColor: "#79a1d4",
+  themeColor: "#fffacd",
 };
 
 export default function RootLayout({
@@ -82,9 +80,9 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <meta name="apple-mobile-web-app-title" content="K-Navi" />
-      <GoogleTagManager gtmId="G-VYFHW582FS" />
-      <GoogleAnalytics gaId="G-VYFHW582FS" />
       <body className="font-sans antialiased min-h-screen flex flex-col">
+        <GoogleTagManager gtmId="G-VYFHW582FS" />
+        <GoogleAnalytics gaId="G-VYFHW582FS" />
         <PwaClient />
         <main>{children}</main>
         <footer className="mt-auto bg-main-50 w-full ">

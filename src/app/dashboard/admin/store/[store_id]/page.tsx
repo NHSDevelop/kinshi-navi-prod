@@ -30,6 +30,8 @@ import ToActiveStore from "@/features/store/to-active";
 import { notFound } from "next/navigation";
 import ItemSelectLink from "@/features/store/food/item/components/select-link";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
+import FoodInfo from "@/features/store/food/info";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 // Store情報は1日に1回程度変わるため、ISR 1時間でキャッシュ
 export const revalidate = 3600;
@@ -42,46 +44,42 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
   const { store_id } = await params;
 
   const db = await getDb();
-  const storeRows = await db
-    .select()
-    .from(stores)
-    .where(eq(stores.id, store_id))
-    .limit(1);
+
+  const [storeRows, attractionRows, foodRows, adminRows, staffRows] =
+    await Promise.all([
+      db.select().from(stores).where(eq(stores.id, store_id)).limit(1),
+      db
+        .select()
+        .from(attractions)
+        .where(eq(attractions.storeId, store_id))
+        .limit(1),
+      db.select().from(foods).where(eq(foods.storeId, store_id)).limit(1),
+      db
+        .select({
+          id: admins.id,
+          name: users.name,
+          userId: admins.userId,
+          role: admins.role,
+        })
+        .from(admins)
+        .innerJoin(users, eq(users.id, admins.userId))
+        .where(
+          and(eq(admins.storeId, store_id), eq(admins.role, "STORE_ADMIN")),
+        ),
+      db
+        .select({
+          id: staffs.id,
+          name: users.name,
+          userId: staffs.userId,
+        })
+        .from(staffs)
+        .innerJoin(users, eq(users.id, staffs.userId))
+        .where(eq(staffs.storeId, store_id)),
+    ]);
+
   if (!storeRows[0]) {
     notFound();
   }
-
-  const attractionRows = await db
-    .select()
-    .from(attractions)
-    .where(eq(attractions.storeId, store_id))
-    .limit(1);
-  const foodRows = await db
-    .select()
-    .from(foods)
-    .where(eq(foods.storeId, store_id))
-    .limit(1);
-
-  const adminRows = await db
-    .select({
-      id: admins.id,
-      name: users.name,
-      userId: admins.userId,
-      role: admins.role,
-    })
-    .from(admins)
-    .innerJoin(users, eq(users.id, admins.userId))
-    .where(and(eq(admins.storeId, store_id), eq(admins.role, "STORE_ADMIN")));
-
-  const staffRows = await db
-    .select({
-      id: staffs.id,
-      name: users.name,
-      userId: staffs.userId,
-    })
-    .from(staffs)
-    .innerJoin(users, eq(users.id, staffs.userId))
-    .where(eq(staffs.storeId, store_id));
 
   return (
     <DashboardPageShell
@@ -89,21 +87,24 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
       description="店舗の基本情報、企画情報、スタッフ情報をまとめて管理できます。"
     >
       <div className="space-y-4 lg:space-y-8">
-        <Separator />
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg">店舗の情報</h2>
-          <Button asChild variant="card">
-            <div className="flex gap-2">
-              <AiFillEdit />
-              <Link
-                href={`/dashboard/admin/store/${store_id}/edit-config/store`}
-              >
-                設定を編集
-              </Link>
-            </div>
-          </Button>
-        </div>
-        <StoreInfo storeId={store_id} />
+        <Card>
+          <CardHeader className="flex items-center justify-between">
+            <CardTitle>店舗の情報</CardTitle>
+            <Button asChild variant="card" className="max-w-32">
+              <div className="flex gap-2">
+                <AiFillEdit />
+                <Link
+                  href={`/dashboard/admin/store/${store_id}/edit-config/store`}
+                >
+                  設定を編集
+                </Link>
+              </div>
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <StoreInfo storeId={store_id} isShowCanVoted />
+          </CardContent>
+        </Card>
         <ToActiveStore
           storeId={storeRows[0].id}
           isActive={storeRows[0].isActive}
@@ -111,27 +112,48 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
         <Separator />
         {attractionRows?.length > 0 && (
           <div className="space-y-4 lg:space-y-8">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg">企画の情報</h2>
-              <Button asChild variant="card">
-                <div className="flex gap-2">
-                  <AiFillEdit />
-                  <Link
-                    href={`/dashboard/admin/store/${store_id}/edit-config/attraction`}
-                  >
-                    設定を編集
-                  </Link>
-                </div>
-              </Button>
-            </div>
-            <AttractionInfo attractionId={attractionRows[0].id} />
+            <Card>
+              <CardHeader className="flex items-center justify-between">
+                <CardTitle>企画の情報</CardTitle>
+                <Button asChild variant="card" className="max-w-32">
+                  <div className="flex gap-2">
+                    <AiFillEdit />
+                    <Link
+                      href={`/dashboard/admin/store/${store_id}/edit-config/attraction`}
+                    >
+                      設定を編集
+                    </Link>
+                  </div>
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <AttractionInfo attractionId={attractionRows[0].id} />
+              </CardContent>
+            </Card>
+            <Separator />
           </div>
         )}
         {foodRows?.length > 0 && (
           <div className="space-y-4 lg:space-y-8">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg">模擬店の情報</h2>
-            </div>
+            <Card>
+              <CardHeader className="flex items-center justify-between">
+                <CardTitle>模擬店の情報</CardTitle>
+                <Button asChild variant="card" className="max-w-32">
+                  <div className="flex gap-2">
+                    <AiFillEdit />
+                    <Link
+                      href={`/dashboard/admin/store/${store_id}/edit-config/food`}
+                    >
+                      設定を編集
+                    </Link>
+                  </div>
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <FoodInfo foodId={foodRows[0].id} />
+              </CardContent>
+            </Card>
+            <Separator />
             <div className="flex  gap-4">
               <Button asChild variant="card">
                 <div className="flex gap-4">
@@ -150,21 +172,14 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
               </Button>
               <Button asChild variant="card">
                 <Link
-                  href={`/dashboard/staff/store/${store_id}/stock-log-history`}
+                  href={`/dashboard/staff/store/${store_id}/register-log-history`}
                 >
-                  商品在庫の変動履歴
+                  会計・在庫履歴
                 </Link>
               </Button>
               <Button asChild variant="card">
                 <Link href={`/dashboard/staff/store/${store_id}/register`}>
                   レジページ
-                </Link>
-              </Button>
-              <Button asChild variant="card">
-                <Link
-                  href={`/dashboard/staff/store/${store_id}/register-log-history`}
-                >
-                  レジ履歴
                 </Link>
               </Button>
             </div>
@@ -177,7 +192,6 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
             />
             <Separator />
             <h3 className="text-lg">商品一覧</h3>
-            <Separator />
             <ItemList foodId={foodRows[0].id} storeId={store_id} />
           </div>
         )}

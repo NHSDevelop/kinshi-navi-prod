@@ -3,6 +3,8 @@ import { RoutePollingRefresh } from "@/components/polling/route-polling-refresh"
 import { Suspense } from "react";
 import { LoadingPrompt } from "@/components/prompt/loading-prompt";
 
+export const dynamic = "force-dynamic";
+
 export default async function FoodStockStatusPage() {
   const mainEventId = process.env.MAIN_EVENT_ID as string;
 

@@ -1,9 +1,11 @@
 import IssueInviteLink from "@/features/auth/invite/issue-link";
+import { requireEventAdminUser } from "@/lib/auth-guard";
 
 export default async function IssueStoreAdminInvitePage(props: {
   params: Promise<{ event_id: string; store_id: string }>;
 }) {
   const { event_id, store_id } = await props.params;
+  await requireEventAdminUser(event_id);
 
   return (
     <div className="space-y-4 lg:space-y-8">

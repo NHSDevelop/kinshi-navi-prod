@@ -7,6 +7,7 @@ import { and, eq } from "drizzle-orm";
 import Link from "next/link";
 import { AiFillEdit, AiFillPlusCircle } from "react-icons/ai";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -22,38 +23,37 @@ import { notFound } from "next/navigation";
 import ToActiveEvent from "@/features/event/to-active";
 import CreateRegisterLane from "@/features/store/food/register/lane/create";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
+import { requireEventAdminUser } from "@/lib/auth-guard";
 
 export default async function AdminEventPage(props: {
   params: Promise<{ event_id: string }>;
 }) {
   const { event_id } = await props.params;
+  await requireEventAdminUser(event_id);
 
   const db = await getDb();
-  const eventRows = await db
-    .select()
-    .from(events)
-    .where(eq(events.id, event_id))
-    .limit(1);
+
+  const [eventRows, storeRows, adminRows] = await Promise.all([
+    db.select().from(events).where(eq(events.id, event_id)).limit(1),
+    db
+      .select({ id: stores.id, name: stores.name, storeType: stores.storeType })
+      .from(stores)
+      .where(eq(stores.eventId, event_id)),
+    db
+      .select({
+        id: admins.id,
+        name: users.name,
+        userId: admins.userId,
+        role: admins.role,
+      })
+      .from(admins)
+      .innerJoin(users, eq(users.id, admins.userId))
+      .where(and(eq(admins.eventId, event_id), eq(admins.role, "EVENT_ADMIN"))),
+  ]);
 
   if (!eventRows[0]) {
     notFound();
   }
-
-  const storeRows = await db
-    .select({ id: stores.id, name: stores.name, storeType: stores.storeType })
-    .from(stores)
-    .where(eq(stores.eventId, event_id));
-
-  const adminRows = await db
-    .select({
-      id: admins.id,
-      name: users.name,
-      userId: admins.userId,
-      role: admins.role,
-    })
-    .from(admins)
-    .innerJoin(users, eq(users.id, admins.userId))
-    .where(and(eq(admins.eventId, event_id), eq(admins.role, "EVENT_ADMIN")));
 
   //TODO ToActiveEventの時にInfoが変化しないのを修正する
 
@@ -64,43 +64,56 @@ export default async function AdminEventPage(props: {
     >
       <div className="space-y-4 lg:space-y-8">
         <Separator />
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg">イベントの情報</h2>
-          <Button asChild variant="card">
-            <div className="flex gap-2">
-              <AiFillEdit />
-              <Link href={`/dashboard/admin/event/${event_id}/edit-config`}>
+        <Card className="border-main-200/80 shadow-sm">
+          <CardHeader>
+            <CardTitle>イベントの情報</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button asChild variant="card">
+              <Link
+                href={`/dashboard/admin/event/${event_id}/edit-config`}
+                className="flex items-center gap-2"
+              >
+                <AiFillEdit />
                 設定を編集
               </Link>
-            </div>
-          </Button>
-        </div>
+            </Button>
 
-        <EventInfo eventId={event_id} />
-        <ToMainEvent eventId={event_id} isMain={eventRows[0].isMain} />
-        <ToActiveEvent eventId={event_id} isActive={eventRows[0].isActive} />
+            <EventInfo eventId={event_id} />
+            <ToMainEvent eventId={event_id} isMain={eventRows[0].isMain} />
+            <ToActiveEvent
+              eventId={event_id}
+              isActive={eventRows[0].isActive}
+            />
+          </CardContent>
+        </Card>
         <Separator />
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg">イベント内の店舗の管理</h2>
-          <Button asChild variant="card">
-            <div className="flex gap-2">
-              <AiFillPlusCircle />
-              <Link href={`/dashboard/admin/event/${event_id}/create-store`}>
+        <Card className="border-main-200/80 shadow-sm">
+          <CardHeader>
+            <CardTitle>イベント内の店舗の管理</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button asChild variant="card">
+              <Link
+                href={`/dashboard/admin/event/${event_id}/create-store`}
+                className="flex items-center gap-2"
+              >
+                <AiFillPlusCircle />
                 店舗を作成
               </Link>
-            </div>
-          </Button>
-        </div>
+            </Button>
 
-        {storeRows.length > 0 ? (
-          <StoreSelectLink
-            href="/dashboard/admin/store"
-            stores={storeRows}
-            context="店舗の管理ページへ"
-          />
-        ) : (
-          <p>イベント内の店舗が存在しません。</p>
-        )}
+            {storeRows.length > 0 ? (
+              <StoreSelectLink
+                href="/dashboard/admin/store"
+                stores={storeRows}
+                context="店舗の管理ページへ"
+              />
+            ) : (
+              <p>イベント内の店舗が存在しません。</p>
+            )}
+          </CardContent>
+        </Card>
 
         <Separator />
         <p className="text-lg">イベント内の店舗の管理者を招待</p>

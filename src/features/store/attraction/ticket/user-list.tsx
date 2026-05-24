@@ -1,16 +1,8 @@
 import { getDb } from "@/lib/db/drizzle";
 import { attractions, events, stores, tickets } from "@/lib/db/schema";
 import { and, asc, eq, inArray } from "drizzle-orm";
-import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselPrevious,
-  CarouselNext,
-  CarouselItem,
-} from "@/components/ui/carousel";
 import { TicketCard } from "./ticket";
-import { TICKET_STATUS_MAP } from "@/lib/type";
+import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 
 interface UserTicketListProps {
   userId: string;
@@ -40,6 +32,10 @@ export default async function UserTicketList({ userId }: UserTicketListProps) {
     )
     .orderBy(asc(tickets.createdAt));
 
+  if (activeTicketRows.length === 0) {
+    return <NotFoundPrompt context="取得したチケット" />;
+  }
+
   const activeTickets = activeTicketRows.map((row) => ({
     id: row.id,
     index: row.index,
@@ -54,40 +50,5 @@ export default async function UserTicketList({ userId }: UserTicketListProps) {
     },
   }));
 
-  return (
-    <div className="space-y-4 lg:space-y-8">
-      {activeTickets.length > 0 ? (
-        <div className="px-12 w-full">
-          <Carousel
-            opts={{
-              align: "start",
-              loop: false,
-            }}
-            className="w-full max-w-3xl mx-auto"
-          >
-            <CarouselContent className="-ml-2 md:-ml-4">
-              {activeTickets.map((ticket) => {
-                const statusLabel =
-                  TICKET_STATUS_MAP[
-                    ticket.status as keyof typeof TICKET_STATUS_MAP
-                  ]?.label ?? ticket.status;
-                return (
-                  <CarouselItem
-                    key={ticket.id}
-                    className="pl-2 md:pl-4 basis-full"
-                  >
-                    <TicketCard ticket={ticket} statusLabel={statusLabel} />
-                  </CarouselItem>
-                );
-              })}
-            </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
-          </Carousel>
-        </div>
-      ) : (
-        <NotFoundPrompt context="取得したチケット" />
-      )}
-    </div>
-  );
+  return <TicketCard ticket={activeTickets[0]} />;
 }

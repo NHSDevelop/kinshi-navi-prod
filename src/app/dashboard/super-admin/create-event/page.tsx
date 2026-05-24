@@ -1,8 +1,11 @@
 import CreateEvent from "@/features/event/create";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
+import { requireSuperAdminUser } from "@/lib/auth-guard";
 
 export default async function CreateEventPage() {
+  await requireSuperAdminUser();
+
   return (
     <DashboardPageShell
       title="イベントを作成"

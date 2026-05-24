@@ -16,21 +16,15 @@ import { MessagePrompt } from "@/components/prompt/message-prompt";
 import { ErrorPrompt } from "@/components/prompt/error-prompt";
 
 type Props = {
-  userId: string;
   stores: Store[];
   storeType: StoreType;
 };
 
-export default function CreateStoreVoteForm({
-  userId,
-  stores,
-  storeType,
-}: Props) {
+export default function CreateStoreVoteForm({ stores, storeType }: Props) {
   const [state, formAction, isPending] = useActionState(createStoreVote, null);
   const [chosenStoreId, setChosenStoreId] = useState<string>("");
   const [chosenStoreName, setChosenStorename] = useState<string>("");
   const [chosenStoreImageUrl, setChosenStoreImageUrl] = useState<string>("");
-  const filterdStores = stores.filter((store) => store.storeType === storeType);
 
   const handleClick = (store: Store) => {
     setChosenStoreId(store.id);
@@ -50,9 +44,9 @@ export default function CreateStoreVoteForm({
 
   const selectedImageSrc =
     chosenStoreImageUrl === ""
-      ? "/images/choose-store.png"
+      ? "/images/choose-store.webp"
       : chosenStoreImageUrl === "default"
-        ? "/images/default-image.png"
+        ? "/images/default-image.webp"
         : chosenStoreImageUrl;
 
   const selectedImageWidth = chosenStoreImageUrl === "default" ? 200 : 300;
@@ -71,7 +65,6 @@ export default function CreateStoreVoteForm({
             action={formAction}
             className="flex flex-col justify-center items-center gap-2"
           >
-            <input type="hidden" name="userId" value={userId} />
             <input type="hidden" name="storeType" value={storeType} />
             <input type="hidden" name="storeId" value={chosenStoreId} />
 
@@ -114,7 +107,7 @@ export default function CreateStoreVoteForm({
       </Card>
 
       <Card className="w-full grid grid-cols-3 md:grid-cols-4 p-4 gap-2">
-        {filterdStores.map((store) => (
+        {stores.map((store) => (
           <div
             key={store.id}
             className="flex flex-col justify-center items-center border-2 rounded-md p-2 md:p-4"
@@ -130,11 +123,12 @@ export default function CreateStoreVoteForm({
                 />
               ) : (
                 <Image
-                  src="/images/default-image.png"
+                  src="/images/default-image.webp"
                   alt="画像なし"
                   width={200}
                   height={300}
                   className="object-contain rounded-md"
+                  loading="eager"
                 />
               )}
             </button>

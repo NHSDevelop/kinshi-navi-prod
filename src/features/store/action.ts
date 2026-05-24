@@ -1,5 +1,10 @@
 "use server";
 
+import {
+  canManageEvent,
+  canManageStore,
+  getAuthenticatedUser,
+} from "@/lib/auth-guard";
 import { getDb } from "@/lib/db/drizzle";
 import {
   attractions,
@@ -10,6 +15,7 @@ import {
   stores,
   stockLogs,
   tickets,
+  storeTypeValues,
   type StoreType,
 } from "@/lib/db/schema";
 import { FormState } from "@/lib/type";
@@ -21,25 +27,46 @@ import { unstable_cache, revalidatePath } from "next/cache";
 export type ZodErrors = {
   slug?: string[];
   name?: string[];
+  storeType?: string[];
+  imageUrl?: string[];
+  apparanceImageUrl?: string[];
+  startedAtDate?: string[];
+  startedAtTime?: string[];
+  finishedAtDate?: string[];
+  finishedAtTime?: string[];
+  description?: string[];
+  canVoted?: string[];
 } | null;
 
 export type StoreState = {
   slug?: string;
   name?: string;
   storeType?: string;
+  imageUrl?: string;
+  apparanceImageUrl?: string;
+  startedAtDate?: string;
+  startedAtTime?: string;
+  finishedAtDate?: string;
+  finishedAtTime?: string;
+  description?: string;
+  canVoted?: boolean;
   zodErrors: ZodErrors;
   message?: string | null;
   success?: boolean;
 };
 
 // ISR 対象ページを無効化する関数
-function invalidateStorePages(storeId?: string) {
+function invalidateStorePages(storeId?: string, storeSlug?: string) {
   if (storeId) {
     revalidatePath(`/dashboard/staff/store/${storeId}`);
     revalidatePath(`/dashboard/admin/store/${storeId}`);
     revalidatePath(`/dashboard/staff/store/${storeId}/item-list`);
     revalidatePath(`/dashboard/staff/store/${storeId}/call-ticket`);
     revalidatePath(`/dashboard/admin/store/${storeId}/create-item`);
+    revalidatePath(`/dashboard/admin/store/${storeId}/edit-config/store`);
+  }
+  if (storeSlug) {
+    revalidatePath(`/store/${storeSlug}`);
   }
   revalidatePath("/attraction/waiting-status");
   revalidatePath("/food/stock-status");
@@ -48,54 +75,138 @@ function invalidateStorePages(storeId?: string) {
 export type UpdateStoreConfigZodErrors = {
   name?: string[];
   imageUrl?: string[];
+  apparanceImageUrl?: string[];
   startedAtDate?: string[];
   startedAtTime?: string[];
   finishedAtDate?: string[];
   finishedAtTime?: string[];
   description?: string[];
+  canVoted?: string[];
 } | null;
 
 export type UpdateStoreConfigState = {
   name?: string;
   imageUrl?: string;
+  apparanceImageUrl?: string;
   startedAtDate?: string;
   startedAtTime?: string;
   finishedAtDate?: string;
   finishedAtTime?: string;
   description?: string;
+  canVoted?: boolean;
   zodErrors?: UpdateStoreConfigZodErrors;
   message?: string | null;
   error?: string | null;
   success?: boolean;
 };
 
-const RegisterSchema = z.object({
+const CreateStoreSchema = z.object({
   slug: slugSchema,
   name: z.string().min(1, "必須項目です"),
+  storeType: z.enum(storeTypeValues),
+  imageUrl: z.string().url("画像URLの形式が正しくありません").nullable(),
+  apparanceImageUrl: z
+    .string()
+    .url("画像URLの形式が正しくありません")
+    .nullable(),
+  startedAtDate: z.date().nullable(),
+  startedAtTime: z
+    .string()
+    .regex(/^\d{2}:\d{2}$/, "HH:mm形式で入力してください")
+    .nullable(),
+  finishedAtDate: z.date().nullable(),
+  finishedAtTime: z
+    .string()
+    .regex(/^\d{2}:\d{2}$/, "HH:mm形式で入力してください")
+    .nullable(),
+  description: z.string().nullable(),
+  canVoted: z
+    .enum(["true", "false"])
+    .transform((val: "true" | "false") => val === "true"),
 });
 
 export async function createStore(
   prevState: unknown,
   formData: FormData,
 ): Promise<StoreState> {
-  const validationResult = RegisterSchema.safeParse({
+  const user = await getAuthenticatedUser();
+  if (!user) {
+    return {
+      zodErrors: null,
+      message: "ログインが必要です",
+      success: false,
+    };
+  }
+
+  const validationResult = CreateStoreSchema.safeParse({
     slug: formData.get("slug"),
     name: formData.get("name"),
+    storeType: formData.get("storeType"),
+    imageUrl: formData.get("imageUrl")
+      ? (formData.get("imageUrl") as string)
+      : null,
+    apparanceImageUrl: formData.get("apparanceImageUrl")
+      ? (formData.get("apparanceImageUrl") as string)
+      : null,
+    startedAtDate: formData.get("startedAtDate")
+      ? new Date(formData.get("startedAtDate") as string)
+      : null,
+    startedAtTime: formData.get("startedAtTime")
+      ? (formData.get("startedAtTime") as string)
+      : null,
+    finishedAtDate: formData.get("finishedAtDate")
+      ? new Date(formData.get("finishedAtDate") as string)
+      : null,
+    finishedAtTime: formData.get("finishedAtTime")
+      ? (formData.get("finishedAtTime") as string)
+      : null,
+    description: formData.get("description")
+      ? (formData.get("description") as string)
+      : null,
+    canVoted: formData.get("canVoted") as string,
   });
 
   if (!validationResult.success) {
     return {
       slug: (formData.get("slug") as string) || "",
       name: (formData.get("name") as string) || "",
+      storeType: (formData.get("storeType") as string) || "",
+      imageUrl: (formData.get("imageUrl") as string) || "",
+      apparanceImageUrl: (formData.get("apparanceImageUrl") as string) || "",
+      startedAtDate: (formData.get("startedAtDate") as string) || "",
+      startedAtTime: (formData.get("startedAtTime") as string) || "",
+      finishedAtDate: (formData.get("finishedAtDate") as string) || "",
+      finishedAtTime: (formData.get("finishedAtTime") as string) || "",
+      description: (formData.get("description") as string) || "",
+      canVoted: (formData.get("canVoted") as string) === "true",
       zodErrors: validationResult.error.flatten().fieldErrors,
       message: "入力形式が正しくありません",
       success: false,
     };
   }
 
-  const { slug, name } = validationResult.data;
-  const storeType = formData.get("storeType") as StoreType;
+  const {
+    slug,
+    name,
+    storeType,
+    imageUrl,
+    apparanceImageUrl,
+    startedAtDate,
+    startedAtTime,
+    finishedAtDate,
+    finishedAtTime,
+    description,
+    canVoted,
+  } = validationResult.data;
   const eventId = formData.get("eventId") as string;
+  if (!(await canManageEvent(user.id, eventId))) {
+    return {
+      zodErrors: null,
+      message: "権限がありません。",
+      success: false,
+    };
+  }
+
   const db = await getDb();
 
   const storeRows = await db
@@ -118,8 +229,20 @@ export async function createStore(
         name: name,
         storeType: storeType,
         eventId: eventId,
+        imageUrl: imageUrl,
+        apparanceImageUrl: apparanceImageUrl,
+        startedAtDate: startedAtDate,
+        startedAtTime: startedAtTime,
+        finishedAtDate: finishedAtDate,
+        finishedAtTime: finishedAtTime,
+        description: description,
+        canVoted: canVoted,
       })
-      .returning({ id: stores.id, storeType: stores.storeType });
+      .returning({
+        id: stores.id,
+        storeType: stores.storeType,
+        slug: stores.slug,
+      });
 
     const createdStore = createdStoreRows[0];
     if (!createdStore) {
@@ -139,7 +262,7 @@ export async function createStore(
         break;
     }
 
-    invalidateStorePages(createdStore.id);
+    invalidateStorePages(createdStore.id, createdStore.slug);
     return {
       zodErrors: null,
       message: "操作が完了しました。",
@@ -158,6 +281,10 @@ export async function createStore(
 const storeConfigSchema = z.object({
   name: z.string().min(1, "必須項目です"),
   imageUrl: z.string().url("画像URLの形式が正しくありません").nullable(),
+  apparanceImageUrl: z
+    .string()
+    .url("画像URLの形式が正しくありません")
+    .nullable(),
   isActive: z.boolean(),
   startedAtDate: z.date().nullable(),
   startedAtTime: z
@@ -170,17 +297,33 @@ const storeConfigSchema = z.object({
     .regex(/^\d{2}:\d{2}$/, "HH:mm形式で入力してください")
     .nullable(),
   description: z.string().nullable(),
+  canVoted: z
+    .enum(["true", "false"])
+    .transform((val: "true" | "false") => val === "true"),
 });
 
 export async function updateStoreConfig(
   prevState: unknown,
   formData: FormData,
 ): Promise<UpdateStoreConfigState> {
+  const user = await getAuthenticatedUser();
+  if (!user) {
+    return {
+      zodErrors: null,
+      success: false,
+      message: null,
+      error: "ログインが必要です",
+    };
+  }
+
   const isActiveRaw = formData.get("isActive");
   const validationResult = storeConfigSchema.safeParse({
     name: formData.get("name"),
     imageUrl: formData.get("imageUrl")
       ? (formData.get("imageUrl") as string)
+      : null,
+    apparanceImageUrl: formData.get("apparanceImageUrl")
+      ? (formData.get("apparanceImageUrl") as string)
       : null,
     isActive: isActiveRaw === "true" || isActiveRaw === "on",
     startedAtDate: formData.get("startedAtDate")
@@ -198,16 +341,19 @@ export async function updateStoreConfig(
     description: formData.get("description")
       ? (formData.get("description") as string)
       : null,
+    canVoted: formData.get("canVoted") as string,
   });
   if (!validationResult.success) {
     return {
       name: (formData.get("name") as string) || "",
       imageUrl: (formData.get("imageUrl") as string) || "",
+      apparanceImageUrl: (formData.get("apparanceImageUrl") as string) || "",
       startedAtDate: (formData.get("startedAtDate") as string) || "",
       startedAtTime: (formData.get("startedAtTime") as string) || "",
       finishedAtDate: (formData.get("finishedAtDate") as string) || "",
       finishedAtTime: (formData.get("finishedAtTime") as string) || "",
       description: (formData.get("description") as string) || "",
+      canVoted: (formData.get("canVoted") as string) === "true",
       zodErrors: validationResult.error.flatten().fieldErrors,
       success: false,
       message: null,
@@ -217,15 +363,26 @@ export async function updateStoreConfig(
   const {
     name,
     imageUrl,
+    apparanceImageUrl,
     isActive,
     startedAtDate,
     startedAtTime,
     finishedAtDate,
     finishedAtTime,
     description,
+    canVoted,
   } = validationResult.data;
 
   const storeId = formData.get("storeId") as string;
+  if (!(await canManageStore(user.id, storeId))) {
+    return {
+      zodErrors: null,
+      success: false,
+      message: null,
+      error: "権限がありません",
+    };
+  }
+
   const db = await getDb();
   try {
     await db
@@ -233,12 +390,14 @@ export async function updateStoreConfig(
       .set({
         name: name,
         imageUrl: imageUrl,
+        apparanceImageUrl: apparanceImageUrl,
         isActive: isActive,
         startedAtDate: startedAtDate,
         startedAtTime: startedAtTime,
         finishedAtDate: finishedAtDate,
         finishedAtTime: finishedAtTime,
         description: description,
+        canVoted: canVoted,
         updatedAt: new Date(),
       })
       .where(eq(stores.id, storeId));
@@ -334,7 +493,22 @@ export async function getStoreIdByStoreSlug(
 }
 
 export async function deleteStore(prevState: unknown, formData: FormData) {
+  const user = await getAuthenticatedUser();
+  if (!user) {
+    return {
+      success: false,
+      error: "ログインが必要です",
+    };
+  }
+
   const storeId = formData.get("storeId") as string;
+  if (!(await canManageStore(user.id, storeId))) {
+    return {
+      success: false,
+      error: "権限がありません。",
+    };
+  }
+
   try {
     const db = await getDb();
 
@@ -416,8 +590,23 @@ export async function deleteStore(prevState: unknown, formData: FormData) {
 
 export async function toActiveStore(prevState: unknown, formData: FormData) {
   try {
+    const user = await getAuthenticatedUser();
+    if (!user) {
+      return {
+        success: false,
+        message: "ログインが必要です",
+      };
+    }
+
     const db = await getDb();
     const storeId = formData.get("storeId") as string;
+    if (!(await canManageStore(user.id, storeId))) {
+      return {
+        success: false,
+        message: "権限がありません。",
+      };
+    }
+
     const storeRows = await db
       .select()
       .from(stores)
@@ -434,7 +623,7 @@ export async function toActiveStore(prevState: unknown, formData: FormData) {
       .update(stores)
       .set({ isActive: !store.isActive })
       .where(eq(stores.id, storeId));
-    invalidateStorePages(storeId);
+    invalidateStorePages(storeId, store.slug);
     return {
       success: true,
       message: "操作が完了しました。",
