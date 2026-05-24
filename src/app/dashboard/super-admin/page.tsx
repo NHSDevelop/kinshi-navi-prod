@@ -49,13 +49,11 @@ export default async function SuperAdminHomePage() {
         <Separator />
         <Card className="border-main-200/80 shadow-sm">
           <CardHeader>
-            <CardTitle>PDFをアップロード</CardTitle>
+            <CardTitle>PDFを管理</CardTitle>
           </CardHeader>
           <CardContent>
             <Button variant="card" asChild>
-              <Link href="/dashboard/super-admin/upload-pdf">
-                PDFをアップロード
-              </Link>
+              <Link href="/dashboard/super-admin/pdf-documents">PDFを管理</Link>
             </Button>
           </CardContent>
         </Card>
