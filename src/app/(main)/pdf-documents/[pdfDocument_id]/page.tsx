@@ -7,7 +7,7 @@ import { pdfDocuments } from "@/lib/db/schema";
 import { Suspense } from "react";
 import { LoadingPrompt } from "@/components/prompt/loading-prompt";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 export default async function PdfDocumentPage(props: {
   params: Promise<{ pdfDocument_id: string }>;
