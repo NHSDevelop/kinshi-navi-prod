@@ -7,6 +7,7 @@ import { and, eq } from "drizzle-orm";
 import Link from "next/link";
 import { AiFillEdit, AiFillPlusCircle } from "react-icons/ai";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -63,43 +64,56 @@ export default async function AdminEventPage(props: {
     >
       <div className="space-y-4 lg:space-y-8">
         <Separator />
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg">イベントの情報</h2>
-          <Button asChild variant="card">
-            <div className="flex gap-2">
-              <AiFillEdit />
-              <Link href={`/dashboard/admin/event/${event_id}/edit-config`}>
+        <Card className="border-main-200/80 shadow-sm">
+          <CardHeader>
+            <CardTitle>イベントの情報</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button asChild variant="card">
+              <Link
+                href={`/dashboard/admin/event/${event_id}/edit-config`}
+                className="flex items-center gap-2"
+              >
+                <AiFillEdit />
                 設定を編集
               </Link>
-            </div>
-          </Button>
-        </div>
+            </Button>
 
-        <EventInfo eventId={event_id} />
-        <ToMainEvent eventId={event_id} isMain={eventRows[0].isMain} />
-        <ToActiveEvent eventId={event_id} isActive={eventRows[0].isActive} />
+            <EventInfo eventId={event_id} />
+            <ToMainEvent eventId={event_id} isMain={eventRows[0].isMain} />
+            <ToActiveEvent
+              eventId={event_id}
+              isActive={eventRows[0].isActive}
+            />
+          </CardContent>
+        </Card>
         <Separator />
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg">イベント内の店舗の管理</h2>
-          <Button asChild variant="card">
-            <div className="flex gap-2">
-              <AiFillPlusCircle />
-              <Link href={`/dashboard/admin/event/${event_id}/create-store`}>
+        <Card className="border-main-200/80 shadow-sm">
+          <CardHeader>
+            <CardTitle>イベント内の店舗の管理</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button asChild variant="card">
+              <Link
+                href={`/dashboard/admin/event/${event_id}/create-store`}
+                className="flex items-center gap-2"
+              >
+                <AiFillPlusCircle />
                 店舗を作成
               </Link>
-            </div>
-          </Button>
-        </div>
+            </Button>
 
-        {storeRows.length > 0 ? (
-          <StoreSelectLink
-            href="/dashboard/admin/store"
-            stores={storeRows}
-            context="店舗の管理ページへ"
-          />
-        ) : (
-          <p>イベント内の店舗が存在しません。</p>
-        )}
+            {storeRows.length > 0 ? (
+              <StoreSelectLink
+                href="/dashboard/admin/store"
+                stores={storeRows}
+                context="店舗の管理ページへ"
+              />
+            ) : (
+              <p>イベント内の店舗が存在しません。</p>
+            )}
+          </CardContent>
+        </Card>
 
         <Separator />
         <p className="text-lg">イベント内の店舗の管理者を招待</p>
