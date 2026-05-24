@@ -113,9 +113,23 @@ export async function PdfDocumentList() {
                     編集
                   </Link>
                 </Button>
+                {/* server-side form is rendered here so Next.js server action can be attached
+                    The dialog's submit button will reference this form via its `form` attribute */}
+                <form
+                  id={`delete-pdf-${pdfDocument.id}`}
+                  action={deletePdfDocument}
+                  className="hidden"
+                >
+                  <input
+                    type="hidden"
+                    name="pdfDocumentId"
+                    value={pdfDocument.id}
+                  />
+                </form>
+
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="outline">Show Dialog</Button>
+                    <Button variant="danger">削除</Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
@@ -128,15 +142,12 @@ export async function PdfDocumentList() {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>キャンセル</AlertDialogCancel>
-                      <AlertDialogAction formAction={deletePdfDocument}>
-                        <input
-                          type="hidden"
-                          name="pdfDocumentId"
-                          value={pdfDocument.id}
-                        />
-                        <Button type="submit" variant="danger">
-                          削除
-                        </Button>
+                      <AlertDialogAction
+                        form={`delete-pdf-${pdfDocument.id}`}
+                        type="submit"
+                        variant="danger"
+                      >
+                        削除
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
