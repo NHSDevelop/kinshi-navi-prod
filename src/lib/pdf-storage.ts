@@ -1,21 +1,10 @@
-import {
-  DeleteObjectCommand,
-  PutObjectCommand,
-  S3Client,
-} from "@aws-sdk/client-s3";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { createId } from "@paralleldrive/cuid2";
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024;
 
-function getPdfStorageClient() {
-  return new S3Client({
-    region: "auto",
-    endpoint: process.env.R2_ENDPOINT!,
-    credentials: {
-      accessKeyId: process.env.R2_ACCESS_KEY!,
-      secretAccessKey: process.env.R2_SECRET_KEY!,
-    },
-  });
+function getPdfPublicBaseUrl() {
+  return (process.env.BASE_URL ?? "").replace(/\/$/, "");
 }
 
 function sanitizeFileName(fileName: string) {
@@ -40,24 +29,23 @@ export function getMaxPdfFileSize() {
 }
 
 export async function uploadPdfFile(file: File) {
-  const client = getPdfStorageClient();
   const fileBuffer = Buffer.from(await file.arrayBuffer());
   const safeName = sanitizeFileName(file.name);
   const key = `pdf-documents/${Date.now()}-${createId()}-${safeName}.pdf`;
+  const { env } = await getCloudflareContext({ async: true });
 
-  await client.send(
-    new PutObjectCommand({
-      Bucket: process.env.R2_BUCKET_NAME,
-      Key: key,
-      ContentType: "application/pdf",
-      Body: fileBuffer,
-      CacheControl: "public, max-age=31536000, immutable",
-    }),
-  );
+  await env.IMG_BUCKET.put(key, fileBuffer, {
+    httpMetadata: {
+      contentType: "application/pdf",
+      cacheControl: "public, max-age=31536000, immutable",
+    },
+  });
+
+  const baseUrl = getPdfPublicBaseUrl();
 
   return {
     fileKey: key,
-    fileUrl: `${process.env.R2_BUCKET_URL}/${key}`,
+    fileUrl: baseUrl ? `${baseUrl}/${key}` : key,
     fileName: file.name,
     mimeType: "application/pdf",
     fileSize: file.size,
@@ -66,13 +54,8 @@ export async function uploadPdfFile(file: File) {
 
 export async function deletePdfFile(fileKey: string) {
   try {
-    const client = getPdfStorageClient();
-    await client.send(
-      new DeleteObjectCommand({
-        Bucket: process.env.R2_BUCKET_NAME,
-        Key: fileKey,
-      }),
-    );
+    const { env } = await getCloudflareContext({ async: true });
+    await env.IMG_BUCKET.delete(fileKey);
   } catch (error) {
     console.error("Failed to delete pdf file from R2:", error);
   }
