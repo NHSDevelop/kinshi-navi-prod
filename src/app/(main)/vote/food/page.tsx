@@ -2,6 +2,8 @@ import { LoadingPrompt } from "@/components/prompt/loading-prompt";
 import CreateStoreVote from "@/features/store/vote/create";
 import { Suspense } from "react";
 
+export const dynamic = "force-dynamic";
+
 export default function FoodVotePage() {
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 lg:gap-8">
