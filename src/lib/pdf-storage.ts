@@ -4,7 +4,7 @@ import { createId } from "@paralleldrive/cuid2";
 const MAX_FILE_SIZE = 25 * 1024 * 1024;
 
 function getPdfPublicBaseUrl() {
-  return (process.env.BASE_URL ?? "").replace(/\/$/, "");
+  return "".replace(/\/$/, "");
 }
 
 function sanitizeFileName(fileName: string) {
