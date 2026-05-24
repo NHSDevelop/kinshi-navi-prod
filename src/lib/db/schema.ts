@@ -430,6 +430,31 @@ export const systemInfos = sqliteTable("system_infos", {
 
 export type SystemInfo = typeof systemInfos.$inferSelect;
 
+export const pdfDocuments = sqliteTable("pdf_documents", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => createId()),
+  title: text("title").notNull(),
+  description: text("description"),
+  fileUrl: text("fileUrl").notNull(),
+  fileKey: text("fileKey").notNull().unique(),
+  fileName: text("fileName").notNull(),
+  mimeType: text("mimeType").notNull(),
+  fileSize: integer("fileSize").notNull(),
+  isPublished: integer("isPublished", { mode: "boolean" })
+    .notNull()
+    .default(true),
+  createdAt: integer("createdAt", { mode: "timestamp_ms" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer("updatedAt", { mode: "timestamp_ms" })
+    .notNull()
+    .$defaultFn(() => new Date())
+    .$onUpdateFn(() => new Date()),
+});
+
+export type PdfDocument = typeof pdfDocuments.$inferSelect;
+
 export const storeVotes = sqliteTable(
   "store_votes",
   {

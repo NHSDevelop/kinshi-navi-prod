@@ -182,3 +182,31 @@ export async function canUseManagementActions(userId: string) {
 
   return staffRows.length > 0;
 }
+
+export async function canManagePdfDocuments(userId: string) {
+  const db = await getDb();
+
+  const adminRows = await db
+    .select({ role: admins.role })
+    .from(admins)
+    .where(eq(admins.userId, userId))
+    .limit(1);
+
+  if (adminRows.length === 0) {
+    return false;
+  }
+
+  return (
+    adminRows[0].role === "SUPER_ADMIN" || adminRows[0].role === "EVENT_ADMIN"
+  );
+}
+
+export async function requirePdfManagerUser() {
+  const user = await requireSignedInUser();
+
+  if (!(await canManagePdfDocuments(user.id))) {
+    redirect("/signin");
+  }
+
+  return user;
+}

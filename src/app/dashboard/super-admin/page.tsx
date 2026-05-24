@@ -45,6 +45,19 @@ export default async function SuperAdminHomePage() {
           </CardContent>
         </Card>
         <Separator />
+        <Card className="border-main-200/80 shadow-sm">
+          <CardHeader>
+            <CardTitle>PDFをアップロード</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button variant="card" asChild>
+              <Link href="/dashboard/super-admin/upload-pdf">
+                PDFをアップロード
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+        <Separator />
         <div className="flex items-center justify-between">
           <h2 className="text-lg">イベントの管理</h2>
           <Button asChild variant="card">
