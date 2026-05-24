@@ -1,7 +1,7 @@
 "use client";
 
 import { Store, StoreType } from "@/lib/db/schema";
-import { useActionState, useState } from "react";
+import { Suspense, useActionState, useState } from "react";
 import Image from "next/image";
 import { createStoreVote } from "./action";
 import {
@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { AiOutlineCloseCircle } from "react-icons/ai";
 import { MessagePrompt } from "@/components/prompt/message-prompt";
 import { ErrorPrompt } from "@/components/prompt/error-prompt";
+import { Spinner } from "@/components/ui/spinner";
 
 type Props = {
   stores: Store[];
@@ -112,26 +113,28 @@ export default function CreateStoreVoteForm({ stores, storeType }: Props) {
             key={store.id}
             className="flex flex-col justify-center items-center border-2 rounded-md p-2 md:p-4"
           >
-            <button onClick={() => handleClick(store)}>
-              {store.imageUrl ? (
-                <Image
-                  src={store.imageUrl}
-                  alt={`${store.name}の画像`}
-                  width={200}
-                  height={300}
-                  className="object-contain rounded-md"
-                />
-              ) : (
-                <Image
-                  src="/images/default-image.webp"
-                  alt="画像なし"
-                  width={200}
-                  height={300}
-                  className="object-contain rounded-md"
-                  loading="eager"
-                />
-              )}
-            </button>
+            <Suspense fallback={<Spinner />}>
+              <button onClick={() => handleClick(store)}>
+                {store.imageUrl ? (
+                  <Image
+                    src={store.imageUrl}
+                    alt={`${store.name}の画像`}
+                    width={200}
+                    height={300}
+                    className="object-contain rounded-md"
+                  />
+                ) : (
+                  <Image
+                    src="/images/default-image.webp"
+                    alt="画像なし"
+                    width={200}
+                    height={300}
+                    className="object-contain rounded-md"
+                    loading="eager"
+                  />
+                )}
+              </button>
+            </Suspense>
             <p className="mt-2 md:mt-4 text-sm md:text-lg">{store.name}</p>
           </div>
         ))}

@@ -4,7 +4,37 @@ import { createId } from "@paralleldrive/cuid2";
 const MAX_FILE_SIZE = 25 * 1024 * 1024;
 
 function getPdfPublicBaseUrl() {
-  return "".replace(/\/$/, "");
+  return (process.env.R2_BUCKET_URL ?? "").replace(/\/$/, "");
+}
+
+function buildPdfPublicUrl(key: string) {
+  const baseUrl = getPdfPublicBaseUrl();
+
+  if (!baseUrl) {
+    return key;
+  }
+
+  const normalizedKey = key.replace(/^\/+/, "");
+
+  try {
+    const parsedBaseUrl = new URL(baseUrl);
+    const basePath = parsedBaseUrl.pathname.replace(/\/$/, "");
+
+    if (basePath && basePath !== "/") {
+      const keyPrefix = normalizedKey.split("/")[0] ?? "";
+
+      if (basePath === `/${keyPrefix}`) {
+        const rest = normalizedKey.slice(keyPrefix.length + 1);
+        return `${parsedBaseUrl.origin}${basePath}/${rest}`;
+      }
+
+      return `${parsedBaseUrl.origin}${basePath}/${normalizedKey}`;
+    }
+
+    return `${parsedBaseUrl.origin}/${normalizedKey}`;
+  } catch {
+    return `${baseUrl}/${normalizedKey}`;
+  }
 }
 
 function sanitizeFileName(fileName: string) {
@@ -41,11 +71,9 @@ export async function uploadPdfFile(file: File) {
     },
   });
 
-  const baseUrl = getPdfPublicBaseUrl();
-
   return {
     fileKey: key,
-    fileUrl: baseUrl ? `${baseUrl}/${key}` : key,
+    fileUrl: buildPdfPublicUrl(key),
     fileName: file.name,
     mimeType: "application/pdf",
     fileSize: file.size,

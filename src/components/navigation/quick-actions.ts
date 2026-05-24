@@ -6,13 +6,21 @@ import {
   UserRound,
   UtensilsCrossed,
   Vote,
+  Info,
 } from "lucide-react";
 
 export type QuickAction = {
   href: string;
   title: string;
   description: string;
-  iconName: "user" | "ticket" | "store" | "clock" | "utensils" | "vote";
+  iconName:
+    | "user"
+    | "ticket"
+    | "store"
+    | "clock"
+    | "utensils"
+    | "vote"
+    | "info";
 };
 
 export const quickActions: QuickAction[] = [
@@ -58,6 +66,12 @@ export const quickActions: QuickAction[] = [
     description: "模擬店の人気投票を行う",
     iconName: "vote",
   },
+  {
+    href: "/pdf-documents",
+    title: "その他の情報",
+    description: "タイムテーブルなどを確認",
+    iconName: "info",
+  },
 ];
 
 export const quickActionIconMap: Record<QuickAction["iconName"], LucideIcon> = {
@@ -67,4 +81,5 @@ export const quickActionIconMap: Record<QuickAction["iconName"], LucideIcon> = {
   clock: Clock3,
   utensils: UtensilsCrossed,
   vote: Vote,
+  info: Info,
 };
