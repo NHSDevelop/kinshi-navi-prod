@@ -1,5 +1,7 @@
 import { LoadingPrompt } from "@/components/prompt/loading-prompt";
+import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import CreateAnonymousUser from "@/features/auth/anonymous/create";
+import { getMainEvent } from "@/features/event/action";
 import IssueTicket from "@/features/store/attraction/ticket/issue";
 import { getSessionFromRequestHeaders } from "@/lib/auth-session";
 import { Suspense } from "react";
@@ -7,7 +9,11 @@ import { Suspense } from "react";
 export const dynamic = "force-dynamic";
 
 export default async function TicketIssuePage() {
-  const mainEventId = process.env.MAIN_EVENT_ID as string;
+  const mainEvent = await getMainEvent();
+
+  if (!mainEvent) {
+    return <NotFoundPrompt context="メインイベント" />;
+  }
 
   const session = await getSessionFromRequestHeaders();
   const user = session?.user;
@@ -47,7 +53,7 @@ export default async function TicketIssuePage() {
       {user.isAnonymous ? (
         <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
           <Suspense fallback={<LoadingPrompt context="発行画面" />}>
-            <IssueTicket eventId={mainEventId} isPaper={false} />
+            <IssueTicket eventId={mainEvent.id} isPaper={false} />
           </Suspense>
         </section>
       ) : (

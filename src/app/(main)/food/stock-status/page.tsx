@@ -2,11 +2,17 @@ import ItemStockStatus from "@/features/store/food/item/stock-status";
 import { RoutePollingRefresh } from "@/components/polling/route-polling-refresh";
 import { Suspense } from "react";
 import { LoadingPrompt } from "@/components/prompt/loading-prompt";
+import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
+import { getMainEvent } from "@/features/event/action";
 
 export const dynamic = "force-dynamic";
 
 export default async function FoodStockStatusPage() {
-  const mainEventId = process.env.MAIN_EVENT_ID as string;
+  const mainEvent = await getMainEvent();
+
+  if (!mainEvent) {
+    return <NotFoundPrompt context="メインイベント" />;
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 lg:gap-8">
@@ -21,7 +27,7 @@ export default async function FoodStockStatusPage() {
       </section>
       <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
         <Suspense fallback={<LoadingPrompt context="在庫状況" />}>
-          <ItemStockStatus eventId={mainEventId} />
+          <ItemStockStatus eventId={mainEvent.id} />
         </Suspense>
       </section>
     </div>
