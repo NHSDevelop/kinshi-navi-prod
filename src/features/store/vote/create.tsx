@@ -7,14 +7,15 @@ import { and, eq } from "drizzle-orm";
 import { getSessionFromRequestHeaders } from "@/lib/auth-session";
 import { Suspense } from "react";
 import { LoadingPrompt } from "@/components/prompt/loading-prompt";
+import { getMainEvent } from "@/features/event/action";
 
 type Props = {
   storeType: StoreType;
 };
 
 export default async function CreateStoreVote({ storeType }: Props) {
-  const mainEventId = process.env.MAIN_EVENT_ID;
-  if (!mainEventId) {
+  const mainEvent = await getMainEvent();
+  if (!mainEvent) {
     return <NotFoundPrompt context="メインイベント" />;
   }
 
@@ -25,7 +26,7 @@ export default async function CreateStoreVote({ storeType }: Props) {
       .from(stores)
       .where(
         and(
-          eq(stores.eventId, mainEventId),
+          eq(stores.eventId, mainEvent.id),
           eq(stores.canVoted, true),
           eq(stores.storeType, storeType),
         ),

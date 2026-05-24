@@ -23,6 +23,7 @@ import { eq, and } from "drizzle-orm";
 import z from "zod";
 import { slugSchema } from "@/lib/schemas/store";
 import { unstable_cache, revalidatePath } from "next/cache";
+import { getMainEvent } from "@/features/event/action";
 
 export type ZodErrors = {
   slug?: string[];
@@ -451,11 +452,18 @@ export async function getStoresInMainEvent(
   const storeType = formData.get("storeType") as StoreType | "all";
 
   try {
-    const mainEventId = process.env.MAIN_EVENT_ID as string;
+    const mainEvent = await getMainEvent();
+    if (!mainEvent) {
+      return {
+        success: false,
+        message: null,
+        error: "メインイベントが設定されていません。",
+      };
+    }
 
     // キャッシュ版を呼び出し
     const storeRows = await getCachedStoresInMainEvent(
-      mainEventId,
+      mainEvent.id,
       storeType || "all",
     );
     return {
