@@ -7,6 +7,8 @@ import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import { eq } from "drizzle-orm";
 import { Separator } from "@/components/ui/separator";
 
+export const dynamic = "force-dynamic";
+
 export default async function TicketListPage(props: {
   params: Promise<{ store_id: string }>;
 }) {

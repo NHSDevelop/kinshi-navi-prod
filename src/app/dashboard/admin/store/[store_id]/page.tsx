@@ -33,8 +33,7 @@ import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import FoodInfo from "@/features/store/food/info";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-// Store情報は1日に1回程度変わるため、ISR 1時間でキャッシュ
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 interface AdminStorePageProps {
   params: Promise<{ store_id: string }>;

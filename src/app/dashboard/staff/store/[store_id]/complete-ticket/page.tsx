@@ -9,6 +9,8 @@ import { eq } from "drizzle-orm";
 import Link from "next/link";
 import { requireStaffOrManageStoreUser } from "@/lib/auth-guard";
 
+export const dynamic = "force-dynamic";
+
 export default async function CallTicketPage(props: {
   params: Promise<{ store_id: string }>;
 }) {

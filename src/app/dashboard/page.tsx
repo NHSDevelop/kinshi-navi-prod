@@ -7,6 +7,8 @@ import { admins, staffs } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 import { getSessionFromRequestHeaders } from "@/lib/auth-session";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashBoardPage() {
   const session = await getSessionFromRequestHeaders();
 
