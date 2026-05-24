@@ -25,6 +25,8 @@ import CreateRegisterLane from "@/features/store/food/register/lane/create";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import { requireEventAdminUser } from "@/lib/auth-guard";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminEventPage(props: {
   params: Promise<{ event_id: string }>;
 }) {

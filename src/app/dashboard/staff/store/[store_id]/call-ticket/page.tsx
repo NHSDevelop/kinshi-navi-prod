@@ -7,8 +7,7 @@ import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import { eq } from "drizzle-orm";
 import { requireStaffOrManageStoreUser } from "@/lib/auth-guard";
 
-// Attraction情報は1日に1回程度変わるため、ISR 1時間でキャッシュ
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 export default async function CallTicketPage(props: {
   params: Promise<{ store_id: string }>;

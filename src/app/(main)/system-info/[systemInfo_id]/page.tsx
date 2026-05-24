@@ -3,7 +3,7 @@ import { getDb } from "@/lib/db/drizzle";
 import { systemInfos } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 export default async function SystemInfoPage(props: {
   params: Promise<{ systemInfo_id: string }>;

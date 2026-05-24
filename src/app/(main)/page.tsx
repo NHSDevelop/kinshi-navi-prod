@@ -2,6 +2,8 @@ import { LoadingPrompt } from "@/components/prompt/loading-prompt";
 import { SystemInfoList } from "@/features/system-info/list";
 import { Suspense } from "react";
 
+export const dynamic = "force-dynamic";
+
 export default async function EventTopPage() {
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6 pb-10 lg:gap-8">

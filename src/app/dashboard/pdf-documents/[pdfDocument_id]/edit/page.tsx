@@ -8,6 +8,8 @@ import { getDb } from "@/lib/db/drizzle";
 import { pdfDocuments } from "@/lib/db/schema";
 import UpdatePdfDocumentForm from "@/features/pdf/update-form";
 
+export const dynamic = "force-dynamic";
+
 export default async function EditPdfDocumentPage(props: {
   params: Promise<{ pdfDocument_id: string }>;
 }) {
