@@ -60,7 +60,7 @@ export async function createInvite(prevState: unknown, formData: FormData) {
       return {
         success: false,
         message: null,
-        error: "サインインが必要です。",
+        error: "ログインが必要です。",
       };
     }
 

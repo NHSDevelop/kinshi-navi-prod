@@ -121,7 +121,7 @@ async function main() {
   const signedIn = await ensureDashboardAuth(page);
   if (!signedIn) {
     console.log(
-      "[warn] ダッシュボードは未サインインでした。Google OAuth自動サインインは行わず、公開ページと(event)配下の撮影を継続します。",
+      "[warn] ダッシュボードは未ログインでした。Google OAuth自動ログインは行わず、公開ページと(event)配下の撮影を継続します。",
     );
   }
 

@@ -37,7 +37,7 @@ export function GoogleSignInButton({
       onClick={handleSignIn}
       disabled={disabled || isPending}
     >
-      {isPending ? "Googleに移動中..." : "Googleでサインイン"}
+      {isPending ? "Googleに移動中..." : "Googleでログイン"}
     </Button>
   );
 }

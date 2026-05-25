@@ -9,6 +9,7 @@ import {
   unsubscribeUser,
 } from "./action";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -106,7 +107,9 @@ export function PushNotificationManager() {
       if (!result?.success) {
         await sub.unsubscribe();
         throw new Error(
-          result?.message ?? result?.error ?? "購読の保存に失敗しました。",
+          result?.message ??
+            result?.error ??
+            "プッシュ通知の購読に失敗しました。",
         );
       }
 
@@ -125,7 +128,7 @@ export function PushNotificationManager() {
       await unsubscribeUser();
       setSubscription(null);
     } catch (error) {
-      console.error("解除エラー:", error);
+      console.error("無効化エラー:", error);
     } finally {
       setIsLoading(false);
     }
@@ -133,11 +136,11 @@ export function PushNotificationManager() {
 
   if (!isSupported) {
     return (
-      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-        <p className="text-sm text-red-600">
+      <Alert>
+        <AlertDescription>
           お使いのブラウザはプッシュ通知をサポートしていません。
-        </p>
-      </div>
+        </AlertDescription>
+      </Alert>
     );
   }
 
@@ -145,24 +148,28 @@ export function PushNotificationManager() {
     <div className="space-y-4 lg:space-y-8">
       {subscription ? (
         <>
-          <p>状態：プッシュ通知が有効です。</p>
+          <Alert variant="success">
+            <AlertDescription>状態：プッシュ通知が有効です。</AlertDescription>
+          </Alert>
           <Button
             variant="warn"
             onClick={unsubscribeFromPush}
             disabled={isLoading}
           >
-            {isLoading ? "処理中..." : "プッシュ通知を無効にする"}
+            {isLoading ? "処理中..." : "通知を無効化"}
           </Button>
         </>
       ) : (
         <>
-          <p>状態：プッシュ通知が無効です。</p>
+          <Alert variant="warn">
+            <AlertDescription>プッシュ通知が無効です。</AlertDescription>
+          </Alert>
           <Button
             onClick={subscribeToPush}
             disabled={isLoading}
             variant="success"
           >
-            {isLoading ? "処理中..." : "プッシュ通知を有効にする"}
+            {isLoading ? "処理中..." : "通知を有効化"}
           </Button>
         </>
       )}

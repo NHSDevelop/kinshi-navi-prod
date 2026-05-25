@@ -28,7 +28,7 @@ export default function GoogleSignIn({ callbackURL }: Props) {
       });
     } catch (error) {
       console.log(error);
-      throw new Error("Googleサインインエラー", { cause: error });
+      throw new Error("Googleログインエラー", { cause: error });
     } finally {
       setIsPending(false);
     }
@@ -41,7 +41,7 @@ export default function GoogleSignIn({ callbackURL }: Props) {
       className="flex items-center justify-center gap-2 max-w-md"
     >
       <AiOutlineGoogle />
-      <p>{isPending ? "サインイン中..." : "Googleでサインイン"}</p>
+      <p>{isPending ? "ログイン中..." : "Googleでログイン"}</p>
     </Button>
   );
 }
