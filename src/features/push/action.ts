@@ -38,7 +38,7 @@ export async function getPushPublicKey() {
 
 export async function getUserSubscription(): Promise<number> {
   const user = await getAuthenticatedUser();
-  if (!user || user.isAnonymous) {
+  if (!user) {
     return 0;
   }
 
@@ -53,10 +53,10 @@ export async function getUserSubscription(): Promise<number> {
 export async function subscribeUser(sub: PushSubscriptionJSONInput) {
   try {
     const user = await getAuthenticatedUser();
-    if (!user || user.isAnonymous) {
+    if (!user) {
       return {
         success: false,
-        message: "ログインが必要です。",
+        message: "匿名ユーザーを作成して下さい。",
       };
     }
 
@@ -94,10 +94,10 @@ export async function subscribeUser(sub: PushSubscriptionJSONInput) {
 export async function unsubscribeUser() {
   try {
     const user = await getAuthenticatedUser();
-    if (!user || user.isAnonymous) {
+    if (!user) {
       return {
         success: false,
-        message: "ログインが必要です。",
+        message: "匿名ユーザーを作成して下さい。",
       };
     }
 

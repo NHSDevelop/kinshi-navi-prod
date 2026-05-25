@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -13,23 +14,21 @@ interface BeforeInstallPromptEvent extends Event {
 export function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
-  const [isIOS] = useState(
-    () =>
-      typeof navigator !== "undefined" &&
-      /iPad|iPhone|iPod/.test(navigator.userAgent),
-  );
-  const [isInstalled, setIsInstalled] = useState(
-    () =>
-      typeof window !== "undefined" &&
-      (window.matchMedia("(display-mode: standalone)").matches ||
-        (typeof navigator !== "undefined" && "standalone" in navigator
-          ? (navigator as Navigator & { standalone?: boolean }).standalone ===
-            true
-          : false)),
-  );
+  const [isClient, setIsClient] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
   const [isInstalling, setIsInstalling] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
+    setIsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent));
+    setIsInstalled(
+      window.matchMedia("(display-mode: standalone)").matches ||
+        ("standalone" in navigator &&
+          (navigator as Navigator & { standalone?: boolean }).standalone ===
+            true),
+    );
+
     const onBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
       setDeferredPrompt(event as BeforeInstallPromptEvent);
@@ -48,6 +47,10 @@ export function InstallPrompt() {
       window.removeEventListener("appinstalled", onAppInstalled);
     };
   }, []);
+
+  if (!isClient) {
+    return null;
+  }
 
   if (isInstalled) {
     return null;
