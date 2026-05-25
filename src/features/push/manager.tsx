@@ -2,7 +2,12 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { getUserSubscription, subscribeUser, unsubscribeUser } from "./action";
+import {
+  getPushPublicKey,
+  getUserSubscription,
+  subscribeUser,
+  unsubscribeUser,
+} from "./action";
 import { Button } from "@/components/ui/button";
 
 function urlBase64ToUint8Array(base64String: string) {
@@ -47,8 +52,9 @@ export function PushNotificationManager() {
       const client_sub = await registration.pushManager.getSubscription();
 
       if (client_sub) {
-        const db_sub = await getUserSubscription();
-        if (db_sub.length === 0) {
+        const db_sub_length = await getUserSubscription();
+
+        if (db_sub_length === 0) {
           await client_sub.unsubscribe();
           setSubscription(null);
           return;
@@ -82,15 +88,28 @@ export function PushNotificationManager() {
           return;
         }
       }
+
+      const vapidPublicKey = await getPushPublicKey();
+
+      if (!vapidPublicKey) {
+        throw new Error("VAPID公開鍵が設定されていません。");
+      }
+
       const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(
-          process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-        ),
+        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
       });
 
       const serializedSub = JSON.parse(JSON.stringify(sub));
-      await subscribeUser(serializedSub);
+      const result = await subscribeUser(serializedSub);
+
+      if (!result?.success) {
+        await sub.unsubscribe();
+        throw new Error(
+          result?.message ?? result?.error ?? "購読の保存に失敗しました。",
+        );
+      }
+
       setSubscription(sub);
     } catch (error) {
       console.error("購読エラー:", error);

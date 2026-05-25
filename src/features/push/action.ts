@@ -3,14 +3,28 @@
 import { getAuthenticatedUser } from "@/lib/auth-guard";
 import { getDb } from "@/lib/db/drizzle";
 import { pushSubscriptions } from "@/lib/db/schema";
+import { getRuntimeEnv } from "@/lib/runtime-env";
 import { eq } from "drizzle-orm";
 import webpush from "web-push";
 
-webpush.setVapidDetails(
-  "mailto:support@kinshi-navi.com",
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!,
-);
+const vapidSubject = "mailto:support@kinshi-navi.com";
+let isWebPushConfigured = false;
+
+function configureWebPush() {
+  if (isWebPushConfigured) {
+    return;
+  }
+
+  const publicKey = getRuntimeEnv("NEXT_PUBLIC_VAPID_PUBLIC_KEY");
+  const privateKey = getRuntimeEnv("VAPID_PRIVATE_KEY");
+
+  if (!publicKey || !privateKey) {
+    throw new Error("VAPID keys are not configured.");
+  }
+
+  webpush.setVapidDetails(vapidSubject, publicKey, privateKey);
+  isWebPushConfigured = true;
+}
 
 export type PushSubscriptionJSONInput = {
   endpoint: string;
@@ -18,17 +32,22 @@ export type PushSubscriptionJSONInput = {
   expirationTime?: number | null;
 };
 
-export async function getUserSubscription() {
+export async function getPushPublicKey() {
+  return getRuntimeEnv("NEXT_PUBLIC_VAPID_PUBLIC_KEY") ?? null;
+}
+
+export async function getUserSubscription(): Promise<number> {
   const user = await getAuthenticatedUser();
   if (!user || user.isAnonymous) {
-    return [];
+    return 0;
   }
 
   const db = await getDb();
-  return await db
-    .select()
+  const subRows = await db
+    .select({ id: pushSubscriptions.id })
     .from(pushSubscriptions)
     .where(eq(pushSubscriptions.userId, user.id));
+  return subRows.length;
 }
 
 export async function subscribeUser(sub: PushSubscriptionJSONInput) {
@@ -109,6 +128,9 @@ export async function sendPushNotification(
   if (!sub) {
     throw new Error("No subscription available");
   }
+
+  configureWebPush();
+
   const subscription = {
     endpoint: sub.endpoint,
     keys: {
