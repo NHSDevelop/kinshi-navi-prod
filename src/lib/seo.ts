@@ -1,3 +1,5 @@
+import { getRuntimeEnv } from "@/lib/runtime-env";
+
 const DEFAULT_SITE_URL = "https://kinshi-navi.com/";
 
 export const SITE_NAME = "Kinshi Navi";
@@ -6,8 +8,8 @@ export const SITE_DESCRIPTION =
 
 export function getSiteUrl(): URL {
   const rawUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    process.env.SITE_URL ??
+    getRuntimeEnv("NEXT_PUBLIC_SITE_URL") ??
+    getRuntimeEnv("SITE_URL") ??
     DEFAULT_SITE_URL;
 
   try {

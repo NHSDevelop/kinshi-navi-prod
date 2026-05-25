@@ -1,3 +1,5 @@
+import { getRuntimeEnv } from "@/lib/runtime-env";
+
 const INVITE_TOKEN_CHARS =
   "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
 
@@ -32,7 +34,7 @@ export async function hashInviteToken(token: string) {
 
 export function buildInviteUrl(token: string, path: string) {
   const baseUrl =
-    process.env.BETTER_AUTH_URL ?? process.env.NEXT_PUBLIC_APP_URL;
+    getRuntimeEnv("BETTER_AUTH_URL") ?? getRuntimeEnv("NEXT_PUBLIC_APP_URL");
   const search = new URLSearchParams({ token }).toString();
   if (!baseUrl) {
     return `${path}?${search}`;
