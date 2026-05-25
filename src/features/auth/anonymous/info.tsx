@@ -106,12 +106,27 @@ export default async function UserInfo({ userId }: UserInfoProps) {
                       ) : null}
                     </div>
                     {binding.canUnlink ? (
-                      <UnlinkBindingButton
-                        bindingType={binding.kind}
-                        targetLabel={
-                          binding.storeName ?? binding.eventName ?? "対象"
+                      (() => {
+                        const unlinkableKind =
+                          binding.kind === "EVENT_ADMIN" ||
+                          binding.kind === "STORE_ADMIN" ||
+                          binding.kind === "STAFF"
+                            ? binding.kind
+                            : null;
+
+                        if (!unlinkableKind) {
+                          return null;
                         }
-                      />
+
+                        return (
+                          <UnlinkBindingButton
+                            bindingType={unlinkableKind}
+                            targetLabel={
+                              binding.storeName ?? binding.eventName ?? "対象"
+                            }
+                          />
+                        );
+                      })()
                     ) : (
                       <p className="text-sm text-main-900/60">
                         この権限は解除できません。
