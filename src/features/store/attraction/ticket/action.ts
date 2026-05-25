@@ -112,8 +112,9 @@ export async function createTicket(
   try {
     const db = await getDb();
     const attractionRows = await db
-      .select({ id: attractions.id })
+      .select({ id: attractions.id, isActive: stores.isActive })
       .from(attractions)
+      .innerJoin(stores, eq(attractions.storeId, stores.id))
       .where(eq(attractions.storeId, storeId))
       .limit(1);
     const attraction = attractionRows[0];
@@ -123,6 +124,14 @@ export async function createTicket(
         zodErrors: null,
         success: false,
         message: "企画が存在しません。",
+      };
+    }
+
+    if (!attraction.isActive) {
+      return {
+        zodErrors: null,
+        success: false,
+        message: "停止中のためチケットを発行できません。",
       };
     }
 
@@ -175,6 +184,79 @@ export async function createTicket(
       zodErrors: null,
       message: "サーバーエラーが発生しました",
       success: false,
+    };
+  }
+}
+
+export async function disableAttractionTickets(
+  prevState: unknown,
+  formData: FormData,
+) {
+  try {
+    const user = await getAuthenticatedUser();
+    if (!user) {
+      return { success: false as const, message: "ログインが必要です" };
+    }
+
+    const storeId = formData.get("storeId") as string;
+    if (!storeId || !(await canStaffOrManageStore(user.id, storeId))) {
+      return { success: false as const, message: "権限がありません" };
+    }
+
+    const db = await getDb();
+    const attractionRows = await db
+      .select({ id: attractions.id })
+      .from(attractions)
+      .where(eq(attractions.storeId, storeId))
+      .limit(1);
+    const attraction = attractionRows[0];
+
+    if (!attraction) {
+      return { success: false as const, message: "企画が存在しません" };
+    }
+
+    const targetRows = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(tickets)
+      .where(
+        and(
+          eq(tickets.attractionId, attraction.id),
+          inArray(tickets.status, ["ISSUED", "CALLED"]),
+        ),
+      );
+
+    const targetCount = Number(targetRows[0]?.count ?? 0);
+    if (targetCount === 0) {
+      invalidateTicketPages(storeId);
+      return {
+        success: true as const,
+        message: "無効化するチケットはありません。",
+        count: 0,
+      };
+    }
+
+    await db
+      .update(tickets)
+      .set({ status: "DISABLED" })
+      .where(
+        and(
+          eq(tickets.attractionId, attraction.id),
+          inArray(tickets.status, ["ISSUED", "CALLED"]),
+        ),
+      );
+
+    invalidateTicketPages(storeId);
+
+    return {
+      success: true as const,
+      message: `${targetCount}件のチケットを無効化しました。`,
+      count: targetCount,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      success: false as const,
+      message: "サーバーエラーが発生しました",
     };
   }
 }

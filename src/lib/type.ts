@@ -3,6 +3,7 @@ export const TICKET_STATUS_MAP = {
   CALLED: { label: "呼出中" },
   COMPLETED: { label: "完了" },
   CANCELED: { label: "キャンセル" },
+  DISABLED: { label: "無効" },
 } as const;
 
 export const STORE_TYPE_MAP = {

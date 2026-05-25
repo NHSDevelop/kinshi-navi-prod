@@ -11,6 +11,7 @@ export const ticketStatusValues = [
   "CALLED",
   "COMPLETED",
   "CANCELED",
+  "DISABLED",
 ] as const;
 export type TicketStatus = (typeof ticketStatusValues)[number];
 
