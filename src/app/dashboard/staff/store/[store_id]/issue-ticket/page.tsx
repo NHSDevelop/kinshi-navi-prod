@@ -2,7 +2,7 @@ import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import IssueTicket from "@/features/store/attraction/ticket/issue";
 import { getDb } from "@/lib/db/drizzle";
-import { attractions, stores } from "@/lib/db/schema";
+import { stores } from "@/lib/db/schema";
 import { requireStaffOrManageStoreUser } from "@/lib/auth-guard";
 
 import { eq } from "drizzle-orm";

@@ -21,7 +21,6 @@ import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import { requireStaffOrManageStoreUser } from "@/lib/auth-guard";
 import StoreInfo from "@/features/store/info";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { AiFillEdit } from "react-icons/ai";
 
 export const dynamic = "force-dynamic";
 
