@@ -10,7 +10,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "サインイン | Kinshi Navi",
+  title: "ログイン | Kinshi Navi",
 };
 
 interface Props {
@@ -26,16 +26,16 @@ export default async function SignInPage(props: Props) {
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 lg:gap-8">
       <section className="rounded-[1.75rem] border border-main-200 bg-main-50/70 p-5 md:p-7">
         <h1 className="text-2xl font-bold text-main-950 md:text-3xl">
-          管理者サインイン
+          管理者ログイン
         </h1>
         <p className="mt-3 text-sm leading-6 text-main-900/80 md:text-base">
-          管理者機能を利用するため、Googleアカウントでサインインしてください。
+          管理者機能を利用するため、Googleアカウントでログインしてください。
         </p>
       </section>
       <div className="flex flex-col gap-4">
         <Card className="w-full border-main-200 bg-white/95 shadow-sm">
           <CardHeader>
-            <CardTitle>管理者サインイン</CardTitle>
+            <CardTitle>管理者ログイン</CardTitle>
           </CardHeader>
           <CardContent className="w-full">
             <GoogleSignIn callbackURL={callbackURL} />
@@ -56,10 +56,10 @@ export default async function SignInPage(props: Props) {
         </Card>
         <div className="rounded-2xl border border-main-200 bg-white p-4 text-sm leading-6 text-slate-700 shadow-sm md:p-5 md:text-base">
           <p>
-            ※Webアプリとしてインストール済みの方はアプリ内ブラウザでサインインしてください。
+            ※Webアプリとしてインストール済みの方はアプリ内ブラウザでログインしてください。
           </p>
           <p className="mt-3">
-            ※ゲストユーザーの方で間違えてサインインしてしまった場合、ゲストユーザーのデータが削除されますのでご注意ください。
+            ※ゲストユーザーの方で間違えてログインしてしまった場合、ゲストユーザーのデータが削除されますのでご注意ください。
           </p>
         </div>
       </div>

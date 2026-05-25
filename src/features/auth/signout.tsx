@@ -13,7 +13,7 @@ export default function Signout() {
   };
   return (
     <Button variant="card" onClick={handleSignOut}>
-      サインアウト
+      ログアウト
     </Button>
   );
 }
