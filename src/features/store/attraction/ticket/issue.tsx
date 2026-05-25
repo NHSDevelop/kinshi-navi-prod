@@ -2,6 +2,7 @@ import { getDb } from "@/lib/db/drizzle";
 import { stores } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 import { IssueTicketForm } from "./issue-form";
+import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 
 interface IssueTicketProps {
   eventId: string;
@@ -19,11 +20,15 @@ export default async function IssueTicket({
     .select()
     .from(stores)
     .where(
-      and(eq(stores.eventId, eventId), eq(stores.storeType, "ATTRACTION")),
+      and(
+        eq(stores.eventId, eventId),
+        eq(stores.storeType, "ATTRACTION"),
+        eq(stores.isActive, true),
+      ),
     );
 
   if (storeList.length === 0) {
-    return <p>企画が存在しません</p>;
+    return <NotFoundPrompt context="開催中の企画" />;
   }
 
   return (

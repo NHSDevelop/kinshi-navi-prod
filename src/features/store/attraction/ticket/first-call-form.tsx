@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { MessagePrompt } from "@/components/prompt/message-prompt";
-import { ErrorPrompt } from "@/components/prompt/error-prompt";
 
 interface FirstCallTicketFormProps {
   attractionId: string;

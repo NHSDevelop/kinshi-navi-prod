@@ -49,6 +49,19 @@ export default async function SuperAdminHomePage() {
         <Separator />
         <Card className="border-main-200/80 shadow-sm">
           <CardHeader>
+            <CardTitle>お知らせの管理</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button variant="card" asChild>
+              <Link href="/dashboard/super-admin/system-info">
+                お知らせを管理
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+        <Separator />
+        <Card className="border-main-200/80 shadow-sm">
+          <CardHeader>
             <CardTitle>PDFを管理</CardTitle>
           </CardHeader>
           <CardContent>

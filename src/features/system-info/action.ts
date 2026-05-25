@@ -31,12 +31,23 @@ export type UpdateSystemInfoState = {
   error?: string | null;
 };
 
+export type DeleteSystemInfoState = {
+  success?: boolean;
+  message?: string | null;
+  error?: string | null;
+};
+
 function revaliedateSystemInfoPages(systemInfoId?: string) {
   revalidatePath(`/`);
+  revalidatePath(`/dashboard/super-admin/system-info`);
   if (systemInfoId) {
     revalidatePath(`/system-info/${systemInfoId}/`);
   }
 }
+
+const deleteSystemInfoInputSchema = z.object({
+  systemInfoId: z.string().min(1, "必須項目です"),
+});
 
 export async function createSystemInfo(prevState: unknown, formData: FormData) {
   try {
@@ -154,6 +165,76 @@ export async function updateSystemInfo(
     console.log(error);
     return {
       zodErrors: null,
+      success: false,
+      message: null,
+      error: "サーバーエラーが発生しました",
+    };
+  }
+}
+
+export async function deleteSystemInfo(
+  prevState: unknown,
+  formData: FormData,
+): Promise<DeleteSystemInfoState> {
+  try {
+    const user = await getAuthenticatedUser();
+    if (!user) {
+      return {
+        success: false,
+        message: null,
+        error: "ログインが必要です",
+      };
+    }
+
+    if (!(await canSuperAdmin(user.id))) {
+      return {
+        success: false,
+        message: null,
+        error: "権限がありません",
+      };
+    }
+
+    const validationResult = deleteSystemInfoInputSchema.safeParse({
+      systemInfoId: formData.get("systemInfoId") as string,
+    });
+
+    if (!validationResult.success) {
+      return {
+        success: false,
+        message: null,
+        error: "入力形式が正しくありません",
+      };
+    }
+
+    const { systemInfoId } = validationResult.data;
+    const db = await getDb();
+
+    const rows = await db
+      .select({ id: systemInfos.id })
+      .from(systemInfos)
+      .where(eq(systemInfos.id, systemInfoId))
+      .limit(1);
+
+    if (rows.length === 0) {
+      return {
+        success: false,
+        message: null,
+        error: "お知らせが存在しません",
+      };
+    }
+
+    await db.delete(systemInfos).where(eq(systemInfos.id, systemInfoId));
+
+    revaliedateSystemInfoPages(systemInfoId);
+
+    return {
+      success: true,
+      message: "お知らせの削除が完了しました",
+      error: null,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
       success: false,
       message: null,
       error: "サーバーエラーが発生しました",

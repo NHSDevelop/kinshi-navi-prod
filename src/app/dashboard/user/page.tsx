@@ -38,7 +38,7 @@ export default async function UserPage() {
   return (
     <DashboardPageShell
       title="ユーザーページ"
-      description="アカウント設定やログアウト、登録情報の確認をまとめています。"
+      description="権限区分や紐づいているイベント・店舗の確認、アカウント設定、ログアウトをまとめています。"
     >
       <div className="flex flex-col gap-4">
         <Separator />

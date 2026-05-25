@@ -57,8 +57,6 @@ export default async function AdminEventPage(props: {
     notFound();
   }
 
-  //TODO ToActiveEventの時にInfoが変化しないのを修正する
-
   return (
     <DashboardPageShell
       title="イベントの管理"
@@ -82,11 +80,6 @@ export default async function AdminEventPage(props: {
             </Button>
 
             <EventInfo eventId={event_id} />
-            <ToMainEvent eventId={event_id} isMain={eventRows[0].isMain} />
-            <ToActiveEvent
-              eventId={event_id}
-              isActive={eventRows[0].isActive}
-            />
           </CardContent>
         </Card>
         <Separator />

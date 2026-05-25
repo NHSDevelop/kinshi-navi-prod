@@ -3,6 +3,7 @@
 import {
   canManageEvent,
   canManageStore,
+  canStaffOrManageStore,
   getAuthenticatedUser,
 } from "@/lib/auth-guard";
 import { getDb } from "@/lib/db/drizzle";
@@ -608,7 +609,7 @@ export async function toActiveStore(prevState: unknown, formData: FormData) {
 
     const db = await getDb();
     const storeId = formData.get("storeId") as string;
-    if (!(await canManageStore(user.id, storeId))) {
+    if (!(await canStaffOrManageStore(user.id, storeId))) {
       return {
         success: false,
         message: "権限がありません。",

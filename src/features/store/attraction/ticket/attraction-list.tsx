@@ -36,6 +36,7 @@ const STATUS_OPTIONS: { value: TicketStatus | null; label: string }[] = [
   { value: "CALLED", label: "呼び出し中" },
   { value: "COMPLETED", label: "完了" },
   { value: "CANCELED", label: "キャンセル" },
+  { value: "DISABLED", label: "無効" },
 ];
 
 export default function AttractionTicketList({

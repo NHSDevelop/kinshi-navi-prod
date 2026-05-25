@@ -4,18 +4,29 @@ import { useActionState } from "react";
 import { toActiveStore } from "./action";
 import { Button } from "@/components/ui/button";
 import { ErrorPrompt } from "@/components/prompt/error-prompt";
+import DisableAttractionTickets from "@/features/store/attraction/ticket/disable";
 
 type Props = {
   storeId: string;
   isActive: boolean;
+  activeTicketCount?: number;
 };
 
-export default function ToActiveStore({ storeId, isActive }: Props) {
+export default function ToActiveStore({
+  storeId,
+  isActive,
+  activeTicketCount = 0,
+}: Props) {
   const [state, formAction, isPending] = useActionState(toActiveStore, null);
   const isActiveStore = state?.isActive ?? isActive;
 
   return (
     <div className="space-y-4">
+      <DisableAttractionTickets
+        storeId={storeId}
+        isActive={isActiveStore}
+        activeTicketCount={activeTicketCount}
+      />
       <form action={formAction}>
         <input type="hidden" name="storeId" value={storeId} />
         <Button type="submit" disabled={isPending}>

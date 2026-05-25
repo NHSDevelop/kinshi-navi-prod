@@ -32,6 +32,9 @@ import ItemSelectLink from "@/features/store/food/item/components/select-link";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import FoodInfo from "@/features/store/food/info";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { tickets } from "@/lib/db/schema";
+import { inArray, sql } from "drizzle-orm";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 export const dynamic = "force-dynamic";
 
@@ -44,37 +47,51 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
 
   const db = await getDb();
 
-  const [storeRows, attractionRows, foodRows, adminRows, staffRows] =
-    await Promise.all([
-      db.select().from(stores).where(eq(stores.id, store_id)).limit(1),
-      db
-        .select()
-        .from(attractions)
-        .where(eq(attractions.storeId, store_id))
-        .limit(1),
-      db.select().from(foods).where(eq(foods.storeId, store_id)).limit(1),
-      db
-        .select({
-          id: admins.id,
-          name: users.name,
-          userId: admins.userId,
-          role: admins.role,
-        })
-        .from(admins)
-        .innerJoin(users, eq(users.id, admins.userId))
-        .where(
-          and(eq(admins.storeId, store_id), eq(admins.role, "STORE_ADMIN")),
+  const [
+    storeRows,
+    attractionRows,
+    foodRows,
+    adminRows,
+    staffRows,
+    activeTicketRows,
+  ] = await Promise.all([
+    db.select().from(stores).where(eq(stores.id, store_id)).limit(1),
+    db
+      .select()
+      .from(attractions)
+      .where(eq(attractions.storeId, store_id))
+      .limit(1),
+    db.select().from(foods).where(eq(foods.storeId, store_id)).limit(1),
+    db
+      .select({
+        id: admins.id,
+        name: users.name,
+        userId: admins.userId,
+        role: admins.role,
+      })
+      .from(admins)
+      .innerJoin(users, eq(users.id, admins.userId))
+      .where(and(eq(admins.storeId, store_id), eq(admins.role, "STORE_ADMIN"))),
+    db
+      .select({
+        id: staffs.id,
+        name: users.name,
+        userId: staffs.userId,
+      })
+      .from(staffs)
+      .innerJoin(users, eq(users.id, staffs.userId))
+      .where(eq(staffs.storeId, store_id)),
+    db
+      .select({ count: sql<number>`count(*)` })
+      .from(tickets)
+      .innerJoin(attractions, eq(tickets.attractionId, attractions.id))
+      .where(
+        and(
+          eq(attractions.storeId, store_id),
+          inArray(tickets.status, ["ISSUED", "CALLED"]),
         ),
-      db
-        .select({
-          id: staffs.id,
-          name: users.name,
-          userId: staffs.userId,
-        })
-        .from(staffs)
-        .innerJoin(users, eq(users.id, staffs.userId))
-        .where(eq(staffs.storeId, store_id)),
-    ]);
+      ),
+  ]);
 
   if (!storeRows[0]) {
     notFound();
@@ -107,6 +124,7 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
         <ToActiveStore
           storeId={storeRows[0].id}
           isActive={storeRows[0].isActive}
+          activeTicketCount={Number(activeTicketRows[0]?.count ?? 0)}
         />
         <Separator />
         {attractionRows?.length > 0 && (
@@ -130,6 +148,41 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
               </CardContent>
             </Card>
             <Separator />
+            <p className="text-lg">操作メニュー</p>
+            <ScrollArea className="w-full whitespace-nowrap rounded-md">
+              <div className="flex w-max gap-2 pb-4">
+                <Button asChild variant="card">
+                  <Link href={`/dashboard/admin/store/${store_id}/call-ticket`}>
+                    チケットを呼び出す
+                  </Link>
+                </Button>
+                <Button asChild variant="card">
+                  <Link
+                    href={`/dashboard/admin/store/${store_id}/complete-ticket`}
+                  >
+                    チケットの受付
+                  </Link>
+                </Button>
+                <Button asChild variant="card">
+                  <Link
+                    href={`/dashboard/admin/store/${store_id}/issue-ticket`}
+                  >
+                    チケットを発行する（紙）
+                  </Link>
+                </Button>
+                <Button asChild variant="card">
+                  <Link href={`/dashboard/admin/store/${store_id}/ticket-list`}>
+                    チケットの一覧
+                  </Link>
+                </Button>
+                <Button asChild variant="card">
+                  <Link href={`/dashboard/admin/store/${store_id}/show-status`}>
+                    待機状況を表示
+                  </Link>
+                </Button>
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
           </div>
         )}
         {foodRows?.length > 0 && (
@@ -153,35 +206,41 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
               </CardContent>
             </Card>
             <Separator />
-            <div className="flex  gap-4">
-              <Button asChild variant="card">
-                <div className="flex gap-4">
-                  <AiFillPlusCircle />
-                  <Link href={`/dashboard/admin/store/${store_id}/create-item`}>
-                    商品を登録
+            <p className="text-lg">操作メニュー</p>
+            <ScrollArea className="w-full whitespace-nowrap rounded-md">
+              <div className="flex w-max gap-2 pb-4">
+                <Button asChild variant="card">
+                  <div className="flex gap-4">
+                    <AiFillPlusCircle />
+                    <Link
+                      href={`/dashboard/admin/store/${store_id}/create-item`}
+                    >
+                      商品を登録
+                    </Link>
+                  </div>
+                </Button>
+                <Button asChild variant="card">
+                  <div className="flex gap-4">
+                    <Link href={`/dashboard/admin/store/${store_id}/add-stock`}>
+                      商品の在庫を追加
+                    </Link>
+                  </div>
+                </Button>
+                <Button asChild variant="card">
+                  <Link
+                    href={`/dashboard/staff/store/${store_id}/register-log-history`}
+                  >
+                    会計・在庫履歴
                   </Link>
-                </div>
-              </Button>
-              <Button asChild variant="card">
-                <div className="flex gap-4">
-                  <Link href={`/dashboard/admin/store/${store_id}/add-stock`}>
-                    商品の在庫を追加
+                </Button>
+                <Button asChild variant="card">
+                  <Link href={`/dashboard/staff/store/${store_id}/register`}>
+                    レジページ
                   </Link>
-                </div>
-              </Button>
-              <Button asChild variant="card">
-                <Link
-                  href={`/dashboard/staff/store/${store_id}/register-log-history`}
-                >
-                  会計・在庫履歴
-                </Link>
-              </Button>
-              <Button asChild variant="card">
-                <Link href={`/dashboard/staff/store/${store_id}/register`}>
-                  レジページ
-                </Link>
-              </Button>
-            </div>
+                </Button>
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
             <Separator />
             <h3 className="text-lg">商品設定の更新</h3>
             <ItemSelectLink
