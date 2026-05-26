@@ -1,6 +1,6 @@
-import { Separator } from "@/components/ui/separator";
 import CreateStockLog from "@/features/store/food/stock-log/create";
 import { requireStoreAdminUser } from "@/lib/auth-guard";
+import { DashboardPageShell } from "@/components/dashboard/page-shell";
 
 export default async function AddItemStockPage(props: {
   params: Promise<{ store_id: string }>;
@@ -9,10 +9,8 @@ export default async function AddItemStockPage(props: {
   await requireStoreAdminUser(store_id);
 
   return (
-    <div className="space-y-4 lg:space-y-8">
-      <h1 className="font-bold text-xl">商品の在庫を追加</h1>
-      <Separator />
+    <DashboardPageShell title="商品の在庫を追加">
       <CreateStockLog storeId={store_id} />
-    </div>
+    </DashboardPageShell>
   );
 }

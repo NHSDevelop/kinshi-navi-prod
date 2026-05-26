@@ -73,10 +73,8 @@ export default async function SuperAdminHomePage() {
         </Card>
         <Separator />
         <Card className="border-main-200/80 shadow-sm">
-          <CardHeader>
+          <CardHeader className="flex items-center justify-between">
             <CardTitle>イベントの管理</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
             <Button asChild variant="card">
               <Link
                 href="/dashboard/super-admin/create-event"
@@ -86,6 +84,8 @@ export default async function SuperAdminHomePage() {
                 イベントを作成
               </Link>
             </Button>
+          </CardHeader>
+          <CardContent className="space-y-4">
             {eventRows.length > 0 ? (
               <EventSelectLink
                 href="/dashboard/admin/event"

@@ -6,13 +6,21 @@ import {
   UserRound,
   UtensilsCrossed,
   Vote,
+  House,
 } from "lucide-react";
 
 export type QuickAction = {
   href: string;
   title: string;
   description: string;
-  iconName: "user" | "ticket" | "store" | "clock" | "utensils" | "vote";
+  iconName:
+    | "user"
+    | "ticket"
+    | "store"
+    | "clock"
+    | "utensils"
+    | "vote"
+    | "house";
 };
 
 export const quickActions: QuickAction[] = [
@@ -67,4 +75,5 @@ export const quickActionIconMap: Record<QuickAction["iconName"], LucideIcon> = {
   clock: Clock3,
   utensils: UtensilsCrossed,
   vote: Vote,
+  house: House,
 };

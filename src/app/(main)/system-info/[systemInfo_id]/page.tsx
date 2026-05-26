@@ -2,6 +2,11 @@ import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import { getDb } from "@/lib/db/drizzle";
 import { systemInfos } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "運営からのお知らせ ",
+};
 
 export const dynamic = "force-dynamic";
 

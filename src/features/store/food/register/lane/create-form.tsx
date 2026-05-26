@@ -32,6 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 
 type StoreOption = {
   storeId: string;
@@ -179,44 +180,35 @@ export default function CreateRegisterLaneForm({
         )}
 
         <form action={formAction}>
-          <FieldGroup>
-            <FieldSet>
-              <Field>
-                <FieldLabel>作成するレーン数</FieldLabel>
-                <Input
-                  name="laneCount"
-                  type="number"
-                  min={1}
-                  max={50}
-                  required
-                  disabled={isPending}
-                  defaultValue={state.laneCount}
-                />
-                <FieldError message={state.zodErrors?.laneCount?.[0]} />
-              </Field>
-            </FieldSet>
-            <FieldSeparator />
-            <input type="hidden" name="eventId" value={eventId} />
-          </FieldGroup>
-          <Button
-            type="submit"
-            variant="card"
-            className="mt-4"
-            disabled={isPending}
-          >
-            {isPending ? "作成中..." : "レジレーンを作成"}
-          </Button>
+          <div className="flex gap-2 items-end">
+            <Field>
+              <FieldLabel>作成するレーン数</FieldLabel>
+              <Input
+                name="laneCount"
+                type="number"
+                min={1}
+                max={50}
+                required
+                disabled={isPending}
+                defaultValue={state.laneCount}
+              />
+              <FieldError message={state.zodErrors?.laneCount?.[0]} />
+            </Field>
+            <Button
+              type="submit"
+              variant="card"
+              className="mt-4"
+              disabled={isPending}
+            >
+              {isPending ? "作成中..." : "レジレーンを作成"}
+            </Button>
+          </div>
+          <input type="hidden" name="eventId" value={eventId} />
         </form>
-
+        <Separator className="my-4" />
         {state.success && <MessagePrompt message={state.message} />}
         {!state.success && state.message && (
           <ErrorPrompt error={state.message} />
-        )}
-
-        {state.success && (
-          <Button className="mt-3" onClick={() => router.refresh()}>
-            一覧を更新
-          </Button>
         )}
 
         <div className="mt-6 space-y-2">

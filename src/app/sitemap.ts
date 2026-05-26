@@ -1,27 +1,60 @@
 import type { MetadataRoute } from "next";
-import { getSiteUrl } from "@/lib/seo";
-
-const PUBLIC_PATHS = [
-  "/",
-  "/event-list",
-  "/help",
-  "/help/admin",
-  "/help/ticket",
-  "/help/inventory",
-  "/help/register",
-  "/help/management",
-  "/terms",
-  "/policy",
-];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const siteUrl = getSiteUrl();
-  const now = new Date();
-
-  return PUBLIC_PATHS.map((path) => ({
-    url: new URL(path, siteUrl).toString(),
-    lastModified: now,
-    changeFrequency: path === "/" ? "daily" : "weekly",
-    priority: path === "/" ? 1 : 0.7,
-  }));
+  return [
+    {
+      url: "https://kinshi-navi.com/",
+      lastModified: new Date(),
+      changeFrequency: "yearly",
+      priority: 1,
+    },
+    {
+      url: "https://kinshi-navi.com/issue-ticket",
+      lastModified: new Date(),
+      changeFrequency: "yearly",
+      priority: 1,
+    },
+    {
+      url: "https://kinshi-navi.com/vote/attraction",
+      lastModified: new Date(),
+      changeFrequency: "yearly",
+      priority: 1,
+    },
+    {
+      url: "https://kinshi-navi.com/vote/food",
+      lastModified: new Date(),
+      changeFrequency: "yearly",
+      priority: 1,
+    },
+    {
+      url: "https://kinshi-navi.com/store-list",
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: "https://kinshi-navi.com/attraction/waiting-status",
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: "https://kinshi-navi.com/food/stock-status",
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: "https://kinshi-navi.com/help",
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.5,
+    },
+    {
+      url: "https://kinshi-navi.com/anonymous-user",
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.5,
+    },
+  ];
 }

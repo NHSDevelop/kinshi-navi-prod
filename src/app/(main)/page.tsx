@@ -1,6 +1,11 @@
 import { LoadingPrompt } from "@/components/prompt/loading-prompt";
 import { SystemInfoList } from "@/features/system-info/list";
 import { Suspense } from "react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Kinshi Navi",
+};
 
 export const dynamic = "force-dynamic";
 

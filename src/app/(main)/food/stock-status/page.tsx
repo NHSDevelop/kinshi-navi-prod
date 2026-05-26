@@ -4,6 +4,12 @@ import { Suspense } from "react";
 import { LoadingPrompt } from "@/components/prompt/loading-prompt";
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import { getMainEvent } from "@/features/event/action";
+import { PageBunner } from "@/components/navigation/page-bunner";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "模擬店の商品在庫状況 ",
+};
 
 export const dynamic = "force-dynamic";
 
@@ -17,14 +23,10 @@ export default async function FoodStockStatusPage() {
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 lg:gap-8">
       <RoutePollingRefresh intervalMs={5 * 60 * 1000} />
-      <section className="rounded-[1.75rem] border border-main-200 bg-main-50/70 p-5 md:p-7">
-        <h1 className="text-2xl font-bold text-main-950 md:text-3xl">
-          各模擬店の商品在庫状況
-        </h1>
-        <p className="mt-3 text-sm leading-6 text-main-900/80 md:text-base">
-          売り切れや在庫数を一覧で確認できます。5分ごと、または画面に戻ったときに更新します。
-        </p>
-      </section>
+      <PageBunner
+        title="模擬店の商品在庫状況"
+        description="売り切れや在庫数を一覧で確認できます。5分ごと、または画面に戻ったときに更新します。"
+      />
       <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
         <Suspense fallback={<LoadingPrompt context="在庫状況" />}>
           <ItemStockStatus eventId={mainEvent.id} />

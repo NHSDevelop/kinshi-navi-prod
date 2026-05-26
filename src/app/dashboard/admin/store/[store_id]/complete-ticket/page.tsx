@@ -8,6 +8,7 @@ import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
 import { requireStaffOrManageStoreUser } from "@/lib/auth-guard";
+import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 
 export const dynamic = "force-dynamic";
 
@@ -31,20 +32,18 @@ export default async function CallTicketPage(props: {
     return (
       <DashboardPageShell
         title="チケット受付"
-        description="受付を完了し、必要に応じて紙チケットへ進みます。"
+        description="呼び出した整理券の受付を完了します。"
       >
-        <p>企画が存在しません。</p>
+        <NotFoundPrompt context="企画" />
       </DashboardPageShell>
     );
   }
   return (
     <DashboardPageShell
       title="チケット受付"
-      description="受付を完了し、必要に応じて紙チケットへ進みます。"
+      description="呼び出した整理券の受付を完了します。"
     >
       <div className="space-y-4 lg:space-y-8">
-        <h1 className="font-bold text-xl">チケット受付ページ</h1>
-        <Separator />
         <CompleteTicket />
         <Button asChild variant="warn">
           <Link href={`/dashboard/staff/store/${store_id}/ticket-list`}>

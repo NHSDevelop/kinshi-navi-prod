@@ -9,6 +9,12 @@ import { getSessionFromRequestHeaders } from "@/lib/auth-session";
 import { Suspense } from "react";
 import { LoadingPrompt } from "@/components/prompt/loading-prompt";
 import { Separator } from "@/components/ui/separator";
+import { PageBunner } from "@/components/navigation/page-bunner";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "ゲストユーザーページ ",
+};
 
 export default async function AnonymousUserPage() {
   const session = await getSessionFromRequestHeaders();
@@ -17,14 +23,10 @@ export default async function AnonymousUserPage() {
   if (!user) {
     return (
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 lg:gap-8">
-        <section className="rounded-[1.75rem] border border-main-200 bg-main-50/70 p-5 md:p-7">
-          <h1 className="text-2xl font-bold text-main-950 md:text-3xl">
-            ゲストユーザーページ
-          </h1>
-          <p className="mt-3 text-sm leading-6 text-main-900/80 md:text-base">
-            まずゲストユーザーを作成してください。
-          </p>
-        </section>
+        <PageBunner
+          title="ゲストユーザーページ"
+          description="まずユーザーを作成して下さい。"
+        />
         <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
           <Suspense fallback={<LoadingPrompt context="ユーザー作成ボタン" />}>
             <CreateAnonymousUser />
@@ -38,15 +40,10 @@ export default async function AnonymousUserPage() {
   }
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 lg:gap-8">
-      <section className="rounded-[1.75rem] border border-main-200 bg-main-50/70 p-5 md:p-7">
-        <h1 className="text-2xl font-bold text-main-950 md:text-3xl">
-          ゲストユーザーページ
-        </h1>
-        <p className="mt-3 text-sm leading-6 text-main-900/80 md:text-base">
-          通知設定、取得済みチケットの確認、ゲストユーザー管理をこのページで行えます。
-        </p>
-      </section>
-
+      <PageBunner
+        title="ゲストユーザーページ"
+        description="通知設定、取得済みチケットの確認、ゲストユーザー管理をこのページで行えます。"
+      />
       <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
         <h2 className="text-lg font-bold text-main-950 md:text-xl mb-4">
           ユーザー設定

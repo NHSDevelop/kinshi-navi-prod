@@ -5,6 +5,12 @@ import { getMainEvent } from "@/features/event/action";
 import IssueTicket from "@/features/store/attraction/ticket/issue";
 import { getSessionFromRequestHeaders } from "@/lib/auth-session";
 import { Suspense } from "react";
+import { PageBunner } from "@/components/navigation/page-bunner";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "チケット発行 ",
+};
 
 export const dynamic = "force-dynamic";
 
@@ -21,14 +27,10 @@ export default async function TicketIssuePage() {
   if (!user) {
     return (
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 lg:gap-8">
-        <section className="rounded-[1.75rem] border border-main-200 bg-main-50/70 p-5 md:p-7">
-          <h1 className="text-2xl font-bold text-main-950 md:text-3xl">
-            チケットを発行する
-          </h1>
-          <p className="mt-3 text-sm leading-6 text-main-900/80 md:text-base">
-            ゲストユーザーとしてログインして、チケットを発行できます。
-          </p>
-        </section>
+        <PageBunner
+          title="チケットを発行する"
+          description="ゲストユーザーとしてログインして、チケットを発行できます。"
+        />
         <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
           <Suspense
             fallback={<LoadingPrompt context="ゲストユーザーの作成画面" />}
@@ -42,14 +44,10 @@ export default async function TicketIssuePage() {
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 lg:gap-8">
-      <section className="rounded-[1.75rem] border border-main-200 bg-main-50/70 p-5 md:p-7">
-        <h1 className="text-2xl font-bold text-main-950 md:text-3xl">
-          チケットを発行する
-        </h1>
-        <p className="mt-3 text-sm leading-6 text-main-900/80 md:text-base">
-          混雑時の呼び出しをスムーズにするため、受付用チケットをこの画面から発行できます。
-        </p>
-      </section>
+      <PageBunner
+        title="チケットを発行する"
+        description="混雑時の呼び出しをスムーズにするため、受付用チケットをこの画面から発行できます。"
+      />
       {user.isAnonymous ? (
         <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
           <Suspense fallback={<LoadingPrompt context="発行画面" />}>

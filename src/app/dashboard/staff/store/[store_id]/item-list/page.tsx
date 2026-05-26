@@ -1,5 +1,4 @@
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
-import { Separator } from "@/components/ui/separator";
 import ItemList from "@/features/store/food/item/list";
 import { getDb } from "@/lib/db/drizzle";
 import { foods } from "@/lib/db/schema";
@@ -40,11 +39,7 @@ export default async function ItemListPage(props: {
       title="商品一覧"
       description="模擬店の商品の一覧を表示します。"
     >
-      <div className="space-y-4 lg:space-y-8">
-        <h1 className="font-bold text-xl">商品の一覧</h1>
-        <Separator />
-        <ItemList foodId={foodRows[0].id} />
-      </div>
+      <ItemList foodId={foodRows[0].id} />
     </DashboardPageShell>
   );
 }

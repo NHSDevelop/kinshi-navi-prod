@@ -1,5 +1,6 @@
 import UpdateFoodConfig from "@/features/store/food/update";
 import { requireStoreAdminUser } from "@/lib/auth-guard";
+import { DashboardPageShell } from "@/components/dashboard/page-shell";
 
 export default async function EditFoodConfigPage(props: {
   params: Promise<{ store_id: string }>;
@@ -8,9 +9,8 @@ export default async function EditFoodConfigPage(props: {
   await requireStoreAdminUser(store_id);
 
   return (
-    <div className="space-y-4 lg:space-y-8">
-      <h1 className="font-bold text-xl">模擬店の設定を編集</h1>
+    <DashboardPageShell title="模擬店の設定を編集">
       <UpdateFoodConfig storeId={store_id} />
-    </div>
+    </DashboardPageShell>
   );
 }

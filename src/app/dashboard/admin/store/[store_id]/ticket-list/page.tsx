@@ -3,9 +3,7 @@ import { getDb } from "@/lib/db/drizzle";
 import { attractions, tickets } from "@/lib/db/schema";
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
-
 import { eq } from "drizzle-orm";
-import { Separator } from "@/components/ui/separator";
 
 export const dynamic = "force-dynamic";
 
@@ -51,14 +49,10 @@ export default async function TicketListPage(props: {
       title="チケット一覧"
       description="企画のチケット一覧を表示します。"
     >
-      <div className="space-y-4 lg:space-y-8">
-        <h1 className="font-bold text-xl">チケットの一覧</h1>
-        <Separator />
-        <AttractionTicketList
-          storeId={store_id}
-          initialTickets={initialTickets}
-        />
-      </div>
+      <AttractionTicketList
+        storeId={store_id}
+        initialTickets={initialTickets}
+      />
     </DashboardPageShell>
   );
 }

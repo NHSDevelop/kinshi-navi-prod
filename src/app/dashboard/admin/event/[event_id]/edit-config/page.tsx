@@ -1,5 +1,6 @@
 import UpdateEventConfig from "@/features/event/update";
 import { requireEventAdminUser } from "@/lib/auth-guard";
+import { DashboardPageShell } from "@/components/dashboard/page-shell";
 
 export default async function EditEventConfigPage(props: {
   params: Promise<{ event_id: string }>;
@@ -8,9 +9,8 @@ export default async function EditEventConfigPage(props: {
   await requireEventAdminUser(event_id);
 
   return (
-    <div className="space-y-4 lg:space-y-8">
-      <h1 className="font-bold text-xl">イベントの設定を編集</h1>
+    <DashboardPageShell title="イベントの設定を編集">
       <UpdateEventConfig eventId={event_id} />
-    </div>
+    </DashboardPageShell>
   );
 }

@@ -1,5 +1,6 @@
 import IssueInviteLink from "@/features/auth/invite/issue-link";
 import { requireStoreAdminUser } from "@/lib/auth-guard";
+import { DashboardPageShell } from "@/components/dashboard/page-shell";
 
 export default async function IssueStaffnvitePage(props: {
   params: Promise<{ store_id: string }>;
@@ -8,13 +9,13 @@ export default async function IssueStaffnvitePage(props: {
   await requireStoreAdminUser(store_id);
 
   return (
-    <div className="space-y-4 lg:space-y-8">
+    <DashboardPageShell title="店舗のスタッフを招待">
       <h1 className="font-bold text-xl">店舗のスタッフを招待</h1>
       <IssueInviteLink
         issuerScope="STORE_ADMIN"
         targetScope="STAFF"
         storeId={store_id}
       />
-    </div>
+    </DashboardPageShell>
   );
 }

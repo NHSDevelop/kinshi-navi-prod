@@ -8,9 +8,10 @@ import {
 import GoogleSignIn from "@/features/auth/google-signin";
 import Link from "next/link";
 import { Metadata } from "next";
+import { PageBunner } from "@/components/navigation/page-bunner";
 
 export const metadata: Metadata = {
-  title: "ログイン | Kinshi Navi",
+  title: "ログイン ",
 };
 
 interface Props {
@@ -24,14 +25,10 @@ export default async function SignInPage(props: Props) {
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 lg:gap-8">
-      <section className="rounded-[1.75rem] border border-main-200 bg-main-50/70 p-5 md:p-7">
-        <h1 className="text-2xl font-bold text-main-950 md:text-3xl">
-          管理者ログイン
-        </h1>
-        <p className="mt-3 text-sm leading-6 text-main-900/80 md:text-base">
-          管理者機能を利用するため、Googleアカウントでログインしてください。
-        </p>
-      </section>
+      <PageBunner
+        title="管理者ログイン"
+        description="管理者機能を利用するため、Googleアカウントでログインしてください。"
+      />
       <div className="flex flex-col gap-4">
         <Card className="w-full border-main-200 bg-white/95 shadow-sm">
           <CardHeader>
