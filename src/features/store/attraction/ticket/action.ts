@@ -441,22 +441,23 @@ export async function completeTicket(ticketId: string) {
         message: "整理券は呼び出されていません",
       };
     }
-    await db
-      .update(tickets)
-      .set({ status: "COMPLETED" })
-      .where(eq(tickets.id, ticketId));
-
-    await db
-      .update(tickets)
-      .set({ status: "CALLED" })
-      .where(
-        and(
-          eq(tickets.attractionId, fetchedTicket.attractionId),
-          eq(tickets.status, "ISSUED"),
-          gt(tickets.index, fetchedTicket.index),
-          lte(tickets.index, fetchedTicket.index + 3),
+    await db.batch([
+      db
+        .update(tickets)
+        .set({ status: "COMPLETED" })
+        .where(eq(tickets.id, ticketId)),
+      db
+        .update(tickets)
+        .set({ status: "CALLED" })
+        .where(
+          and(
+            eq(tickets.attractionId, fetchedTicket.attractionId),
+            eq(tickets.status, "ISSUED"),
+            gt(tickets.index, fetchedTicket.index),
+            lte(tickets.index, fetchedTicket.index + 3),
+          ),
         ),
-      );
+    ]);
 
     invalidateTicketPages(storeId);
 
@@ -619,22 +620,23 @@ export async function completePaperTicket(
         message: "整理券は呼び出されていません",
       };
     }
-    await db
-      .update(tickets)
-      .set({ status: "COMPLETED" })
-      .where(eq(tickets.id, ticketId));
-
-    await db
-      .update(tickets)
-      .set({ status: "CALLED" })
-      .where(
-        and(
-          eq(tickets.attractionId, fetchedTicket.attractionId),
-          eq(tickets.status, "ISSUED"),
-          gt(tickets.index, fetchedTicket.index),
-          lte(tickets.index, fetchedTicket.index + 3),
+    await db.batch([
+      db
+        .update(tickets)
+        .set({ status: "COMPLETED" })
+        .where(eq(tickets.id, ticketId)),
+      db
+        .update(tickets)
+        .set({ status: "CALLED" })
+        .where(
+          and(
+            eq(tickets.attractionId, fetchedTicket.attractionId),
+            eq(tickets.status, "ISSUED"),
+            gt(tickets.index, fetchedTicket.index),
+            lte(tickets.index, fetchedTicket.index + 3),
+          ),
         ),
-      );
+    ]);
 
     invalidateTicketPages(storeId);
 

@@ -265,7 +265,6 @@ export async function processRegisterAndStock(
       await db.insert(stockLogs).values(stockLogRecords);
     }
 
-    // Update items stock in a single query
     const itemIds = Object.keys(quantitiesToRecord);
     if (itemIds.length > 0) {
       const updateCases = itemIds.map((itemId) => {
@@ -279,7 +278,6 @@ export async function processRegisterAndStock(
         .where(inArray(items.id, itemIds));
     }
 
-    // Record register log
     await db.insert(registerLogs).values({
       foodId,
       totalAmount,

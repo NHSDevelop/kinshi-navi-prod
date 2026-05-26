@@ -19,6 +19,7 @@ import {
   storeTypeValues,
   type StoreType,
 } from "@/lib/db/schema";
+import { createId } from "@paralleldrive/cuid2";
 import { FormState } from "@/lib/type";
 import { eq, and } from "drizzle-orm";
 import z from "zod";
@@ -224,9 +225,11 @@ export async function createStore(
   }
 
   try {
-    const createdStoreRows = await db
-      .insert(stores)
-      .values({
+    const storeId = createId();
+
+    await db.batch([
+      db.insert(stores).values({
+        id: storeId,
         slug: slug,
         name: name,
         storeType: storeType,
@@ -239,32 +242,13 @@ export async function createStore(
         finishedAtTime: finishedAtTime,
         description: description,
         canVoted: canVoted,
-      })
-      .returning({
-        id: stores.id,
-        storeType: stores.storeType,
-        slug: stores.slug,
-      });
+      }),
+      storeType === "ATTRACTION"
+        ? db.insert(attractions).values({ storeId: storeId })
+        : db.insert(foods).values({ storeId: storeId }),
+    ]);
 
-    const createdStore = createdStoreRows[0];
-    if (!createdStore) {
-      throw new Error("店舗の作成に失敗しました");
-    }
-
-    switch (createdStore.storeType) {
-      case "ATTRACTION":
-        await db.insert(attractions).values({
-          storeId: createdStore.id,
-        });
-        break;
-      case "FOOD":
-        await db.insert(foods).values({
-          storeId: createdStore.id,
-        });
-        break;
-    }
-
-    invalidateStorePages(createdStore.id, createdStore.slug);
+    invalidateStorePages(storeId, slug);
     return {
       zodErrors: null,
       message: "操作が完了しました。",

@@ -84,7 +84,7 @@ function isRateLimited(key: string) {
 }
 
 type RouteContext = {
-  params: Promise<{ store_id: string }> | { store_id: string };
+  params: Promise<{ store_id: string }>;
 };
 
 export async function GET(request: NextRequest, context: RouteContext) {
