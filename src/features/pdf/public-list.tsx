@@ -64,8 +64,7 @@ export default async function PublicPdfDocumentList() {
             ) : null}
           </CardHeader>
           <CardContent className="space-y-2 text-sm text-main-900/80">
-            <p>ファイル名: {pdfDocument.fileName}</p>
-            <p>サイズ: {formatSize(pdfDocument.fileSize)}</p>
+            <p>{pdfDocument.fileName}</p>
             <p>更新日時: {formatDate(pdfDocument.updatedAt)}</p>
           </CardContent>
           <CardFooter className="flex items-center justify-between gap-2">

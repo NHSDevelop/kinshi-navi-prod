@@ -1,7 +1,7 @@
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import { getDb } from "@/lib/db/drizzle";
 import { foods, items, registerLanes } from "@/lib/db/schema";
-import { eq, inArray } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 import FoodRegisterForm from "./register/register-form";
 
 type Props = {
@@ -42,7 +42,7 @@ export default async function FoodRegister({ storeId }: Props) {
   const itemRows = await db
     .select()
     .from(items)
-    .where(inArray(items.foodId, foodIds));
+    .where(and(inArray(items.foodId, foodIds), eq(items.isActive, true)));
 
   if (itemRows.length === 0) {
     return <NotFoundPrompt context="模擬店内の商品" />;

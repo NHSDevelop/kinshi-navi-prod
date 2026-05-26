@@ -35,7 +35,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { tickets } from "@/lib/db/schema";
 import { inArray, sql } from "drizzle-orm";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import DisabledItemForm from "@/features/store/food/item/disabled-form";
 import DisabledItem from "@/features/store/food/item/disabled";
 
 export const dynamic = "force-dynamic";

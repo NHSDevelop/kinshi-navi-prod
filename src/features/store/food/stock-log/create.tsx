@@ -1,6 +1,6 @@
 import { getDb } from "@/lib/db/drizzle";
 import { foods, items } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import CreateStockLogForm from "./create-form";
 
 interface CreateStockLogProps {
@@ -21,7 +21,7 @@ export default async function CreateStockLog({ storeId }: CreateStockLogProps) {
   const itemList = await db
     .select()
     .from(items)
-    .where(eq(items.foodId, food.id));
+    .where(and(eq(items.foodId, food.id), eq(items.isActive, true)));
 
   if (itemList.length === 0) {
     return <p>商品が存在しません。</p>;

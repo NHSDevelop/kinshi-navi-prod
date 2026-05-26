@@ -2,7 +2,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/carousel";
 import Image from "next/image";
 import { MessagePrompt } from "@/components/prompt/message-prompt";
+import { LoadingPrompt } from "@/components/prompt/loading-prompt";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -114,27 +115,31 @@ export function InstallPrompt() {
                 <DialogDescription>
                   下の画像の手順に従ってインストールしてください。
                 </DialogDescription>
-                <Carousel className="mx-auto w-full max-w-[min(84vw,420px)]">
-                  <CarouselContent className="ml-0">
-                    {Array.from({ length: 6 }).map((_, index) => (
-                      <CarouselItem key={index} className="basis-full pl-0">
-                        <div className="p-1 sm:p-2">
-                          <Image
-                            src={`/images/screenshots/help-install-pwa/${index + 1}.webp`}
-                            alt={`インストール手順画像の${index + 1}枚目`}
-                            width={1080}
-                            height={2340}
-                            className="mx-auto h-auto max-h-[70vh] w-full rounded-lg object-contain"
-                            sizes="(max-width: 640px) 78vw, (max-width: 1024px) 58vw, 420px"
-                            quality={90}
-                          />
-                        </div>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  <CarouselPrevious className="left-2 top-1/2 -translate-y-1/2" />
-                  <CarouselNext className="right-2 top-1/2 -translate-y-1/2" />
-                </Carousel>
+                <Suspense
+                  fallback={<LoadingPrompt context="インストール手順" />}
+                >
+                  <Carousel className="mx-auto w-full max-w-[min(84vw,420px)]">
+                    <CarouselContent className="ml-0">
+                      {Array.from({ length: 6 }).map((_, index) => (
+                        <CarouselItem key={index} className="basis-full pl-0">
+                          <div className="p-1 sm:p-2">
+                            <Image
+                              src={`/images/screenshots/help-install-pwa/${index + 1}.webp`}
+                              alt={`インストール手順画像の${index + 1}枚目`}
+                              width={1080}
+                              height={2340}
+                              className="mx-auto h-auto max-h-[70vh] w-full rounded-lg object-contain"
+                              sizes="(max-width: 640px) 78vw, (max-width: 1024px) 58vw, 420px"
+                              quality={90}
+                            />
+                          </div>
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <CarouselPrevious className="left-2 top-1/2 -translate-y-1/2" />
+                    <CarouselNext className="right-2 top-1/2 -translate-y-1/2" />
+                  </Carousel>
+                </Suspense>
               </DialogHeader>
             </DialogContent>
           </Dialog>
