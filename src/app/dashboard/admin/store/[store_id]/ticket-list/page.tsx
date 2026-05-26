@@ -3,7 +3,7 @@ import { getDb } from "@/lib/db/drizzle";
 import { attractions, tickets } from "@/lib/db/schema";
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
-import { eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
@@ -42,7 +42,13 @@ export default async function TicketListPage(props: {
       attractionId: tickets.attractionId,
     })
     .from(tickets)
-    .where(eq(tickets.attractionId, attractionRows[0].id));
+    .where(
+      and(
+        eq(tickets.attractionId, attractionRows[0].id),
+        inArray(tickets.status, ["ISSUED", "CALLED", "COMPLETED", "CANCELED"]),
+      ),
+    )
+    .orderBy(desc(tickets.index));
 
   return (
     <DashboardPageShell

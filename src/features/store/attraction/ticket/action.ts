@@ -10,7 +10,7 @@ import {
   tickets,
   type TicketStatus,
 } from "@/lib/db/schema";
-import { and, asc, eq, gt, inArray, lte, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, inArray, lte, sql } from "drizzle-orm";
 import { sendPushNotification } from "@/features/push/action";
 import { getDb } from "@/lib/db/drizzle";
 import { revalidatePath } from "next/cache";
@@ -559,12 +559,30 @@ export async function fetchTicketsByStatus(
             and(
               eq(tickets.attractionId, attraction.id),
               eq(tickets.status, status),
+              inArray(tickets.status, [
+                "ISSUED",
+                "CALLED",
+                "COMPLETED",
+                "CANCELED",
+              ]),
             ),
           )
+          .orderBy(desc(tickets.index))
       : await db
           .select()
           .from(tickets)
-          .where(eq(tickets.attractionId, attraction.id));
+          .where(
+            and(
+              eq(tickets.attractionId, attraction.id),
+              inArray(tickets.status, [
+                "ISSUED",
+                "CALLED",
+                "COMPLETED",
+                "CANCELED",
+              ]),
+            ),
+          )
+          .orderBy(desc(tickets.index));
 
     return {
       success: true,

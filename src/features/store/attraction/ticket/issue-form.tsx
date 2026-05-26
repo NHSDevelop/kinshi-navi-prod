@@ -144,17 +144,9 @@ export function IssueTicketForm({
           {state?.success && isPaper === false && (
             <Alert>
               <AlertDescription>
-                <div className="flex items-center">
-                  <p className="text-sm md:text-base">
-                    取得した整理券は、画面右上の
-                  </p>
-                  <div className="bg-gray-50 border border-gray-950 rounded-full w-4 h-4 flex items-center justify-center">
-                    <AiOutlineUser />
-                  </div>
-                  <p className="text-sm md:text-base">
-                    （ゲストユーザーページ）からみることができます。
-                  </p>
-                </div>
+                <p className="text-sm md:text-base">
+                  取得した整理券はユーザーページから確認できます。
+                </p>
               </AlertDescription>
             </Alert>
           )}

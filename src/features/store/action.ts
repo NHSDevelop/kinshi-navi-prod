@@ -73,6 +73,7 @@ function invalidateStorePages(storeId?: string, storeSlug?: string) {
   }
   revalidatePath("/attraction/waiting-status");
   revalidatePath("/food/stock-status");
+  revalidatePath("/issue-ticket");
 }
 
 export type UpdateStoreConfigZodErrors = {
