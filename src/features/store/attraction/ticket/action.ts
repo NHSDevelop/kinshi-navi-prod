@@ -10,7 +10,7 @@ import {
   tickets,
   type TicketStatus,
 } from "@/lib/db/schema";
-import { and, asc, desc, eq, gt, inArray, lte, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, inArray, lte, sql } from "drizzle-orm";
 import { sendPushNotification } from "@/features/push/action";
 import { getDb } from "@/lib/db/drizzle";
 import { revalidatePath } from "next/cache";
@@ -215,15 +215,56 @@ export async function disableAttractionTickets(
       return { success: false as const, message: "企画が存在しません" };
     }
 
+    const createdAtFromValue = formData.get("createdAtFrom");
+    const createdAtToValue = formData.get("createdAtTo");
+
+    const createdAtFrom =
+      typeof createdAtFromValue === "string" && createdAtFromValue.trim()
+        ? new Date(createdAtFromValue)
+        : null;
+    const createdAtTo =
+      typeof createdAtToValue === "string" && createdAtToValue.trim()
+        ? new Date(createdAtToValue)
+        : null;
+
+    if (createdAtFrom && Number.isNaN(createdAtFrom.getTime())) {
+      return {
+        success: false as const,
+        message: "開始日時の形式が正しくありません",
+      };
+    }
+
+    if (createdAtTo && Number.isNaN(createdAtTo.getTime())) {
+      return {
+        success: false as const,
+        message: "終了日時の形式が正しくありません",
+      };
+    }
+
+    if (createdAtFrom && createdAtTo && createdAtFrom > createdAtTo) {
+      return {
+        success: false as const,
+        message: "開始日時は終了日時より前にしてください",
+      };
+    }
+
+    const targetConditions = [
+      eq(tickets.attractionId, attraction.id),
+      inArray(tickets.status, ["ISSUED", "CALLED", "COMPLETED", "CANCELED"]),
+    ];
+
+    if (createdAtFrom) {
+      targetConditions.push(gte(tickets.createdAt, createdAtFrom));
+    }
+
+    if (createdAtTo) {
+      targetConditions.push(lte(tickets.createdAt, createdAtTo));
+    }
+
     const targetRows = await db
       .select({ count: sql<number>`count(*)` })
       .from(tickets)
-      .where(
-        and(
-          eq(tickets.attractionId, attraction.id),
-          inArray(tickets.status, ["ISSUED", "CALLED"]),
-        ),
-      );
+      .where(and(...targetConditions));
 
     const targetCount = Number(targetRows[0]?.count ?? 0);
     if (targetCount === 0) {
@@ -238,12 +279,7 @@ export async function disableAttractionTickets(
     await db
       .update(tickets)
       .set({ status: "DISABLED" })
-      .where(
-        and(
-          eq(tickets.attractionId, attraction.id),
-          inArray(tickets.status, ["ISSUED", "CALLED"]),
-        ),
-      );
+      .where(and(...targetConditions));
 
     invalidateTicketPages(storeId);
 

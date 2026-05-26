@@ -59,7 +59,12 @@ export default async function StoreStaffHomePage(props: {
       .where(
         and(
           eq(attractions.storeId, store_id),
-          inArray(tickets.status, ["ISSUED", "CALLED"]),
+          inArray(tickets.status, [
+            "ISSUED",
+            "CALLED",
+            "COMPLETED",
+            "CANCELED",
+          ]),
         ),
       ),
   ]);
