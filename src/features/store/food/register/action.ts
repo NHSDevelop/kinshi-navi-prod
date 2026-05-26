@@ -16,7 +16,6 @@ function invalidateRegisterPages(storeId: string) {
   revalidatePath(`/dashboard/staff/store/${storeId}`);
   revalidatePath(`/dashboard/staff/store/${storeId}/register`);
   revalidatePath(`/dashboard/staff/store/${storeId}/register-log-history`);
-  revalidatePath(`/dashboard/staff/store/${storeId}/stock-log-history`);
   revalidatePath(`/dashboard/staff/store/${storeId}/item-list`);
   revalidatePath(`/dashboard/admin/store/${storeId}`);
   revalidatePath("/food/stock-status");

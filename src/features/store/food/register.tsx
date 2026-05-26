@@ -40,17 +40,7 @@ export default async function FoodRegister({ storeId }: Props) {
   }
 
   const itemRows = await db
-    .select({
-      id: items.id,
-      name: items.name,
-      foodId: items.foodId,
-      stock: items.stock,
-      price: items.price,
-      imageUrl: items.imageUrl,
-      description: items.description,
-      createdAt: items.createdAt,
-      updatedAt: items.updatedAt,
-    })
+    .select()
     .from(items)
     .where(inArray(items.foodId, foodIds));
 

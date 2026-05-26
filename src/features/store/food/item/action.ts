@@ -1,8 +1,8 @@
 "use server";
 
 import z from "zod";
-import { foods, Item, items } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { foods, Item, items, stores } from "@/lib/db/schema";
+import { eq, and } from "drizzle-orm";
 import { getDb } from "@/lib/db/drizzle";
 import { revalidatePath } from "next/cache";
 
@@ -218,11 +218,17 @@ export async function updateItemConfig(
       revalidatePath(`/dashboard/staff/store/${storeId}`);
       revalidatePath(`/dashboard/admin/store/${storeId}`);
       revalidatePath(`/dashboard/staff/store/${storeId}/item-list`);
-      revalidatePath(`/dashboard/staff/store/${storeId}/call-ticket`);
       revalidatePath(`/dashboard/admin/store/${storeId}/create-item`);
       revalidatePath("/food/stock-status");
     }
-
+    const storeRows = await db
+      .select()
+      .from(stores)
+      .where(eq(stores.id, storeId));
+    const storeSlug = storeRows[0]?.slug;
+    if (storeSlug) {
+      revalidatePath(`/store/${storeSlug}`);
+    }
     return {
       zodErrors: null,
       success: true,
@@ -245,10 +251,67 @@ export async function getItemsByFoodId(foodId: string): Promise<Item[] | null> {
     const itemRows = await db
       .select()
       .from(items)
-      .where(eq(items.foodId, foodId));
+      .where(and(eq(items.foodId, foodId), eq(items.isActive, true)));
     return itemRows;
   } catch (error) {
     console.log(error);
   }
   return null;
+}
+
+export async function disabledItem(prevState: unknown, formData: FormData) {
+  const itemId = formData.get("itemId") as string;
+  if (!itemId) {
+    return {
+      success: false,
+      message: "指定された商品がありません。",
+    };
+  }
+  try {
+    const db = await getDb();
+    await db.update(items).set({ isActive: false }).where(eq(items.id, itemId));
+    const itemRows = await db
+      .select({ foodId: items.foodId })
+      .from(items)
+      .where(eq(items.id, itemId));
+    const item = itemRows[0];
+
+    if (!item) {
+      return {
+        success: false,
+        message: "商品が存在しません。",
+      };
+    }
+    const storeIdRows = await db
+      .select({ storeId: foods.storeId })
+      .from(foods)
+      .where(eq(foods.id, item.foodId))
+      .limit(1);
+    const storeId = storeIdRows[0]?.storeId;
+    const storeRows = await db
+      .select()
+      .from(stores)
+      .where(eq(stores.id, storeId));
+    const storeSlug = storeRows[0]?.slug;
+    if (storeId) {
+      revalidatePath(`/dashboard/staff/store/${storeId}`);
+      revalidatePath(`/dashboard/admin/store/${storeId}`);
+      revalidatePath(`/dashboard/staff/store/${storeId}/item-list`);
+      revalidatePath(`/dashboard/admin/store/${storeId}/create-item`);
+    }
+    revalidatePath("/food/stock-status");
+    if (storeSlug) {
+      revalidatePath(`/store/${storeSlug}`);
+    }
+    return {
+      success: true,
+      message: "操作が完了しました。",
+    };
+  } catch (e) {
+    console.log(e);
+    return {
+      success: false,
+      message: "サーバーエラーが発生しました",
+    };
+  }
 }

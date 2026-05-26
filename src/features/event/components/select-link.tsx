@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 
 type EventOption = { id: string; name: string };
 
@@ -28,29 +29,35 @@ export default function EventSelectLink({
   const [selectedEventId, setSelectedEventId] = useState<string>("");
 
   return (
-    <div className="flex gap-4 items-center">
-      <Select onValueChange={setSelectedEventId}>
-        <SelectTrigger>
-          <SelectValue placeholder="イベントを選択" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            {events.map((event) => (
-              <SelectItem key={event.id} value={event.id}>
-                {event.name}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
+    <>
+      {events.length > 0 ? (
+        <div className="flex gap-4 items-center">
+          <Select onValueChange={setSelectedEventId}>
+            <SelectTrigger>
+              <SelectValue placeholder="イベントを選択" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {events.map((event) => (
+                  <SelectItem key={event.id} value={event.id}>
+                    {event.name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
 
-      {selectedEventId ? (
-        <Button asChild variant="card">
-          <Link href={`${href}/${selectedEventId}`}>{context}</Link>
-        </Button>
+          {selectedEventId ? (
+            <Button asChild variant="card">
+              <Link href={`${href}/${selectedEventId}`}>{context}</Link>
+            </Button>
+          ) : (
+            <p>イベントを選択してください</p>
+          )}
+        </div>
       ) : (
-        <p>イベントを選択してください</p>
+        <NotFoundPrompt context="イベント" />
       )}
-    </div>
+    </>
   );
 }

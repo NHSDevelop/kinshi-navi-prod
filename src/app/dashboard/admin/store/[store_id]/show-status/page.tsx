@@ -1,6 +1,5 @@
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { RoutePollingRefresh } from "@/components/polling/route-polling-refresh";
 import { getDb } from "@/lib/db/drizzle";
 import { attractions, tickets } from "@/lib/db/schema";

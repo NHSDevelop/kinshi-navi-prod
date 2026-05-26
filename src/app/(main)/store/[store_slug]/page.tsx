@@ -88,7 +88,7 @@ export default async function StorePage(props: {
                 商品一覧
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-700">
-                取り扱い商品の一覧です。在庫状況は在庫ページから確認できます。
+                取り扱い商品の一覧です。在庫状況は「模擬店の在庫状況」ページから確認できます。
               </p>
             </div>
             <Suspense fallback={<LoadingPrompt context="商品一覧" />}>

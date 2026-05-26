@@ -11,7 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { getDb } from "@/lib/db/drizzle";
 import { foods, items, stores } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 interface ItemStockStatusProps {
   eventId: string;
@@ -42,7 +42,7 @@ export default async function ItemStockStatus({
     .from(items)
     .innerJoin(foods, eq(foods.id, items.foodId))
     .innerJoin(stores, eq(stores.id, foods.storeId))
-    .where(eq(stores.eventId, eventId))
+    .where(and(eq(stores.eventId, eventId), eq(items.isActive, true)))
     .orderBy(stores.name, items.name)
     .limit(pageSize)
     .offset(offset);

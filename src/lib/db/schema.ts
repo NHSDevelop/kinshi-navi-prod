@@ -229,6 +229,7 @@ export const items = sqliteTable("items", {
     .notNull()
     .references(() => foods.id, { onDelete: "cascade" }),
   description: text("description"),
+  isActive: integer("isActive", { mode: "boolean" }).default(true),
   createdAt: integer("createdAt", { mode: "timestamp_ms" })
     .notNull()
     .$defaultFn(() => new Date()),

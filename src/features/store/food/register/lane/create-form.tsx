@@ -11,13 +11,7 @@ import {
 import { RegisterLane } from "@/lib/db/schema";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Field,
-  FieldGroup,
-  FieldLabel,
-  FieldSeparator,
-  FieldSet,
-} from "@/components/ui/field";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { FieldError } from "@/components/ui/field-error";
 import { Input } from "@/components/ui/input";
 import { MessagePrompt } from "@/components/prompt/message-prompt";
@@ -165,7 +159,6 @@ export default function CreateRegisterLaneForm({
     createRegisterLane,
     INITIAL_STATE,
   );
-  const router = useRouter();
 
   return (
     <Card>

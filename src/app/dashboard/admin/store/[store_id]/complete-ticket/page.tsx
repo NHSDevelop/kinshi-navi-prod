@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import CompleteTicket from "@/features/store/attraction/ticket/complete";
 import { getDb } from "@/lib/db/drizzle";
 import { attractions } from "@/lib/db/schema";

@@ -3,9 +3,7 @@ import { getDb } from "@/lib/db/drizzle";
 import { attractions, tickets } from "@/lib/db/schema";
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
-
 import { eq } from "drizzle-orm";
-import { Separator } from "@/components/ui/separator";
 
 export const dynamic = "force-dynamic";
 

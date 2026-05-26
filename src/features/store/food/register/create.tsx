@@ -21,17 +21,7 @@ export default async function CreateRegister({ storeId }: CreateRegisterProps) {
   }
 
   const itemList = await db
-    .select({
-      id: items.id,
-      name: items.name,
-      createdAt: items.createdAt,
-      updatedAt: items.updatedAt,
-      imageUrl: items.imageUrl,
-      description: items.description,
-      stock: items.stock,
-      price: items.price,
-      foodId: items.foodId,
-    })
+    .select()
     .from(items)
     .where(eq(items.foodId, food.id));
 

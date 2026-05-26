@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 
 type StoreOption = { id: string; name: string };
 
@@ -28,28 +29,34 @@ export default function StoreSelectLink({
   const [selectedStoreId, setSelectedStoreId] = useState<string>("");
 
   return (
-    <div className="flex gap-4 items-center">
-      <Select onValueChange={setSelectedStoreId}>
-        <SelectTrigger>
-          <SelectValue placeholder="店舗を選択" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            {stores.map((store) => (
-              <SelectItem key={store.id} value={store.id}>
-                {store.name}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
-      {selectedStoreId ? (
-        <Button asChild variant="card">
-          <Link href={`${href}/${selectedStoreId}`}>{context}</Link>
-        </Button>
+    <>
+      {stores.length > 0 ? (
+        <div className="flex gap-4 items-center">
+          <Select onValueChange={setSelectedStoreId}>
+            <SelectTrigger>
+              <SelectValue placeholder="店舗を選択" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {stores.map((store) => (
+                  <SelectItem key={store.id} value={store.id}>
+                    {store.name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          {selectedStoreId ? (
+            <Button asChild variant="card">
+              <Link href={`${href}/${selectedStoreId}`}>{context}</Link>
+            </Button>
+          ) : (
+            <p>店舗を選択してください</p>
+          )}
+        </div>
       ) : (
-        <p>店舗を選択してください</p>
+        <NotFoundPrompt context="店舗" />
       )}
-    </div>
+    </>
   );
 }
