@@ -1,6 +1,6 @@
 import { getDb } from "@/lib/db/drizzle";
 import { items } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import ItemInfo from "./info";
 
@@ -19,7 +19,7 @@ export default async function ItemList({ foodId }: ItemListProps) {
       price: items.price,
     })
     .from(items)
-    .where(eq(items.foodId, foodId));
+    .where(and(eq(items.foodId, foodId), eq(items.isActive, true)));
   return (
     <div className="space-y-4 lg:space-y-8">
       {itemRows.length > 0 ? (

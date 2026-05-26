@@ -17,13 +17,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
-import ToMainEvent from "@/features/event/to-main";
-import DeleteEvent from "@/features/event/delete";
 import { notFound } from "next/navigation";
-import ToActiveEvent from "@/features/event/to-active";
-import CreateRegisterLane from "@/features/store/food/register/lane/create";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import { requireEventAdminUser } from "@/lib/auth-guard";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 export const dynamic = "force-dynamic";
 
@@ -65,10 +62,8 @@ export default async function AdminEventPage(props: {
       <div className="space-y-4 lg:space-y-8">
         <Separator />
         <Card className="border-main-200/80 shadow-sm">
-          <CardHeader>
+          <CardHeader className="flex items-center justify-between">
             <CardTitle>イベントの情報</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
             <Button asChild variant="card">
               <Link
                 href={`/dashboard/admin/event/${event_id}/edit-config`}
@@ -78,16 +73,15 @@ export default async function AdminEventPage(props: {
                 設定を編集
               </Link>
             </Button>
-
+          </CardHeader>
+          <CardContent className="space-y-4">
             <EventInfo eventId={event_id} />
           </CardContent>
         </Card>
         <Separator />
         <Card className="border-main-200/80 shadow-sm">
-          <CardHeader>
+          <CardHeader className="flex items-center justify-between">
             <CardTitle>イベント内の店舗の管理</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
             <Button asChild variant="card">
               <Link
                 href={`/dashboard/admin/event/${event_id}/create-store`}
@@ -97,7 +91,8 @@ export default async function AdminEventPage(props: {
                 店舗を作成
               </Link>
             </Button>
-
+          </CardHeader>
+          <CardContent className="space-y-4">
             {storeRows.length > 0 ? (
               <StoreSelectLink
                 href="/dashboard/admin/store"
@@ -109,7 +104,23 @@ export default async function AdminEventPage(props: {
             )}
           </CardContent>
         </Card>
-
+        <Separator />
+        <p className="text-lg">その他の操作</p>
+        <ScrollArea className="w-full whitespace-nowrap rounded-md">
+          <div className="flex w-max gap-2 pb-4">
+            <Button asChild variant="card">
+              <Link href={`/dashboard/admin/event/${event_id}/register-lane`}>
+                レジレーンの管理
+              </Link>
+            </Button>
+            <Button asChild variant="card">
+              <Link href={`/dashboard/admin/event/${event_id}/vote-result`}>
+                投票結果を見る
+              </Link>
+            </Button>
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
         <Separator />
         <p className="text-lg">イベント内の店舗の管理者を招待</p>
         {storeRows.length > 0 ? (
@@ -121,9 +132,6 @@ export default async function AdminEventPage(props: {
         ) : (
           <p>イベント内の店舗が存在しません。</p>
         )}
-        <Separator />
-        <p className="text-lg">模擬店とレジレーンの紐づけ</p>
-        <CreateRegisterLane eventId={event_id} />
         <Separator />
         <p className="text-lg">イベントの管理者一覧</p>
         {adminRows.length > 0 ? (
@@ -144,14 +152,6 @@ export default async function AdminEventPage(props: {
         ) : (
           <NotFoundPrompt context="該当する管理者" />
         )}
-        <Separator />
-        <Button asChild variant="card">
-          <Link href={`/dashboard/admin/event/${event_id}/vote-result`}>
-            投票結果を見る
-          </Link>
-        </Button>
-        <Separator />
-        <DeleteEvent eventId={event_id} pushUrl="/dashboard" />
       </div>
     </DashboardPageShell>
   );

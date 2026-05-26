@@ -35,6 +35,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { tickets } from "@/lib/db/schema";
 import { inArray, sql } from "drizzle-orm";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import DisabledItemForm from "@/features/store/food/item/disabled-form";
+import DisabledItem from "@/features/store/food/item/disabled";
 
 export const dynamic = "force-dynamic";
 
@@ -153,26 +155,26 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
               <div className="flex w-max gap-2 pb-4">
                 <Button asChild variant="card">
                   <Link href={`/dashboard/admin/store/${store_id}/call-ticket`}>
-                    チケットを呼び出す
+                    整理券を呼び出す
                   </Link>
                 </Button>
                 <Button asChild variant="card">
                   <Link
                     href={`/dashboard/admin/store/${store_id}/complete-ticket`}
                   >
-                    チケットの受付
+                    整理券の受付
                   </Link>
                 </Button>
                 <Button asChild variant="card">
                   <Link
                     href={`/dashboard/admin/store/${store_id}/issue-ticket`}
                   >
-                    チケットを発行する（紙）
+                    整理券を発行する（紙）
                   </Link>
                 </Button>
                 <Button asChild variant="card">
                   <Link href={`/dashboard/admin/store/${store_id}/ticket-list`}>
-                    チケットの一覧
+                    整理券の一覧
                   </Link>
                 </Button>
                 <Button asChild variant="card">
@@ -242,6 +244,9 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
               <ScrollBar orientation="horizontal" />
             </ScrollArea>
             <Separator />
+            <h3 className="text-lg">商品一覧</h3>
+            <ItemList foodId={foodRows[0].id} storeId={store_id} />
+            <Separator />
             <h3 className="text-lg">商品設定の更新</h3>
             <ItemSelectLink
               foodId={foodRows[0].id}
@@ -249,8 +254,8 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
               context="商品の設定を編集"
             />
             <Separator />
-            <h3 className="text-lg">商品一覧</h3>
-            <ItemList foodId={foodRows[0].id} storeId={store_id} />
+            <h3 className="text-lg">商品の削除</h3>
+            <DisabledItem storeId={store_id} />
           </div>
         )}
         <Separator />

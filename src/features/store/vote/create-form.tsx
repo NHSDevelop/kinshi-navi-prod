@@ -50,17 +50,9 @@ export default function CreateStoreVoteForm({ stores, storeType }: Props) {
         ? "/images/default-image.webp"
         : chosenStoreImageUrl;
 
-  const selectedImageWidth = chosenStoreImageUrl === "default" ? 200 : 300;
-  const selectedImageHeight = chosenStoreImageUrl === "default" ? 300 : 400;
-
   return (
     <div className="flex flex-col gap-8 items-center">
       <Card className="flex w-full flex-col items-center justify-center">
-        <CardHeader className="w-full ">
-          <CardDescription className="mx-auto max-w-xl">
-            下の一覧から投票したい店舗の画像を選んで投票してください。
-          </CardDescription>
-        </CardHeader>
         <CardContent>
           <form
             action={formAction}
@@ -72,8 +64,8 @@ export default function CreateStoreVoteForm({ stores, storeType }: Props) {
             <Image
               src={selectedImageSrc}
               alt="選択中の画像"
-              width={selectedImageWidth}
-              height={selectedImageHeight}
+              width={200}
+              height={300}
               className="object-contain rounded-md"
             />
 

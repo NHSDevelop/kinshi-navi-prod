@@ -2,7 +2,7 @@ import { CreateItem } from "@/features/store/food/item/create";
 import { getDb } from "@/lib/db/drizzle";
 import { foods } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { Separator } from "@/components/ui/separator";
+import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import { requireStoreAdminUser } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
@@ -24,10 +24,8 @@ export default async function CreateFoodItemPage(props: {
   ]);
 
   return (
-    <div className="space-y-4 lg:space-y-8">
-      <h1 className="font-bold text-xl">商品を登録</h1>
-      <Separator />
+    <DashboardPageShell title="商品登録">
       {foodRows?.length > 0 && <CreateItem foodId={foodRows[0].id} />}
-    </div>
+    </DashboardPageShell>
   );
 }

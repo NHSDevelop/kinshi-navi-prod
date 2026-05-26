@@ -7,6 +7,11 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "ダッシュボード ",
+};
 
 const dashboardQuickActions: QuickAction[] = [
   {
@@ -14,6 +19,12 @@ const dashboardQuickActions: QuickAction[] = [
     title: "ユーザーページ",
     description: "アカウントと設定を確認",
     iconName: "user",
+  },
+  {
+    href: "/",
+    title: "トップページ",
+    description: "トップページに戻る",
+    iconName: "house",
   },
 ];
 

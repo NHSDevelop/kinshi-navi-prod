@@ -131,7 +131,7 @@ export async function createTicket(
       return {
         zodErrors: null,
         success: false,
-        message: "停止中のためチケットを発行できません。",
+        message: "停止中のため整理券を発行できません。",
       };
     }
 
@@ -149,7 +149,7 @@ export async function createTicket(
       return {
         zodErrors: null,
         success: false,
-        message: "ゲストユーザーが同時に取得できるチケットは1枚までです",
+        message: "ゲストユーザーが同時に取得できる整理券は1枚までです",
       };
     }
     const countRows = await db
@@ -174,7 +174,7 @@ export async function createTicket(
 
     return {
       zodErrors: null,
-      message: "チケットの発行が完了しました。",
+      message: "整理券の発行が完了しました。",
       success: true,
       issuedNumber: nextIndex,
     };
@@ -230,7 +230,7 @@ export async function disableAttractionTickets(
       invalidateTicketPages(storeId);
       return {
         success: true as const,
-        message: "無効化するチケットはありません。",
+        message: "無効化する整理券はありません。",
         count: 0,
       };
     }
@@ -249,7 +249,7 @@ export async function disableAttractionTickets(
 
     return {
       success: true as const,
-      message: `${targetCount}件のチケットを無効化しました。`,
+      message: `${targetCount}件の整理券を無効化しました。`,
       count: targetCount,
     };
   } catch (error) {
@@ -313,7 +313,7 @@ export async function callFirstTicket(
     if (limitedCount === 0) {
       return {
         zodErrors: null,
-        message: "呼び出すチケットがありません。",
+        message: "呼び出す整理券がありません。",
         success: false,
       };
     }
@@ -341,7 +341,7 @@ export async function callFirstTicket(
     if (ids.length === 0) {
       return {
         zodErrors: null,
-        message: "呼び出すチケットがありません。",
+        message: "呼び出す整理券がありません。",
         success: false,
       };
     }
@@ -376,8 +376,8 @@ export async function callFirstTicket(
       }
       await sendPushNotification(
         sub,
-        "チケットが呼び出されました",
-        `あなたのチケット（番号: ${ticket.index}）が呼び出されました。企画へお越しください。`,
+        "整理券が呼び出されました",
+        `あなたの整理券（番号: ${ticket.index}）が呼び出されました。企画へお越しください。`,
         `/anonymous-user/`,
       );
     }
@@ -385,14 +385,14 @@ export async function callFirstTicket(
     if (ids.length === 0) {
       return {
         zodErrors: null,
-        message: "呼び出すチケットがありません。",
+        message: "呼び出す整理券がありません。",
         success: false,
       };
     }
 
     return {
       zodErrors: null,
-      message: `${ids.length}件のチケットを呼び出しました。`,
+      message: `${ids.length}件の整理券を呼び出しました。`,
       success: true,
     };
   } catch (error) {
@@ -421,7 +421,7 @@ export async function completeTicket(ticketId: string) {
     const fetchedTicket = fetchedRows[0];
 
     if (!fetchedTicket) {
-      return { success: false as const, message: "チケットが存在しません" };
+      return { success: false as const, message: "整理券が存在しません" };
     }
 
     const storeRows = await db
@@ -438,7 +438,7 @@ export async function completeTicket(ticketId: string) {
     if (fetchedTicket.status != "CALLED") {
       return {
         success: false as const,
-        message: "チケットは呼び出されていません",
+        message: "整理券は呼び出されていません",
       };
     }
     await db
@@ -490,7 +490,7 @@ export async function cancelTicket(ticketId: string) {
     const fetchedTicket = fetchedRows[0];
 
     if (!fetchedTicket) {
-      return { success: false as const, message: "チケットが存在しません" };
+      return { success: false as const, message: "整理券が存在しません" };
     }
 
     const storeRows = await db
@@ -599,7 +599,7 @@ export async function completePaperTicket(
     const fetchedTicket = fetchedRows[0];
 
     if (!fetchedTicket) {
-      return { success: false as const, message: "チケットが存在しません" };
+      return { success: false as const, message: "整理券が存在しません" };
     }
 
     const storeRows = await db
@@ -616,7 +616,7 @@ export async function completePaperTicket(
     if (fetchedTicket.status != "CALLED") {
       return {
         success: false as const,
-        message: "チケットは呼び出されていません",
+        message: "整理券は呼び出されていません",
       };
     }
     await db

@@ -60,10 +60,10 @@ export function IssueTicketForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>チケットを発行</CardTitle>
+        <CardTitle>整理券を発行</CardTitle>
         {isPaper === false && (
           <CardDescription>
-            ※チケットはユーザー一人につき一枚まで取得可能です。
+            ※整理券はユーザー一人につき一枚まで取得可能です。
           </CardDescription>
         )}
       </CardHeader>
@@ -136,7 +136,7 @@ export function IssueTicketForm({
             className="mt-4"
             disabled={isPending}
           >
-            {isPending ? "発行中..." : "チケットを発行"}
+            {isPending ? "発行中..." : "整理券を発行"}
           </Button>
         </form>
         <div className="pt-4 space-y-4">
@@ -146,7 +146,7 @@ export function IssueTicketForm({
               <AlertDescription>
                 <div className="flex items-center">
                   <p className="text-sm md:text-base">
-                    取得したチケットは、画面右上の
+                    取得した整理券は、画面右上の
                   </p>
                   <div className="bg-gray-50 border border-gray-950 rounded-full w-4 h-4 flex items-center justify-center">
                     <AiOutlineUser />
@@ -160,7 +160,7 @@ export function IssueTicketForm({
           )}
           {state?.success && isPaper === true && state?.issuedNumber && (
             <MessagePrompt
-              message={`発行されたチケットの番号は${state?.issuedNumber}です。チケット用紙に企画名と番号を記入し、来場者に渡してください。`}
+              message={`発行された整理券の番号は${state?.issuedNumber}です。整理券用紙に企画名と番号を記入し、来場者に渡してください。`}
             />
           )}
           {!state?.success && state?.message && (

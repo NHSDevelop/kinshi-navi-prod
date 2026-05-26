@@ -1,6 +1,11 @@
 import { LoadingPrompt } from "@/components/prompt/loading-prompt";
 import { SystemInfoList } from "@/features/system-info/list";
 import { Suspense } from "react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Kinshi Navi",
+};
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +26,7 @@ export default async function EventTopPage() {
               <br />
               Kinshi
               Naviでは、整理券の取得、在庫やイベントの確認、人気投票などが行えます。
+              スマホで利用される方は、画面左上のメニューバーを押すと、各ページに移動できます。
             </p>
           </div>
         </div>

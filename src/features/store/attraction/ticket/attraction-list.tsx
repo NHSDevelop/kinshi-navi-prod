@@ -76,11 +76,11 @@ export default function AttractionTicketList({
     });
   }, [state, startTransition, status, storeId]);
 
-  //TODO チケットのsort順を考える
+  //TODO 整理券のsort順を考える
   return (
     <div className="space-y-4 lg:space-y-8">
       <div className="flex gap-4 items-center">
-        <p>チケットの状態で絞り込む</p>
+        <p>整理券の状態で絞り込む</p>
         <Select
           value={status ?? "null"}
           onValueChange={handleStatusChange}
@@ -165,7 +165,7 @@ export default function AttractionTicketList({
           </TableBody>
         </Table>
       ) : (
-        <NotFoundPrompt context="発行されたチケット" />
+        <NotFoundPrompt context="発行された整理券" />
       )}
     </div>
   );

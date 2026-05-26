@@ -1,5 +1,6 @@
 import StoreVoteResult from "@/features/store/vote/result";
 import { requireEventAdminUser } from "@/lib/auth-guard";
+import { DashboardPageShell } from "@/components/dashboard/page-shell";
 
 export default async function IssueStoreAdminInvitePage(props: {
   params: Promise<{ event_id: string }>;
@@ -8,9 +9,8 @@ export default async function IssueStoreAdminInvitePage(props: {
   await requireEventAdminUser(event_id);
 
   return (
-    <div className="space-y-4 lg:space-y-8">
-      <h1 className="font-bold text-xl">投票結果</h1>
+    <DashboardPageShell title="投票結果">
       <StoreVoteResult />
-    </div>
+    </DashboardPageShell>
   );
 }

@@ -1,6 +1,5 @@
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { RoutePollingRefresh } from "@/components/polling/route-polling-refresh";
 import { getDb } from "@/lib/db/drizzle";
 import { attractions, tickets } from "@/lib/db/schema";
@@ -66,10 +65,6 @@ export default async function ShowAttractionStatusPage(props: {
     >
       <div className="flex flex-col gap-6">
         <RoutePollingRefresh intervalMs={5 * 60 * 1000} />
-
-        <h1 className="text-xl font-bold">企画の待機状況</h1>
-        <Separator />
-
         <div className="grid gap-4 md:grid-cols-3">
           <Card>
             <CardHeader className="pb-2">

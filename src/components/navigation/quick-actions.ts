@@ -6,6 +6,7 @@ import {
   UserRound,
   UtensilsCrossed,
   Vote,
+  House,
   Info,
 } from "lucide-react";
 
@@ -20,20 +21,21 @@ export type QuickAction = {
     | "clock"
     | "utensils"
     | "vote"
-    | "info";
+    | "info"
+    | "house";
 };
 
 export const quickActions: QuickAction[] = [
   {
     href: "/anonymous-user",
     title: "ユーザーページ",
-    description: "取得したチケットや通知設定を確認",
+    description: "取得した整理券や通知設定を確認",
     iconName: "user",
   },
   {
     href: "/issue-ticket",
-    title: "チケットを発行",
-    description: "受付用のチケットを発行",
+    title: "整理券を発行",
+    description: "受付用の整理券を発行",
     iconName: "ticket",
   },
   {
@@ -81,5 +83,6 @@ export const quickActionIconMap: Record<QuickAction["iconName"], LucideIcon> = {
   clock: Clock3,
   utensils: UtensilsCrossed,
   vote: Vote,
+  house: House,
   info: Info,
 };

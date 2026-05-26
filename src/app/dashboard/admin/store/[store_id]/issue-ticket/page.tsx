@@ -4,7 +4,6 @@ import IssueTicket from "@/features/store/attraction/ticket/issue";
 import { getDb } from "@/lib/db/drizzle";
 import { stores } from "@/lib/db/schema";
 import { requireStaffOrManageStoreUser } from "@/lib/auth-guard";
-
 import { eq } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
@@ -28,8 +27,8 @@ export default async function StaffIssueTicketPage(props: {
   if (storeRows.length === 0) {
     return (
       <DashboardPageShell
-        title="紙チケット発行"
-        description="端末を持たない方向けに紙チケットを発行します。"
+        title="紙整理券発行"
+        description="端末を持たない方向けに紙整理券を発行します。"
       >
         <NotFoundPrompt context="店舗" />
       </DashboardPageShell>
@@ -38,18 +37,14 @@ export default async function StaffIssueTicketPage(props: {
 
   return (
     <DashboardPageShell
-      title="紙チケット発行"
-      description="端末を持たない方向けに紙チケットを発行します。"
+      title="紙整理券発行"
+      description="端末を持たない方向けに紙整理券を発行します。"
     >
-      <div className="space-y-4 lg:space-y-8">
-        <h1 className="font-bold text-xl">スタッフ用チケット発券ページ</h1>
-        <p>端末を持たない方へのチケットを発行します。</p>
-        <IssueTicket
-          eventId={storeRows[0].eventId}
-          isPaper={true}
-          storeId={store_id}
-        />
-      </div>
+      <IssueTicket
+        eventId={storeRows[0].eventId}
+        isPaper={true}
+        storeId={store_id}
+      />
     </DashboardPageShell>
   );
 }

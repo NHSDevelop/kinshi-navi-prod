@@ -88,24 +88,24 @@ export default async function StoreStaffHomePage(props: {
             <div className="flex w-max gap-2 pb-4">
               <Button asChild variant="card">
                 <Link href={`/dashboard/staff/store/${store_id}/call-ticket`}>
-                  チケットを呼び出す
+                  整理券を呼び出す
                 </Link>
               </Button>
               <Button asChild variant="card">
                 <Link
                   href={`/dashboard/staff/store/${store_id}/complete-ticket`}
                 >
-                  チケットの受付
+                  整理券の受付
                 </Link>
               </Button>
               <Button asChild variant="card">
                 <Link href={`/dashboard/staff/store/${store_id}/issue-ticket`}>
-                  チケットを発行する（紙）
+                  整理券を発行する（紙）
                 </Link>
               </Button>
               <Button asChild variant="card">
                 <Link href={`/dashboard/staff/store/${store_id}/ticket-list`}>
-                  チケットの一覧
+                  整理券の一覧
                 </Link>
               </Button>
               <Button asChild variant="card">
