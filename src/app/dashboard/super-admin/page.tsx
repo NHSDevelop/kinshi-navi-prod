@@ -9,6 +9,7 @@ import { AiFillPlusCircle } from "react-icons/ai";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import { requireSuperAdminUser } from "@/lib/auth-guard";
+import ToMainEvent from "@/features/event/to-main";
 
 export const dynamic = "force-dynamic";
 
@@ -97,6 +98,14 @@ export default async function SuperAdminHomePage() {
           </CardContent>
         </Card>
         <Separator />
+        <Card className="border-main-200/80 shadow-sm">
+          <CardHeader>
+            <CardTitle>メインイベントの管理</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <ToMainEvent />
+          </CardContent>
+        </Card>
         <Card className="border-main-200/80 shadow-sm">
           <CardHeader>
             <CardTitle>スタッフページへ移動</CardTitle>

@@ -17,10 +17,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
-import ToMainEvent from "@/features/event/to-main";
 import DeleteEvent from "@/features/event/delete";
 import { notFound } from "next/navigation";
-import ToActiveEvent from "@/features/event/to-active";
 import CreateRegisterLane from "@/features/store/food/register/lane/create";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import { requireEventAdminUser } from "@/lib/auth-guard";

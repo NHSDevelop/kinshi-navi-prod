@@ -30,7 +30,7 @@ export default function ToActiveStore({
       <form action={formAction}>
         <input type="hidden" name="storeId" value={storeId} />
         <Button type="submit" disabled={isPending}>
-          {isActiveStore ? "停止中にする" : "開催中にする"}
+          {isActiveStore ? "店舗を停止する" : "店舗を開催する"}
         </Button>
       </form>
       {state?.success === false && state?.message && (

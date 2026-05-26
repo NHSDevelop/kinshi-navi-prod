@@ -19,7 +19,7 @@ export default function ToActiveEvent({ eventId, isActive }: Props) {
       <form action={formAction}>
         <input type="hidden" name="eventId" value={eventId} />
         <Button type="submit" disabled={isPending}>
-          {isActiveEvent ? "停止中にする" : "開催中にする"}
+          {isActiveEvent ? "イベントを停止する" : "イベントを開催する"}
         </Button>
       </form>
       {state?.success === false && state?.message && (

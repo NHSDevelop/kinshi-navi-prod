@@ -337,35 +337,12 @@ export async function toMainEvent(prevState: unknown, formData: FormData) {
         message: "該当するイベントが存在しません",
       };
     }
-    const mainEvents = await db
-      .select()
-      .from(events)
-      .where(eq(events.isMain, true))
-      .limit(1);
-    if (event.isMain === true && mainEvents.length === 1) {
-      return {
-        success: false,
-        message: "メインイベントを0個にすることはできません。",
-        isMain: event.isMain,
-      };
-    }
-    if (event.isMain === false && mainEvents.length > 0) {
-      return {
-        success: false,
-        message: "メインイベントを複数にすることはできません。",
-        isMain: event.isMain,
-      };
-    }
-    await db
-      .update(events)
-      .set({ isMain: !event.isMain })
-      .where(eq(events.id, eventId));
+    await db.update(events).set({ isMain: true }).where(eq(events.id, eventId));
 
     revalidateTag(MAIN_EVENT_CACHE_TAG, "max");
     return {
       success: true,
       message: "操作が完了しました。",
-      isMain: !event.isMain,
     };
   } catch (error) {
     console.log(error);
