@@ -9,7 +9,7 @@ import { PageBunner } from "@/components/navigation/page-bunner";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "チケット発行 ",
+  title: "整理券発行 ",
 };
 
 export const dynamic = "force-dynamic";
@@ -28,8 +28,8 @@ export default async function TicketIssuePage() {
     return (
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 lg:gap-8">
         <PageBunner
-          title="チケットを発行する"
-          description="ゲストユーザーとしてログインして、チケットを発行できます。"
+          title="整理券を発行する"
+          description="ゲストユーザーとしてログインして、整理券を発行できます。"
         />
         <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
           <Suspense
@@ -45,8 +45,8 @@ export default async function TicketIssuePage() {
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 lg:gap-8">
       <PageBunner
-        title="チケットを発行する"
-        description="混雑時の呼び出しをスムーズにするため、受付用チケットをこの画面から発行できます。"
+        title="整理券を発行する"
+        description="混雑時の呼び出しをスムーズにするため、受付用整理券をこの画面から発行できます。"
       />
       {user.isAnonymous ? (
         <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
@@ -57,7 +57,7 @@ export default async function TicketIssuePage() {
       ) : (
         <section className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-amber-900 md:p-5">
           <p className="text-sm leading-6 md:text-base">
-            管理者やスタッフはこのページでチケットを取得することはできません。
+            管理者やスタッフはこのページで整理券を取得することはできません。
           </p>
         </section>
       )}

@@ -17,7 +17,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
-import DeleteEvent from "@/features/event/delete";
 import { notFound } from "next/navigation";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import { requireEventAdminUser } from "@/lib/auth-guard";

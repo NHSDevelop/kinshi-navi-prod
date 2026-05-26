@@ -40,9 +40,9 @@ export default function CompleteTicket() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>チケット読み取り</CardTitle>
+        <CardTitle>整理券読み取り</CardTitle>
         <CardDescription>
-          受付時に来場者のチケットを表示してもらい、それを読み込んで受付を完了してください。
+          受付時に来場者の整理券を表示してもらい、それを読み込んで受付を完了してください。
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -51,7 +51,7 @@ export default function CompleteTicket() {
         <div>
           {!isScanning ? (
             <Button className="w-full" onClick={handleStartScan}>
-              チケットを読み込む（カメラが起動します）
+              整理券を読み込む（カメラが起動します）
             </Button>
           ) : (
             <Button variant="success" onClick={() => setIsScanning(false)}>

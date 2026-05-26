@@ -35,9 +35,9 @@ export default function FirstCallTicketForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>チケットの呼び出し</CardTitle>
+        <CardTitle>整理券の呼び出し</CardTitle>
         <CardDescription>
-          チケットを先頭から指定された数だけ呼び出します。
+          整理券を先頭から指定された数だけ呼び出します。
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -46,7 +46,7 @@ export default function FirstCallTicketForm({
             <FieldSet>
               <FieldGroup>
                 <Field>
-                  <FieldLabel>呼び出すチケットの枚数</FieldLabel>
+                  <FieldLabel>呼び出す整理券の枚数</FieldLabel>
                   <Input
                     name="count"
                     type="number"
@@ -65,7 +65,7 @@ export default function FirstCallTicketForm({
             className="mt-4"
             disabled={isPending}
           >
-            {isPending ? "呼び出し中..." : "チケットを呼び出す"}
+            {isPending ? "呼び出し中..." : "整理券を呼び出す"}
           </Button>
         </form>
         <div className="space-y-4 lg:space-y-8">

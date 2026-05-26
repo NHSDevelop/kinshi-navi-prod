@@ -536,7 +536,7 @@ export async function deleteStore(prevState: unknown, formData: FormData) {
       if (ticketRows.length > 0) {
         return {
           success: false,
-          error: "チケットが存在するため店舗を削除できません。",
+          error: "整理券が存在するため店舗を削除できません。",
         };
       }
     }

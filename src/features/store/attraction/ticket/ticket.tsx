@@ -117,9 +117,9 @@ export function TicketCard({ ticket }: TicketCardProps) {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>チケットをキャンセル</DialogTitle>
+              <DialogTitle>整理券をキャンセル</DialogTitle>
               <DialogDescription>
-                チケットをキャンセルします。よろしいですか？
+                整理券をキャンセルします。よろしいですか？
               </DialogDescription>
             </DialogHeader>
             <Button variant="danger" disabled={loading} onClick={handleCancel}>

@@ -30,7 +30,7 @@ export default async function CallTicketPage(props: {
   if (attractionRows.length === 0) {
     return (
       <DashboardPageShell
-        title="チケット受付"
+        title="整理券受付"
         description="呼び出した整理券の受付を完了します。"
       >
         <NotFoundPrompt context="企画" />
@@ -39,14 +39,14 @@ export default async function CallTicketPage(props: {
   }
   return (
     <DashboardPageShell
-      title="チケット受付"
+      title="整理券受付"
       description="呼び出した整理券の受付を完了します。"
     >
       <div className="space-y-4 lg:space-y-8">
         <CompleteTicket />
         <Button asChild variant="warn">
           <Link href={`/dashboard/staff/store/${store_id}/ticket-list`}>
-            紙のチケットの受付
+            紙の整理券の受付
           </Link>
         </Button>
       </div>

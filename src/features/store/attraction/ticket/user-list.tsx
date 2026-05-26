@@ -33,7 +33,7 @@ export default async function UserTicketList({ userId }: UserTicketListProps) {
     .orderBy(asc(tickets.createdAt));
 
   if (activeTicketRows.length === 0) {
-    return <NotFoundPrompt context="取得したチケット" />;
+    return <NotFoundPrompt context="取得した整理券" />;
   }
 
   const activeTickets = activeTicketRows.map((row) => ({

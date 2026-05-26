@@ -22,8 +22,8 @@ export default async function TicketListPage(props: {
   if (attractionRows.length === 0) {
     return (
       <DashboardPageShell
-        title="チケット一覧"
-        description="企画のチケット一覧を表示します。"
+        title="整理券一覧"
+        description="企画の整理券一覧を表示します。"
       >
         <NotFoundPrompt context="企画" />
       </DashboardPageShell>
@@ -46,8 +46,8 @@ export default async function TicketListPage(props: {
 
   return (
     <DashboardPageShell
-      title="チケット一覧"
-      description="企画のチケット一覧を表示します。"
+      title="整理券一覧"
+      description="企画の整理券一覧を表示します。"
     >
       <AttractionTicketList
         storeId={store_id}

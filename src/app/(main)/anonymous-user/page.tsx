@@ -42,7 +42,7 @@ export default async function AnonymousUserPage() {
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 lg:gap-8">
       <PageBunner
         title="ゲストユーザーページ"
-        description="通知設定、取得済みチケットの確認、ゲストユーザー管理をこのページで行えます。"
+        description="通知設定、取得済み整理券の確認、ゲストユーザー管理をこのページで行えます。"
       />
       <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
         <h2 className="text-lg font-bold text-main-950 md:text-xl mb-4">
@@ -64,7 +64,7 @@ export default async function AnonymousUserPage() {
                     インストールは数十秒で終わり、通信料はほとんど発生しません。
                   </li>
                   <li className="text-sm">
-                    インストールする際、チケットなどのデータはブラウザから受け継がれませんのでご注意ください。
+                    インストールする際、整理券などのデータはブラウザから受け継がれませんのでご注意ください。
                   </li>
                 </ul>
               </div>
@@ -80,7 +80,7 @@ export default async function AnonymousUserPage() {
               <div>
                 <ul className="w-auto list-disc space-y-4">
                   <li className="text-sm">
-                    プッシュ通知を有効にすると、チケットの呼び出しなどの情報をリアルタイムで受け取ることができます。
+                    プッシュ通知を有効にすると、整理券の呼び出しなどの情報をリアルタイムで受け取ることができます。
                   </li>
                   <li className="text-sm">
                     iPhone / iPadをお使いの場合:
@@ -91,7 +91,7 @@ export default async function AnonymousUserPage() {
                     ブラウザ・Webアプリのどちらも利用することができます。
                   </li>
                   <li className="text-sm">
-                    ページ内の「プッシュ通知を有効にする」を押した後、画面に表示される通知の許可画面で「通知を許可」を押すことでプッシュ通知機能をご利用いただけます。
+                    ページ内の「通知を有効化」を押した後、画面に表示される通知の許可画面で「通知を許可」を押すことでプッシュ通知機能をご利用いただけます。
                   </li>
                 </ul>
               </div>
@@ -106,30 +106,30 @@ export default async function AnonymousUserPage() {
       <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-lg font-bold text-main-950 md:text-xl">
-            取得したチケット
+            取得した整理券
           </h2>
-          <HelpPrompt title="チケットについて">
+          <HelpPrompt title="整理券について">
             <ul className="w-auto list-disc space-y-4">
               <li className="text-sm">
-                チケットが「呼び出し中」になったら、企画の開催場所までお越しください。
+                整理券が「呼び出し中」になったら、企画の開催場所までお越しください。
               </li>
               <li className="text-sm">
-                企画に参加する際は、画面右上のユーザーアイコンから、「ゲストユーザーページ」にあるチケットのQRコードを受付にて係員に表示してください。
+                企画に参加する際は、画面右上のユーザーアイコンから、「ゲストユーザーページ」にある整理券のQRコードを受付にて係員に表示してください。
               </li>
               <li className="text-sm">
-                チケットが呼び出されたかどうかは、このページ以外にも「イベントページ」→「企画の待機状況」からご覧になることができます。
+                整理券が呼び出されたかどうかは、このページ以外にも「イベントページ」→「企画の待機状況」からご覧になることができます。
               </li>
               <li className="text-sm">
-                呼び出されていてもチケットが「発券済み」の場合は、お手数ですが画面の再読み込みをお願いします。
+                呼び出されていても整理券が「発券済み」の場合は、お手数ですが画面の再読み込みをお願いします。
               </li>
               <li className="text-sm">
-                プッシュ通知を購読していると、チケットが呼び出されたときに通知を受け取ることができます。
+                プッシュ通知を購読していると、整理券が呼び出されたときに通知を受け取ることができます。
               </li>
             </ul>
           </HelpPrompt>
         </div>
         <div className="mt-4">
-          <Suspense fallback={<LoadingPrompt context="取得したチケット" />}>
+          <Suspense fallback={<LoadingPrompt context="取得した整理券" />}>
             <UserTicketList userId={user.id} />
           </Suspense>
         </div>

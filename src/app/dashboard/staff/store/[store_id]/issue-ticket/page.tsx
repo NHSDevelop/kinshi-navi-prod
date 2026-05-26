@@ -27,8 +27,8 @@ export default async function StaffIssueTicketPage(props: {
   if (storeRows.length === 0) {
     return (
       <DashboardPageShell
-        title="紙チケット発行"
-        description="端末を持たない方向けに紙チケットを発行します。"
+        title="紙整理券発行"
+        description="端末を持たない方向けに紙整理券を発行します。"
       >
         <NotFoundPrompt context="店舗" />
       </DashboardPageShell>
@@ -37,8 +37,8 @@ export default async function StaffIssueTicketPage(props: {
 
   return (
     <DashboardPageShell
-      title="紙チケット発行"
-      description="端末を持たない方向けに紙チケットを発行します。"
+      title="紙整理券発行"
+      description="端末を持たない方向けに紙整理券を発行します。"
     >
       <IssueTicket
         eventId={storeRows[0].eventId}

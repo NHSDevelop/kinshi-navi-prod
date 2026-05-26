@@ -30,12 +30,12 @@ export default function DisableAttractionTickets({
     <div className="space-y-4">
       {state?.success ? (
         <Alert variant="success">
-          <AlertTitle>チケットを無効化しました</AlertTitle>
+          <AlertTitle>整理券を無効化しました</AlertTitle>
           <AlertDescription>
             <p>
               {state.count && state.count > 0
-                ? `${state.count}件のチケットを無効化しました。`
-                : "無効化するチケットはありませんでした。"}
+                ? `${state.count}件の整理券を無効化しました。`
+                : "無効化する整理券はありませんでした。"}
             </p>
           </AlertDescription>
         </Alert>
@@ -44,14 +44,14 @@ export default function DisableAttractionTickets({
           <AlertTitle>停止中の企画です</AlertTitle>
           <AlertDescription>
             <p>
-              企画を停止したあと、残っているチケットをまとめて無効化してください。
+              企画を停止したあと、残っている整理券をまとめて無効化してください。
             </p>
             <form action={formAction} className="mt-3">
               <input type="hidden" name="storeId" value={storeId} />
               <Button type="submit" variant="danger" disabled={isPending}>
                 {isPending
                   ? "無効化中..."
-                  : `${activeTicketCount}件のチケットを一括無効化する`}
+                  : `${activeTicketCount}件の整理券を一括無効化する`}
               </Button>
             </form>
           </AlertDescription>

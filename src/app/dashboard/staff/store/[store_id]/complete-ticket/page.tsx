@@ -29,8 +29,8 @@ export default async function CallTicketPage(props: {
   if (attractionRows.length === 0) {
     return (
       <DashboardPageShell
-        title="チケット受付"
-        description="受付を完了し、必要に応じて紙チケットへ進みます。"
+        title="整理券受付"
+        description="受付を完了し、必要に応じて紙整理券へ進みます。"
       >
         <p>企画が存在しません。</p>
       </DashboardPageShell>
@@ -38,13 +38,13 @@ export default async function CallTicketPage(props: {
   }
   return (
     <DashboardPageShell
-      title="チケット受付"
-      description="受付を完了し、必要に応じて紙チケットへ進みます。"
+      title="整理券受付"
+      description="受付を完了し、必要に応じて紙整理券へ進みます。"
     >
       <CompleteTicket />
       <Button asChild variant="warn">
         <Link href={`/dashboard/staff/store/${store_id}/ticket-list`}>
-          紙のチケットの受付
+          紙の整理券の受付
         </Link>
       </Button>
     </DashboardPageShell>

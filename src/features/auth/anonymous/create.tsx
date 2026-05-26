@@ -62,7 +62,7 @@ export default function CreateAnonymousUser() {
               ゲストユーザーの作成
             </h2>
             <p className="text-sm text-muted-foreground">
-              チケットの発行・人気投票を行うには、ゲストユーザーを作成する必要があります。
+              整理券の発行・人気投票を行うには、ゲストユーザーを作成する必要があります。
             </p>
             <Button onClick={handleCreateAnonymousUser} disabled={isPending}>
               {isPending ? "作成中..." : "ゲストユーザーを作成"}
