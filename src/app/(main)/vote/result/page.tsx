@@ -1,22 +1,22 @@
 import StoreVoteResult from "@/features/store/vote/result";
-import { requireEventAdminUser } from "@/lib/auth-guard";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import { Separator } from "@/components/ui/separator";
+import { Suspense } from "react";
+import { LoadingPrompt } from "@/components/prompt/loading-prompt";
 
-export default async function VoteResultAdminPage(props: {
-  params: Promise<{ event_id: string }>;
-}) {
-  const { event_id } = await props.params;
-  await requireEventAdminUser(event_id);
-
+export default async function VoteResultPage() {
   return (
     <DashboardPageShell title="店舗の投票結果">
       <div className="flex flex-col gap-4">
         <h2 className="text-lg">クラス企画の投票結果</h2>
-        <StoreVoteResult storeType="ATTRACTION" />
+        <Suspense fallback={<LoadingPrompt context="投票結果" />}>
+          <StoreVoteResult storeType="ATTRACTION" />
+        </Suspense>
         <Separator />
         <h2 className="text-lg">クラス販売の投票結果</h2>
-        <StoreVoteResult storeType="FOOD" />
+        <Suspense fallback={<LoadingPrompt context="投票結果" />}>
+          <StoreVoteResult storeType="FOOD" />
+        </Suspense>
         <Separator />
       </div>
     </DashboardPageShell>

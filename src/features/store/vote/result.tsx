@@ -1,5 +1,5 @@
 import { getDb } from "@/lib/db/drizzle";
-import { stores, storeVotes } from "@/lib/db/schema";
+import { stores, StoreType, storeVotes } from "@/lib/db/schema";
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import {
   Table,
@@ -12,7 +12,11 @@ import {
 import { and, eq } from "drizzle-orm";
 import { getMainEvent } from "@/features/event/action";
 
-export default async function StoreVoteResult() {
+type Props = {
+  storeType: StoreType;
+};
+
+export default async function StoreVoteResult({ storeType }: Props) {
   const db = await getDb();
   const mainEvent = await getMainEvent();
 
@@ -28,6 +32,7 @@ export default async function StoreVoteResult() {
       and(
         eq(storeVotes.eventId, mainEvent.id),
         eq(stores.eventId, mainEvent.id),
+        eq(stores.storeType, storeType),
       ),
     );
 
@@ -58,8 +63,8 @@ export default async function StoreVoteResult() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>企画名</TableHead>
-              <TableHead>投票数（票）</TableHead>
+              <TableHead>店舗名</TableHead>
+              <TableHead>投票数</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

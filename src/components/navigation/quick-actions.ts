@@ -8,6 +8,8 @@ import {
   Vote,
   House,
   Info,
+  Medal,
+  LayoutDashboard,
 } from "lucide-react";
 
 export type QuickAction = {
@@ -22,7 +24,9 @@ export type QuickAction = {
     | "utensils"
     | "vote"
     | "info"
-    | "house";
+    | "house"
+    | "medal"
+    | "dashboard";
 };
 
 export const quickActions: QuickAction[] = [
@@ -69,6 +73,12 @@ export const quickActions: QuickAction[] = [
     iconName: "vote",
   },
   {
+    href: "/vote/result",
+    title: "人気投票の結果",
+    description: "人気投票の結果を確認",
+    iconName: "medal",
+  },
+  {
     href: "/pdf-documents",
     title: "その他の情報",
     description: "タイムテーブルなどを確認",
@@ -85,4 +95,6 @@ export const quickActionIconMap: Record<QuickAction["iconName"], LucideIcon> = {
   vote: Vote,
   house: House,
   info: Info,
+  medal: Medal,
+  dashboard: LayoutDashboard,
 };

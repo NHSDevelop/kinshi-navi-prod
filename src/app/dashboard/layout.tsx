@@ -15,6 +15,12 @@ export const metadata: Metadata = {
 
 const dashboardQuickActions: QuickAction[] = [
   {
+    href: "/dashboard",
+    title: "ダッシュボードトップ",
+    description: "ダッシュボードトップに戻る",
+    iconName: "dashboard",
+  },
+  {
     href: "/dashboard/user",
     title: "ユーザーページ",
     description: "アカウントと設定を確認",
