@@ -4,6 +4,8 @@ import { Separator } from "@/components/ui/separator";
 import { Suspense } from "react";
 import { LoadingPrompt } from "@/components/prompt/loading-prompt";
 
+export const dynamic = "force-dynamic";
+
 export default async function VoteResultPage() {
   return (
     <DashboardPageShell title="店舗の投票結果">
