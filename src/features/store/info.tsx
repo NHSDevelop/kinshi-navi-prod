@@ -47,7 +47,7 @@ export default async function StoreInfo({
 
   return (
     <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
-      <div className="block md:hidden">
+      <div className="block lg:hidden">
         <h3 className="text-lg font-semibold text-main-950">{store.name}</h3>
         <div className="mt-2 flex flex-wrap gap-2">
           <Badge>{storeType}</Badge>
@@ -109,7 +109,7 @@ export default async function StoreInfo({
         </div>
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-4 lg:pt-1">
-        <div className="hidden md:block">
+        <div className="hidden lg:block">
           <h3 className="text-lg font-semibold text-main-950">{store.name}</h3>
           <div className="mt-2 flex flex-wrap gap-2">
             <Badge>{storeType}</Badge>
@@ -124,7 +124,7 @@ export default async function StoreInfo({
             )}
           </div>
         </div>
-        <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-4 text-sm md:text-base">
+        <div className="grid grid-cols-1 md:grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-4 text-sm lg:text-base">
           <p className="font-medium text-slate-700">開催日：</p>
           <p className="min-w-0 wrap-break-word">{dateRange}</p>
           <p className="font-medium text-slate-700">開催時間：</p>

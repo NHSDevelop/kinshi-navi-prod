@@ -249,7 +249,7 @@ export default function UpdateStoreConfigForm({
                 </Field>
                 <Field>
                   <FieldLabel>開催日</FieldLabel>
-                  <div className="flex gap-2 items-end">
+                  <div className="flex gap-2 items-center">
                     <div className="flex-1">
                       <DatePicker
                         selected={startedAtDate}
@@ -266,7 +266,7 @@ export default function UpdateStoreConfigForm({
                         value={startedAtDate ? startedAtDate.toISOString() : ""}
                       />
                     </div>
-                    <span>〜</span>
+                    <span>~</span>
                     <div className="flex-1">
                       <DatePicker
                         selected={finishedAtDate}
@@ -297,7 +297,7 @@ export default function UpdateStoreConfigForm({
                 </Field>
                 <Field>
                   <FieldLabel>開催時間</FieldLabel>
-                  <div className="flex gap-2 items-end">
+                  <div className="flex gap-2 items-center">
                     <div className="flex-1">
                       <Input
                         type="time"
@@ -307,7 +307,7 @@ export default function UpdateStoreConfigForm({
                         name="startedAtTime"
                       />
                     </div>
-                    <span>〜</span>
+                    <span>~</span>
                     <div className="flex-1">
                       <Input
                         type="time"

@@ -53,5 +53,9 @@ export default async function CreateStoreVote({ storeType }: Props) {
   if (storeRows.length === 0) {
     return <NotFoundPrompt context="店舗" />;
   }
-  return <CreateStoreVoteForm stores={storeRows} storeType={storeType} />;
+  return (
+    <Suspense fallback={<LoadingPrompt context="投票画面" />}>
+      <CreateStoreVoteForm stores={storeRows} storeType={storeType} />
+    </Suspense>
+  );
 }
