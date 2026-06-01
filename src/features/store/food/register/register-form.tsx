@@ -28,6 +28,12 @@ import { FieldError } from "@/components/ui/field-error";
 type Props = {
   items: Item[];
   lanes: RegisterLane[];
+  foodOptions: FoodOption[];
+};
+
+type FoodOption = {
+  foodId: string;
+  storeName: string;
 };
 
 type Quantities = Record<string, number>;
@@ -42,7 +48,8 @@ const INITIAL_STATE: RegisterAndStockState = {
   success: false,
 };
 
-export default function FoodRegisterForm({ items, lanes }: Props) {
+export default function FoodRegisterForm({ items, lanes, foodOptions }: Props) {
+  const [selectedLaneId, setSelectedLaneId] = useState<string>("");
   const [selectedFoodId, setSelectedFoodId] = useState<string>("");
 
   const foodItems = useMemo(
@@ -53,14 +60,6 @@ export default function FoodRegisterForm({ items, lanes }: Props) {
     [items, selectedFoodId],
   );
 
-  const foodOptions = useMemo(() => {
-    const map = new Map<string, Item>();
-    items.forEach((it) => {
-      if (!map.has(it.foodId)) map.set(it.foodId, it);
-    });
-    return Array.from(map.values());
-  }, [items]);
-
   const [quantities, setQuantities] = useState<Quantities>(
     items.reduce((acc, item) => ({ ...acc, [item.id]: 0 }), {}),
   );
@@ -70,6 +69,12 @@ export default function FoodRegisterForm({ items, lanes }: Props) {
     processRegisterAndStock,
     INITIAL_STATE,
   );
+
+  const handleLaneChange = (nextLaneId: string) => {
+    setSelectedLaneId(nextLaneId);
+    setAmountPaid("");
+    setShowPaymentForm(false);
+  };
 
   const handleFoodChange = (nextFoodId: string) => {
     const nextFoodItems = items.filter((item) => item.foodId === nextFoodId);
@@ -93,6 +98,7 @@ export default function FoodRegisterForm({ items, lanes }: Props) {
   );
 
   const hasItems = Object.values(quantities).some((qty) => qty > 0);
+  const isLaneSelected = Boolean(selectedLaneId);
   const isFoodSelected = Boolean(selectedFoodId);
 
   const handleQuantityChange = (itemId: string, value: string) => {
@@ -101,12 +107,13 @@ export default function FoodRegisterForm({ items, lanes }: Props) {
   };
 
   const handleCheckout = () => {
-    if (!hasItems || !isFoodSelected) return;
+    if (!hasItems || !isLaneSelected || !isFoodSelected) return;
     setShowPaymentForm(true);
   };
 
   const handleFormSubmit = async (formData: FormData) => {
-    if (!selectedFoodId) return;
+    if (!selectedLaneId || !selectedFoodId) return;
+    formData.set("laneId", selectedLaneId);
     formData.set("foodId", selectedFoodId);
     formData.set("totalAmount", String(totalAmount));
     Object.entries(quantities).forEach(([itemId, qty]) => {
@@ -122,12 +129,35 @@ export default function FoodRegisterForm({ items, lanes }: Props) {
           {/* 数量選択セクション */}
           <div>
             <Field className="mb-4">
+              <FieldLabel>会計レーン</FieldLabel>
+              <Select
+                name="laneId"
+                value={selectedLaneId}
+                onValueChange={handleLaneChange}
+                disabled={isPending || showPaymentForm}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="レーンを選択" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {lanes.map((lane) => (
+                      <SelectItem key={lane.id} value={lane.id}>
+                        レーン {lane.laneNumber}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </Field>
+
+            <Field className="mb-4">
               <FieldLabel>模擬店</FieldLabel>
               <Select
                 name="foodId"
                 value={selectedFoodId}
                 onValueChange={handleFoodChange}
-                disabled={isPending || showPaymentForm}
+                disabled={isPending || showPaymentForm || !isLaneSelected}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="模擬店を選択" />
@@ -136,7 +166,7 @@ export default function FoodRegisterForm({ items, lanes }: Props) {
                   <SelectGroup>
                     {foodOptions.map((f) => (
                       <SelectItem key={f.foodId} value={f.foodId}>
-                        模擬店 {f.foodId}
+                        {f.storeName}
                       </SelectItem>
                     ))}
                   </SelectGroup>
@@ -146,7 +176,12 @@ export default function FoodRegisterForm({ items, lanes }: Props) {
 
             <h3 className="font-semibold mb-4">販売商品を選択</h3>
             <FieldGroup>
-              {!isFoodSelected && (
+              {!isLaneSelected && (
+                <div className="text-sm text-gray-600 px-2 py-3">
+                  先にレーンを選択してください。
+                </div>
+              )}
+              {isLaneSelected && !isFoodSelected && (
                 <div className="text-sm text-gray-600 px-2 py-3">
                   先に模擬店を選択してください。
                 </div>
@@ -212,7 +247,7 @@ export default function FoodRegisterForm({ items, lanes }: Props) {
           {!showPaymentForm && (
             <Button
               onClick={handleCheckout}
-              disabled={!hasItems || !isFoodSelected}
+              disabled={!hasItems || !isLaneSelected || !isFoodSelected}
               className="w-full"
             >
               会計へ進む
@@ -223,6 +258,7 @@ export default function FoodRegisterForm({ items, lanes }: Props) {
           {showPaymentForm && (
             <form action={handleFormSubmit}>
               <FieldSet>
+                <input type="hidden" name="laneId" value={selectedLaneId} />
                 <Field>
                   <FieldLabel>受取金額</FieldLabel>
                   <Input

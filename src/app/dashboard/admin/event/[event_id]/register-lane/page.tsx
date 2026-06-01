@@ -1,6 +1,6 @@
-import CreateRegisterLane from "@/features/store/food/register/lane/create";
 import { requireEventAdminUser } from "@/lib/auth-guard";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
+import CreateRegisterLane from "@/features/store/food/register/lane/create";
 
 export default async function RegisterLanePage(props: {
   params: Promise<{ event_id: string }>;

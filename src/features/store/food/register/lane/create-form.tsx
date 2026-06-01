@@ -2,7 +2,6 @@
 
 import { useActionState, useEffect } from "react";
 import {
-  assignRegisterLaneToFood,
   createRegisterLane,
   CreateRegisterLaneState,
   deleteRegisterLane,
@@ -18,31 +17,15 @@ import { MessagePrompt } from "@/components/prompt/message-prompt";
 import { ErrorPrompt } from "@/components/prompt/error-prompt";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-
-type StoreOption = {
-  storeId: string;
-  storeName: string;
-  foodId: string;
-};
 
 type Props = {
   eventId: string;
-  stores: StoreOption[];
   lanes: RegisterLane[];
 };
 
 type LaneItemProps = {
   lane: RegisterLane;
-  stores: StoreOption[];
 };
 
 const INITIAL_STATE: CreateRegisterLaneState = {
@@ -53,11 +36,7 @@ const INITIAL_STATE: CreateRegisterLaneState = {
   success: false,
 };
 
-function LaneItem({ lane, stores }: LaneItemProps) {
-  const [assignState, assignAction, isAssignPending] = useActionState(
-    assignRegisterLaneToFood,
-    null,
-  );
+function LaneItem({ lane }: LaneItemProps) {
   const [toggleState, toggleAction, isTogglePending] = useActionState(
     toggleRegisterLaneActive,
     null,
@@ -68,57 +47,20 @@ function LaneItem({ lane, stores }: LaneItemProps) {
   );
   const router = useRouter();
 
-  const assignedStoreName =
-    stores.find((store) => store.foodId === lane.foodId)?.storeName ??
-    "未紐づけ";
-
   useEffect(() => {
-    if (assignState?.success || toggleState?.success || deleteState?.success) {
+    if (toggleState?.success || deleteState?.success) {
       router.refresh();
     }
-  }, [
-    assignState?.success,
-    deleteState?.success,
-    router,
-    toggleState?.success,
-  ]);
+  }, [deleteState?.success, router, toggleState?.success]);
 
   return (
     <div className="border rounded-lg p-3 space-y-2">
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <Badge variant={lane.isActive ? "success" : "warn"}>
-          {`レーン ${lane.laneNumber}`} ({assignedStoreName})
+          {`レーン ${lane.laneNumber}`}
           {lane.name ? ` - ${lane.name}` : ""}
         </Badge>
         <div className="flex gap-2 flex-wrap items-end">
-          <form action={assignAction} className="flex gap-2 items-end">
-            <input type="hidden" name="laneId" value={lane.id} />
-            <Field className="min-w-44">
-              <FieldLabel>模擬店</FieldLabel>
-              <Select
-                name="foodId"
-                required
-                disabled={isAssignPending}
-                defaultValue={lane.foodId ?? undefined}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="模擬店を選択" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {stores.map((store) => (
-                      <SelectItem key={store.foodId} value={store.foodId}>
-                        {store.storeName}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </Field>
-            <Button type="submit" variant="card" disabled={isAssignPending}>
-              {isAssignPending ? "紐づけ中..." : "紐づけ"}
-            </Button>
-          </form>
           <form action={toggleAction}>
             <input type="hidden" name="laneId" value={lane.id} />
             <Button type="submit" variant="outline" disabled={isTogglePending}>
@@ -137,9 +79,6 @@ function LaneItem({ lane, stores }: LaneItemProps) {
           </form>
         </div>
       </div>
-      {assignState?.success === false && assignState?.message && (
-        <ErrorPrompt error={assignState.message} />
-      )}
       {toggleState?.success === false && toggleState?.message && (
         <ErrorPrompt error={toggleState.message} />
       )}
@@ -150,11 +89,7 @@ function LaneItem({ lane, stores }: LaneItemProps) {
   );
 }
 
-export default function CreateRegisterLaneForm({
-  eventId,
-  stores,
-  lanes,
-}: Props) {
+export default function CreateRegisterLaneForm({ eventId, lanes }: Props) {
   const [state, formAction, isPending] = useActionState(
     createRegisterLane,
     INITIAL_STATE,
@@ -163,15 +98,9 @@ export default function CreateRegisterLaneForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>レジレーンの作成と紐づけ</CardTitle>
+        <CardTitle>レジレーンの作成</CardTitle>
       </CardHeader>
       <CardContent>
-        {stores.length === 0 && (
-          <p className="text-sm text-muted-foreground">
-            紐づけ可能な模擬店がありません。
-          </p>
-        )}
-
         <form action={formAction}>
           <div className="flex gap-2 items-end">
             <Field>
@@ -216,7 +145,7 @@ export default function CreateRegisterLaneForm({
               .slice()
               .sort((a, b) => a.laneNumber - b.laneNumber)
               .map((lane) => (
-                <LaneItem key={lane.id} lane={lane} stores={stores} />
+                <LaneItem key={lane.id} lane={lane} />
               ))}
           </div>
         </div>

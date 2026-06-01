@@ -1,8 +1,8 @@
 "use server";
 
 import { getDb } from "@/lib/db/drizzle";
-import { registerLanes, registerLaneFoods } from "@/lib/db/schema";
-import { eq, and } from "drizzle-orm";
+import { registerLanes } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 import z from "zod";
 import { revalidatePath } from "next/cache";
@@ -32,11 +32,6 @@ export type CreateRegisterLaneState = {
   message: string | null;
   success: boolean;
 };
-
-const assignRegisterLaneSchema = z.object({
-  laneId: z.string().min(1, "必須項目です"),
-  foodId: z.string().min(1, "必須項目です"),
-});
 
 export type RegisterLaneOperationState = {
   message: string | null;
@@ -104,83 +99,6 @@ export async function createRegisterLane(
       laneCount: (formData.get("laneCount") as string) || prevState.laneCount,
       zodErrors: null,
       message: errorMessage,
-      success: false,
-    };
-  }
-}
-
-export async function assignRegisterLaneToFood(
-  prevState: RegisterLaneOperationState | null,
-  formData: FormData,
-): Promise<RegisterLaneOperationState> {
-  const validationResult = assignRegisterLaneSchema.safeParse({
-    laneId: formData.get("laneId"),
-    foodId: formData.get("foodId"),
-  });
-
-  if (!validationResult.success) {
-    return {
-      message: "入力形式が正しくありません",
-      success: false,
-    };
-  }
-
-  const { laneId, foodId } = validationResult.data;
-
-  try {
-    const db = await getDb();
-    const laneRows = await db
-      .select({ id: registerLanes.id })
-      .from(registerLanes)
-      .where(eq(registerLanes.id, laneId))
-      .limit(1);
-
-    if (!laneRows[0]) {
-      return {
-        message: "該当するレーンが存在しません",
-        success: false,
-      };
-    }
-
-    // 既に同じ組み合わせが存在しないか確認
-    const existing = await db
-      .select()
-      .from(registerLaneFoods)
-      .where(
-        and(
-          eq(registerLaneFoods.laneId, laneId),
-          eq(registerLaneFoods.foodId, foodId),
-        ),
-      )
-      .limit(1);
-
-    if (existing[0]) {
-      return {
-        message: "既に紐づけ済みです",
-        success: true,
-      };
-    }
-
-    await db.insert(registerLaneFoods).values({ laneId, foodId });
-
-    const laneWithEventRows = await db
-      .select({ eventId: registerLanes.eventId })
-      .from(registerLanes)
-      .where(eq(registerLanes.id, laneId))
-      .limit(1);
-    const eventId = laneWithEventRows[0]?.eventId;
-    if (eventId) {
-      invalidateRegisterLanePages(eventId);
-    }
-
-    return {
-      message: "模擬店を紐づけました。",
-      success: true,
-    };
-  } catch (error) {
-    console.error(error);
-    return {
-      message: "サーバーエラーが発生しました",
       success: false,
     };
   }

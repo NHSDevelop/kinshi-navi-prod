@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getDb } from "@/lib/db/drizzle";
-import { foods, registerLogs } from "@/lib/db/schema";
+import { foods, registerLogs, registerLanes } from "@/lib/db/schema";
 import { desc, eq } from "drizzle-orm";
 
 interface RegisterLogListProps {
@@ -37,10 +37,12 @@ export default async function RegisterLogList({
       id: registerLogs.id,
       totalAmount: registerLogs.totalAmount,
       amountPaid: registerLogs.amountPaid,
+      laneNumber: registerLanes.laneNumber,
       meta: registerLogs.meta,
       createdAt: registerLogs.createdAt,
     })
     .from(registerLogs)
+    .leftJoin(registerLanes, eq(registerLanes.id, registerLogs.laneId))
     .where(eq(registerLogs.foodId, food.id))
     .orderBy(desc(registerLogs.createdAt));
 
@@ -52,6 +54,7 @@ export default async function RegisterLogList({
     <Table>
       <TableHeader>
         <TableRow>
+          <TableHead>レジレーン</TableHead>
           <TableHead>合計金額</TableHead>
           <TableHead>受取金額</TableHead>
           <TableHead>お釣り</TableHead>
@@ -65,6 +68,7 @@ export default async function RegisterLogList({
           const isPositive = change >= 0;
           return (
             <TableRow key={log.id}>
+              <TableCell>{log.laneNumber ?? "未設定"}</TableCell>
               <TableCell>{log.totalAmount.toLocaleString()}円</TableCell>
               <TableCell>{log.amountPaid.toLocaleString()}円</TableCell>
               <TableCell>

@@ -3,7 +3,13 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { getDb } from "@/lib/db/drizzle";
-import { foods, items, registerLogs, stockLogs } from "@/lib/db/schema";
+import {
+  foods,
+  items,
+  registerLogs,
+  registerLanes,
+  stockLogs,
+} from "@/lib/db/schema";
 import { asc, desc, eq } from "drizzle-orm";
 
 type SaleStockChange = {
@@ -20,6 +26,7 @@ type HistoryBlock =
       type: "REGISTER";
       totalAmount: number;
       amountPaid: number;
+      laneNumber: number | null;
       meta: string | null;
       createdAt: Date;
       relatedStockChanges: SaleStockChange[];
@@ -59,10 +66,12 @@ export default async function CombinedHistoryList({
         id: registerLogs.id,
         totalAmount: registerLogs.totalAmount,
         amountPaid: registerLogs.amountPaid,
+        laneNumber: registerLanes.laneNumber,
         meta: registerLogs.meta,
         createdAt: registerLogs.createdAt,
       })
       .from(registerLogs)
+      .leftJoin(registerLanes, eq(registerLanes.id, registerLogs.laneId))
       .where(eq(registerLogs.foodId, food.id))
       .orderBy(asc(registerLogs.createdAt)),
     db
@@ -88,6 +97,7 @@ export default async function CombinedHistoryList({
         createdAt: Date;
         totalAmount: number;
         amountPaid: number;
+        laneNumber: number | null;
         meta: string | null;
       }
     | {
@@ -105,6 +115,7 @@ export default async function CombinedHistoryList({
       createdAt: log.createdAt,
       totalAmount: log.totalAmount,
       amountPaid: log.amountPaid,
+      laneNumber: log.laneNumber,
       meta: log.meta,
     })),
     ...stockRows.map((log) => ({
@@ -142,6 +153,7 @@ export default async function CombinedHistoryList({
       type: "REGISTER",
       totalAmount: event.totalAmount,
       amountPaid: event.amountPaid,
+      laneNumber: event.laneNumber,
       meta: event.meta,
       createdAt: event.createdAt,
       relatedStockChanges: pendingSaleStockChanges.splice(0),
@@ -188,9 +200,10 @@ export default async function CombinedHistoryList({
                     </Badge>
                     <CardTitle className="text-lg">会計記録</CardTitle>
                   </div>
-                  <span className="text-sm text-muted-foreground">
-                    {new Date(block.createdAt).toLocaleString()}
-                  </span>
+                  <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                    <span>{new Date(block.createdAt).toLocaleString()}</span>
+                    <span>レジレーン: {block.laneNumber ?? "未設定"}</span>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
