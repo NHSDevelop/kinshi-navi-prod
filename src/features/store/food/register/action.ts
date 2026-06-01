@@ -37,14 +37,14 @@ const CreateRegisterLogSchema = z.object({
   totalAmount: z.coerce.number().int("整数である必要があります"),
   amountPaid: z.coerce.number().int("整数である必要があります"),
   meta: z.string().optional(),
-  laneId: z.string().min(1, "必須項目です"),
+  laneId: z.string().optional(),
 });
 
 const ProcessRegisterAndStockSchema = z.object({
   foodId: z.string().min(1, "必須項目です"),
   totalAmount: z.coerce.number().int("整数である必要があります"),
   amountPaid: z.coerce.number().int("整数である必要があります"),
-  laneId: z.string().min(1, "必須項目です"),
+  laneId: z.string().optional(),
 });
 
 export type ZodErrors = {
@@ -110,45 +110,13 @@ export async function createRegisterLog(
   const db = await getDb();
 
   try {
-    const laneRows = await db
-      .select({ id: registerLanes.id, foodId: registerLanes.foodId })
-      .from(registerLanes)
-      .where(eq(registerLanes.id, laneId))
-      .limit(1);
-    const lane = laneRows[0];
-
-    if (!lane || !lane.foodId) {
-      return {
-        foodId: formData.get("foodId") as string,
-        totalAmount: formData.get("totalAmount") as string,
-        amountPaid: formData.get("amountPaid") as string,
-        meta: formData.get("meta") as string,
-        laneId: formData.get("laneId") as string,
-        zodErrors: null,
-        message: "このレーンには模擬店が紐づいていません",
-        success: false,
-      };
-    }
-
-    if (lane.foodId !== foodId) {
-      return {
-        foodId: formData.get("foodId") as string,
-        totalAmount: formData.get("totalAmount") as string,
-        amountPaid: formData.get("amountPaid") as string,
-        meta: formData.get("meta") as string,
-        laneId: formData.get("laneId") as string,
-        zodErrors: null,
-        message: "レーンと模擬店の紐づけが一致しません",
-        success: false,
-      };
-    }
-
+    // laneId is optional for register; record register log directly.
     await db.insert(registerLogs).values({
       foodId,
       totalAmount,
       amountPaid,
       meta,
-      laneId,
+      laneId: laneId || null,
     });
 
     const storeId = await getStoreIdByFoodId(foodId);
@@ -209,36 +177,7 @@ export async function processRegisterAndStock(
   const db = await getDb();
 
   try {
-    const laneRows = await db
-      .select({ id: registerLanes.id, foodId: registerLanes.foodId })
-      .from(registerLanes)
-      .where(eq(registerLanes.id, laneId))
-      .limit(1);
-    const lane = laneRows[0];
-
-    if (!lane || !lane.foodId) {
-      return {
-        quantities: prevState.quantities,
-        totalAmount: prevState.totalAmount,
-        amountPaid: formData.get("amountPaid") as string,
-        laneId: formData.get("laneId") as string,
-        zodErrors: null,
-        message: "このレーンには模擬店が紐づいていません",
-        success: false,
-      };
-    }
-
-    if (lane.foodId !== foodId) {
-      return {
-        quantities: prevState.quantities,
-        totalAmount: prevState.totalAmount,
-        amountPaid: formData.get("amountPaid") as string,
-        laneId: formData.get("laneId") as string,
-        zodErrors: null,
-        message: "レーンと模擬店の紐づけが一致しません",
-        success: false,
-      };
-    }
+    // laneId is optional. Proceed with stock updates and register log using foodId.
 
     // Parse quantities from formData (format: quantity_<itemId>)
     const quantitiesToRecord: Record<string, number> = {};

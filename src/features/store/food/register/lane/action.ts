@@ -1,8 +1,8 @@
 "use server";
 
 import { getDb } from "@/lib/db/drizzle";
-import { registerLanes } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { registerLanes, registerLaneFoods } from "@/lib/db/schema";
+import { eq, and } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 import z from "zod";
 import { revalidatePath } from "next/cache";
@@ -142,10 +142,26 @@ export async function assignRegisterLaneToFood(
       };
     }
 
-    await db
-      .update(registerLanes)
-      .set({ foodId })
-      .where(eq(registerLanes.id, laneId));
+    // 既に同じ組み合わせが存在しないか確認
+    const existing = await db
+      .select()
+      .from(registerLaneFoods)
+      .where(
+        and(
+          eq(registerLaneFoods.laneId, laneId),
+          eq(registerLaneFoods.foodId, foodId),
+        ),
+      )
+      .limit(1);
+
+    if (existing[0]) {
+      return {
+        message: "既に紐づけ済みです",
+        success: true,
+      };
+    }
+
+    await db.insert(registerLaneFoods).values({ laneId, foodId });
 
     const laneWithEventRows = await db
       .select({ eventId: registerLanes.eventId })

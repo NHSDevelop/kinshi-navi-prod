@@ -292,6 +292,34 @@ export const registerLanes = sqliteTable(
 
 export type RegisterLane = typeof registerLanes.$inferSelect;
 
+export const registerLaneFoods = sqliteTable(
+  "register_lane_foods",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => createId()),
+    laneId: text("laneId")
+      .notNull()
+      .references(() => registerLanes.id, { onDelete: "cascade" }),
+    foodId: text("foodId")
+      .notNull()
+      .references(() => foods.id, { onDelete: "cascade" }),
+    createdAt: integer("createdAt", { mode: "timestamp_ms" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+    updatedAt: integer("updatedAt", { mode: "timestamp_ms" })
+      .notNull()
+      .$defaultFn(() => new Date())
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => ({
+    laneFoodUnique: uniqueIndex(
+      "register_lane_foods_lane_id_food_id_unique",
+    ).on(table.laneId, table.foodId),
+  }),
+);
+
+export type RegisterLaneFood = typeof registerLaneFoods.$inferSelect;
 export const registerLogs = sqliteTable("register_logs", {
   id: text("id")
     .primaryKey()
