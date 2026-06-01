@@ -3,6 +3,8 @@ import { requireEventAdminUser } from "@/lib/auth-guard";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import { Separator } from "@/components/ui/separator";
 
+export const dynamic = "force-dynamic";
+
 export default async function VoteResultAdminPage(props: {
   params: Promise<{ event_id: string }>;
 }) {
