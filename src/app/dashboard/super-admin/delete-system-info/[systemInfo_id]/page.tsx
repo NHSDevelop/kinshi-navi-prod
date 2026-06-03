@@ -6,6 +6,7 @@ import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireSuperAdminUser } from "@/lib/auth-guard";
+import { formatYMD } from "@/lib/formatDate";
 
 export default async function DeleteSystemInfoPage(props: {
   params: Promise<{ systemInfo_id: string }>;
@@ -38,7 +39,7 @@ export default async function DeleteSystemInfoPage(props: {
           <CardContent className="space-y-4">
             <div className="rounded-2xl border border-main-100 bg-main-50/40 p-4">
               <p className="text-sm text-main-900/70">
-                {systemInfoRows[0].createdAt.toLocaleDateString()}
+                {formatYMD(systemInfoRows[0].createdAt)}
               </p>
               <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-slate-800">
                 {systemInfoRows[0].meta}

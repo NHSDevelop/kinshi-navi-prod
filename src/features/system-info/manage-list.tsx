@@ -4,6 +4,7 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { getDb } from "@/lib/db/drizzle";
 import { systemInfos } from "@/lib/db/schema";
 import Link from "next/link";
+import { formatYMD } from "@/lib/formatDate";
 
 export async function SystemInfoManageList() {
   const db = await getDb();
@@ -20,7 +21,7 @@ export async function SystemInfoManageList() {
       <TableBody>
         {systemInfoRows.map((systemInfo) => (
           <TableRow key={systemInfo.id}>
-            <TableCell>{systemInfo.createdAt.toLocaleDateString()}</TableCell>
+            <TableCell>{formatYMD(systemInfo.createdAt)}</TableCell>
             <TableCell>{systemInfo.title}</TableCell>
             <TableCell className="text-right">
               <div className="flex flex-wrap justify-end gap-2">

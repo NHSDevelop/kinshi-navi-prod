@@ -3,6 +3,7 @@ import { getDb } from "@/lib/db/drizzle";
 import { systemInfos } from "@/lib/db/schema";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import Link from "next/link";
+import { formatYMD } from "@/lib/formatDate";
 
 export async function SystemInfoList() {
   const db = await getDb();
@@ -22,7 +23,7 @@ export async function SystemInfoList() {
               <TableRow key={systemInfo.id}>
                 <TableCell>
                   <Link href={`/system-info/${systemInfo.id}`}>
-                    {systemInfo.createdAt.toLocaleDateString()}
+                    {formatYMD(systemInfo.createdAt)}
                   </Link>
                 </TableCell>
                 <TableCell>

@@ -3,6 +3,7 @@ import { getDb } from "@/lib/db/drizzle";
 import { systemInfos } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { Metadata } from "next";
+import { formatYMD } from "@/lib/formatDate";
 
 export const metadata: Metadata = {
   title: "運営からのお知らせ ",
@@ -39,7 +40,7 @@ export default async function SystemInfoPage(props: {
               </h1>
             </div>
             <div className="rounded-full border border-main-200 bg-main-50 px-3 py-1 text-sm text-main-900">
-              {systemInfoRows[0].createdAt.toLocaleDateString()}
+              {formatYMD(systemInfoRows[0].createdAt)}
             </div>
           </div>
           <div className="mt-6 rounded-2xl border border-main-100 bg-main-50/40 p-4 md:p-5">
