@@ -1,11 +1,9 @@
-import { Button } from "@/components/ui/button";
 import CompleteTicket from "@/features/store/attraction/ticket/complete";
 import { getDb } from "@/lib/db/drizzle";
 import { attractions } from "@/lib/db/schema";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
 
 import { eq } from "drizzle-orm";
-import Link from "next/link";
 import { requireStaffOrManageStoreUser } from "@/lib/auth-guard";
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 
@@ -44,11 +42,6 @@ export default async function CallTicketPage(props: {
     >
       <div className="space-y-4 lg:space-y-8">
         <CompleteTicket />
-        <Button asChild variant="warn">
-          <Link href={`/dashboard/staff/store/${store_id}/ticket-list`}>
-            紙の整理券の受付
-          </Link>
-        </Button>
       </div>
     </DashboardPageShell>
   );

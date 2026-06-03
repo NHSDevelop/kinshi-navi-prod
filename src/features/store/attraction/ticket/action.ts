@@ -10,7 +10,7 @@ import {
   tickets,
   type TicketStatus,
 } from "@/lib/db/schema";
-import { and, asc, desc, eq, gt, gte, inArray, lte, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import { sendPushNotification } from "@/features/push/action";
 import { getDb } from "@/lib/db/drizzle";
 import { revalidatePath } from "next/cache";
@@ -79,7 +79,6 @@ function invalidateTicketPages(storeId: string) {
 }
 
 export async function createTicket(
-  isPaper: boolean,
   prevState: unknown,
   formData: FormData,
 ): Promise<TicketState> {
@@ -108,6 +107,8 @@ export async function createTicket(
 
   const { numberOfPeople } = validationResult.data;
   const storeId = formData.get("storeId") as string;
+  const isPaperBoolean = formData.get("isPaper") as string;
+  const isPaper: boolean = isPaperBoolean === "true";
 
   try {
     const db = await getDb();
@@ -477,23 +478,29 @@ export async function completeTicket(ticketId: string) {
         message: "整理券は呼び出されていません",
       };
     }
-    await db.batch([
-      db
-        .update(tickets)
-        .set({ status: "COMPLETED" })
-        .where(eq(tickets.id, ticketId)),
-      db
+    const nextIssuedRows = await db
+      .select({ id: tickets.id })
+      .from(tickets)
+      .where(
+        and(
+          eq(tickets.attractionId, fetchedTicket.attractionId),
+          eq(tickets.status, "ISSUED"),
+        ),
+      )
+      .orderBy(asc(tickets.index))
+      .limit(1);
+
+    await db
+      .update(tickets)
+      .set({ status: "COMPLETED" })
+      .where(eq(tickets.id, ticketId));
+
+    if (nextIssuedRows[0]) {
+      await db
         .update(tickets)
         .set({ status: "CALLED" })
-        .where(
-          and(
-            eq(tickets.attractionId, fetchedTicket.attractionId),
-            eq(tickets.status, "ISSUED"),
-            gt(tickets.index, fetchedTicket.index),
-            lte(tickets.index, fetchedTicket.index + 3),
-          ),
-        ),
-    ]);
+        .where(eq(tickets.id, nextIssuedRows[0].id));
+    }
 
     invalidateTicketPages(storeId);
 
@@ -674,23 +681,29 @@ export async function completePaperTicket(
         message: "整理券は呼び出されていません",
       };
     }
-    await db.batch([
-      db
-        .update(tickets)
-        .set({ status: "COMPLETED" })
-        .where(eq(tickets.id, ticketId)),
-      db
+    const nextIssuedRows = await db
+      .select({ id: tickets.id })
+      .from(tickets)
+      .where(
+        and(
+          eq(tickets.attractionId, fetchedTicket.attractionId),
+          eq(tickets.status, "ISSUED"),
+        ),
+      )
+      .orderBy(asc(tickets.index))
+      .limit(1);
+
+    await db
+      .update(tickets)
+      .set({ status: "COMPLETED" })
+      .where(eq(tickets.id, ticketId));
+
+    if (nextIssuedRows[0]) {
+      await db
         .update(tickets)
         .set({ status: "CALLED" })
-        .where(
-          and(
-            eq(tickets.attractionId, fetchedTicket.attractionId),
-            eq(tickets.status, "ISSUED"),
-            gt(tickets.index, fetchedTicket.index),
-            lte(tickets.index, fetchedTicket.index + 3),
-          ),
-        ),
-    ]);
+        .where(eq(tickets.id, nextIssuedRows[0].id));
+    }
 
     invalidateTicketPages(storeId);
 

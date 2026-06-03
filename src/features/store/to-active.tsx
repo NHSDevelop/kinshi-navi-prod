@@ -29,7 +29,7 @@ export default function ToActiveStore({
       />
       <form action={formAction}>
         <input type="hidden" name="storeId" value={storeId} />
-        <Button type="submit" disabled={isPending}>
+        <Button type="submit" disabled={isPending} variant="danger">
           {isActiveStore ? "店舗を停止する" : "店舗を開催する"}
         </Button>
       </form>

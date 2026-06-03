@@ -50,9 +50,8 @@ export function IssueTicketForm({
   isPaper,
   storeId,
 }: IssueTicketFormProps) {
-  const createTicketWithPaperMode = createTicket.bind(null, isPaper);
   const [state, formAction, isPending] = useActionState(
-    createTicketWithPaperMode,
+    createTicket,
     INITIAL_STATE,
   );
   const [numberOfPeople, setNumberOfPeople] = useState<number>(1);
@@ -69,6 +68,11 @@ export function IssueTicketForm({
       </CardHeader>
       <CardContent>
         <form action={formAction}>
+          <input
+            type="hidden"
+            name="isPaper"
+            value={isPaper ? "true" : "false"}
+          />
           <FieldGroup>
             <FieldSet>
               <FieldGroup>
@@ -152,7 +156,7 @@ export function IssueTicketForm({
           )}
           {state?.success && isPaper === true && state?.issuedNumber && (
             <MessagePrompt
-              message={`発行された整理券の番号は${state?.issuedNumber}です。整理券用紙に企画名と番号を記入し、来場者に渡してください。`}
+              message={`発行された整理券の番号:${state?.issuedNumber}`}
             />
           )}
           {!state?.success && state?.message && (

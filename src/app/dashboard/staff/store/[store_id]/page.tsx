@@ -3,10 +3,8 @@ import ToActiveStore from "@/features/store/to-active";
 import { getDb } from "@/lib/db/drizzle";
 import { attractions, stores, users, staffs, tickets } from "@/lib/db/schema";
 import { Separator } from "@/components/ui/separator";
-
 import { and, eq, inArray, sql } from "drizzle-orm";
 import Link from "next/link";
-
 import {
   Table,
   TableBody,
@@ -93,7 +91,7 @@ export default async function StoreStaffHomePage(props: {
             <div className="flex w-max gap-2 pb-4">
               <Button asChild variant="card">
                 <Link href={`/dashboard/staff/store/${store_id}/call-ticket`}>
-                  整理券を呼び出す
+                  整理券の呼び出し
                 </Link>
               </Button>
               <Button asChild variant="card">
@@ -105,7 +103,14 @@ export default async function StoreStaffHomePage(props: {
               </Button>
               <Button asChild variant="card">
                 <Link href={`/dashboard/staff/store/${store_id}/issue-ticket`}>
-                  整理券を発行する（紙）
+                  紙の整理券の発行
+                </Link>
+              </Button>
+              <Button asChild variant="card">
+                <Link
+                  href={`/dashboard/staff/store/${store_id}/complete-paper-ticket`}
+                >
+                  紙の整理券の受付
                 </Link>
               </Button>
               <Button asChild variant="card">

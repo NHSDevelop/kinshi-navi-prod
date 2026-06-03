@@ -1,4 +1,5 @@
 import AttractionTicketList from "@/features/store/attraction/ticket/attraction-list";
+import CompletePaperTicket from "@/features/store/attraction/ticket/complete-paper";
 import { getDb } from "@/lib/db/drizzle";
 import { attractions, tickets } from "@/lib/db/schema";
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
@@ -55,10 +56,12 @@ export default async function TicketListPage(props: {
       title="整理券一覧"
       description="企画の整理券一覧を表示します。"
     >
-      <AttractionTicketList
-        storeId={store_id}
-        initialTickets={initialTickets}
-      />
+      <div className="space-y-8">
+        <AttractionTicketList
+          storeId={store_id}
+          initialTickets={initialTickets}
+        />
+      </div>
     </DashboardPageShell>
   );
 }

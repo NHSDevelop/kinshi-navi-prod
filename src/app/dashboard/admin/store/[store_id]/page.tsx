@@ -154,7 +154,7 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
               <div className="flex w-max gap-2 pb-4">
                 <Button asChild variant="card">
                   <Link href={`/dashboard/admin/store/${store_id}/call-ticket`}>
-                    整理券を呼び出す
+                    整理券の呼び出し
                   </Link>
                 </Button>
                 <Button asChild variant="card">
@@ -168,7 +168,14 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
                   <Link
                     href={`/dashboard/admin/store/${store_id}/issue-ticket`}
                   >
-                    整理券を発行する（紙）
+                    紙の整理券の発行
+                  </Link>
+                </Button>
+                <Button asChild variant="card">
+                  <Link
+                    href={`/dashboard/admin/store/${store_id}/complete-paper-ticket`}
+                  >
+                    紙の整理券の受付
                   </Link>
                 </Button>
                 <Button asChild variant="card">
@@ -246,7 +253,7 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
             <h3 className="text-lg">商品一覧</h3>
             <ItemList foodId={foodRows[0].id} storeId={store_id} />
             <Separator />
-            <h3 className="text-lg">商品設定の更新</h3>
+            <h3 className="text-lg">商品設定の編集</h3>
             <ItemSelectLink
               foodId={foodRows[0].id}
               href={`/dashboard/admin/store/${store_id}/edit-item`}

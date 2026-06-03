@@ -9,11 +9,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { useActionState, useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 
 import { TicketStatus, tickets as ticketsTable } from "@/lib/db/schema";
-import { completePaperTicket, fetchTicketsByStatus } from "./action";
+import { fetchTicketsByStatus } from "./action";
 import {
   Select,
   SelectItem,
@@ -22,8 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 
 interface AttractionTicketListProps {
   storeId: string;
@@ -59,21 +58,6 @@ export default function AttractionTicketList({
       }
     });
   };
-  const [state, formAction, isFormPending] = useActionState(
-    completePaperTicket,
-    null,
-  );
-
-  useEffect(() => {
-    if (!state?.success) return;
-
-    startTransition(async () => {
-      const res = await fetchTicketsByStatus(storeId, status);
-      if (res?.success && Array.isArray(res.tickets)) {
-        setTickets(res.tickets);
-      }
-    });
-  }, [state, startTransition, status, storeId]);
 
   //TODO 整理券のsort順を考える
   return (
@@ -112,7 +96,6 @@ export default function AttractionTicketList({
               <TableHead>状態</TableHead>
               <TableHead>種類</TableHead>
               <TableHead>発行日時</TableHead>
-              <TableHead>操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -140,24 +123,6 @@ export default function AttractionTicketList({
                   <TableCell>
                     {new Date(ticket.createdAt).toLocaleString()}
                   </TableCell>
-                  {ticket.isPaper && ticket.status === "CALLED" && (
-                    <TableCell>
-                      <form action={formAction}>
-                        <input
-                          type="hidden"
-                          name="ticketId"
-                          value={ticket.id}
-                        />
-                        <Button
-                          type="submit"
-                          disabled={isFormPending}
-                          variant="warn"
-                        >
-                          {isFormPending ? "処理中..." : "受付する"}
-                        </Button>
-                      </form>
-                    </TableCell>
-                  )}
                 </TableRow>
               );
             })}

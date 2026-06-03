@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import { getDb } from "@/lib/db/drizzle";
 import { admins, staffs } from "@/lib/db/schema";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { getSessionFromRequestHeaders } from "@/lib/auth-session";
 
 export const dynamic = "force-dynamic";
@@ -19,12 +19,7 @@ export default async function DashBoardPage() {
   const db = await getDb();
   const userId = session.user.id;
 
-  const [superAdminRow, adminRow, staffRow] = await Promise.all([
-    db
-      .select({ userId: admins.userId })
-      .from(admins)
-      .where(and(eq(admins.userId, userId), eq(admins.role, "SUPER_ADMIN")))
-      .limit(1),
+  const [adminRow, staffRow] = await Promise.all([
     db
       .select({
         role: admins.role,
@@ -41,21 +36,15 @@ export default async function DashBoardPage() {
       .limit(1),
   ]);
 
-  if (superAdminRow.length > 0) {
-    redirect("/dashboard/super-admin");
-  }
-
   if (adminRow.length > 0) {
-    if (adminRow[0].role === "EVENT_ADMIN" && adminRow[0].eventId) {
+    if (adminRow[0].role === "SUPER_ADMIN") {
+      redirect(`/dashboard/super-admin`);
+    } else if (adminRow[0].role === "EVENT_ADMIN" && adminRow[0].eventId) {
       redirect(`/dashboard/admin/event/${adminRow[0].eventId}`);
-    }
-
-    if (adminRow[0].role === "STORE_ADMIN" && adminRow[0].storeId) {
+    } else if (adminRow[0].role === "STORE_ADMIN" && adminRow[0].storeId) {
       redirect(`/dashboard/admin/store/${adminRow[0].storeId}`);
     }
-  }
-
-  if (staffRow.length > 0 && staffRow[0].storeId) {
+  } else if (staffRow.length > 0 && staffRow[0].storeId) {
     redirect(`/dashboard/staff/store/${staffRow[0].storeId}`);
   }
 

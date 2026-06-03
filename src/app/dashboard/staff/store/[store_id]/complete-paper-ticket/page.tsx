@@ -1,4 +1,3 @@
-import AttractionTicketList from "@/features/store/attraction/ticket/attraction-list";
 import CompletePaperTicket from "@/features/store/attraction/ticket/complete-paper";
 import { getDb } from "@/lib/db/drizzle";
 import { attractions, tickets } from "@/lib/db/schema";
@@ -8,7 +7,7 @@ import { and, desc, eq, inArray } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
-export default async function TicketListPage(props: {
+export default async function CompletePaperTicketStaffPage(props: {
   params: Promise<{ store_id: string }>;
 }) {
   const { store_id } = await props.params;
@@ -23,14 +22,14 @@ export default async function TicketListPage(props: {
   if (attractionRows.length === 0) {
     return (
       <DashboardPageShell
-        title="整理券一覧"
-        description="企画の整理券一覧を表示します。"
+        title="紙の整理券の受付"
+        description="紙で発行された整理券を受付します。"
       >
         <NotFoundPrompt context="企画" />
       </DashboardPageShell>
     );
   }
-  const initialTickets = await db
+  const initialPaperTickets = await db
     .select({
       id: tickets.id,
       index: tickets.index,
@@ -47,22 +46,17 @@ export default async function TicketListPage(props: {
       and(
         eq(tickets.attractionId, attractionRows[0].id),
         inArray(tickets.status, ["ISSUED", "CALLED", "COMPLETED", "CANCELED"]),
+        eq(tickets.isPaper, true),
       ),
     )
     .orderBy(desc(tickets.index));
 
-  const initialPaperTickets = initialTickets.filter((ticket) => ticket.isPaper);
-
   return (
     <DashboardPageShell
-      title="整理券一覧"
-      description="企画の整理券一覧を表示します。"
+      title="紙の整理券の受付"
+      description="紙で発行された整理券を受付します。"
     >
       <div className="space-y-8">
-        <AttractionTicketList
-          storeId={store_id}
-          initialTickets={initialTickets}
-        />
         <CompletePaperTicket
           storeId={store_id}
           initialTickets={initialPaperTickets}
