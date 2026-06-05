@@ -46,7 +46,7 @@ export default async function StoreInfo({
       : "未設定";
 
   return (
-    <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
+    <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:gap-8">
       <div className="block lg:hidden">
         <h3 className="text-lg font-semibold text-main-950">{store.name}</h3>
         <div className="mt-2 flex flex-wrap gap-2">
@@ -62,7 +62,7 @@ export default async function StoreInfo({
           )}
         </div>
       </div>
-      <div className="grid min-w-0 grid-cols-1 gap-4 justify-items-center sm:grid-cols-2 sm:justify-items-stretch lg:w-[min(100%,32rem)] lg:flex-none">
+      <div className="grid min-w-0 grid-cols-1 gap-4 justify-items-center sm:grid-cols-2 sm:justify-items-stretch xl:w-[min(100%,32rem)] xl:flex-none">
         <div className="w-full max-w-56 overflow-hidden rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:max-w-none">
           {store.imageUrl ? (
             <Image
@@ -108,8 +108,8 @@ export default async function StoreInfo({
           )}
         </div>
       </div>
-      <div className="flex min-w-0 flex-1 flex-col gap-4 lg:pt-1">
-        <div className="hidden lg:block">
+      <div className="flex min-w-0 flex-1 flex-col gap-4 xl:pt-1">
+        <div className="hidden xl:block">
           <h3 className="text-lg font-semibold text-main-950">{store.name}</h3>
           <div className="mt-2 flex flex-wrap gap-2">
             <Badge>{storeType}</Badge>
@@ -124,7 +124,7 @@ export default async function StoreInfo({
             )}
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-4 text-sm lg:text-base">
+        <div className="grid grid-cols-1 md:grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-4 text-sm xl:text-base">
           <p className="font-medium text-slate-700">開催日：</p>
           <p className="min-w-0 wrap-break-word">{dateRange}</p>
           <p className="font-medium text-slate-700">開催時間：</p>

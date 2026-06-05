@@ -65,37 +65,60 @@ export default async function StorePage(props: {
       />
 
       <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
-        <Suspense fallback={<LoadingPrompt context="店舗情報" />}>
-          <StoreInfo storeId={storeRows[0].id} isShowCanVoted={false} />
-        </Suspense>
+        <div className="flex flex-col gap-6 md:gap-8">
+          <h2 className="text-lg font-bold text-main-950 md:text-xl">
+            店舗の情報
+          </h2>
+          <Suspense fallback={<LoadingPrompt context="店舗情報" />}>
+            <StoreInfo storeId={storeRows[0].id} isShowCanVoted={false} />
+          </Suspense>
+        </div>
       </section>
 
       {storeRows[0].storeType === "ATTRACTION" && attraction && (
         <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
-          <Suspense fallback={<LoadingPrompt context="企画情報" />}>
-            <AttractionInfo attractionId={attraction.id} />
-          </Suspense>
-        </section>
-      )}
-      {storeRows[0].storeType === "FOOD" && food && (
-        <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
           <div className="flex flex-col gap-6 md:gap-8">
-            <Suspense fallback={<LoadingPrompt context="模擬店の情報" />}>
-              <FoodInfo foodId={food.id} />
-            </Suspense>
-            <div>
-              <h2 className="text-lg font-bold text-main-950 md:text-xl">
-                商品一覧
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-slate-700">
-                取り扱い商品の一覧です。在庫状況は「模擬店の在庫状況」ページから確認できます。
-              </p>
-            </div>
-            <Suspense fallback={<LoadingPrompt context="商品一覧" />}>
-              <ItemList foodId={food.id} />
+            <h2 className="text-lg font-bold text-main-950 md:text-xl">
+              企画の情報
+            </h2>
+
+            <Suspense fallback={<LoadingPrompt context="企画の情報" />}>
+              <AttractionInfo attractionId={attraction.id} />
             </Suspense>
           </div>
         </section>
+      )}
+      {storeRows[0].storeType === "FOOD" && food && (
+        <div className="space-y-4 lg:space-y-8">
+          <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
+            <div className="flex flex-col gap-6 md:gap-8">
+              <h2 className="text-lg font-bold text-main-950 md:text-xl">
+                模擬店の情報
+              </h2>
+              <Suspense fallback={<LoadingPrompt context="商品一覧" />}>
+                <ItemList foodId={food.id} />
+              </Suspense>
+            </div>
+            <Suspense fallback={<LoadingPrompt context="模擬店の情報" />}>
+              <FoodInfo foodId={food.id} />
+            </Suspense>
+          </section>
+          <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
+            <div className="flex flex-col gap-6 md:gap-8">
+              <div>
+                <h2 className="text-lg font-bold text-main-950 md:text-xl">
+                  商品一覧
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-slate-700">
+                  取り扱い商品の一覧です。在庫状況は「模擬店の在庫状況」ページから確認できます。
+                </p>
+              </div>
+              <Suspense fallback={<LoadingPrompt context="商品一覧" />}>
+                <ItemList foodId={food.id} />
+              </Suspense>
+            </div>
+          </section>
+        </div>
       )}
     </div>
   );

@@ -21,7 +21,7 @@ export default async function ItemInfo({ itemId }: Props) {
       {itemRows.length > 0 ? (
         <Card>
           <CardContent>
-            <div className="flex flex-col gap-4 md:gap-8 md:flex-row md:items-center">
+            <div className="flex flex-col gap-4 sm:gap-8 sm:flex-row items-center">
               {itemRows[0].imageUrl ? (
                 <Image
                   src={itemRows[0].imageUrl}

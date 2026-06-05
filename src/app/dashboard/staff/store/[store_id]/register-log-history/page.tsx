@@ -70,10 +70,22 @@ export default async function RegisterLogHistoryPage(props: {
         {canDownload && (
           <div className="flex flex-wrap gap-2">
             <Button asChild variant="card">
-              <a href={buildExportUrl("accounting")}>会計CSVをダウンロード</a>
+              <a
+                href={buildExportUrl("accounting")}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                会計CSVをダウンロード
+              </a>
             </Button>
             <Button asChild variant="card">
-              <a href={buildExportUrl("inventory")}>在庫CSVをダウンロード</a>
+              <a
+                href={buildExportUrl("inventory")}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                在庫CSVをダウンロード
+              </a>
             </Button>
           </div>
         )}
