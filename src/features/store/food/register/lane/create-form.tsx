@@ -143,7 +143,7 @@ export default function CreateRegisterLaneForm({ eventId, lanes }: Props) {
           <div className="space-y-3">
             {lanes
               .slice()
-              .sort((a, b) => a.laneNumber - b.laneNumber)
+              .sort((a, b) => (a.laneNumber ?? 0) - (b.laneNumber ?? 0))
               .map((lane) => (
                 <LaneItem key={lane.id} lane={lane} />
               ))}

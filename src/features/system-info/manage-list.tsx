@@ -27,14 +27,14 @@ export async function SystemInfoManageList() {
               <div className="flex flex-wrap justify-end gap-2">
                 <Button asChild size="sm" variant="outline">
                   <Link
-                    href={`/dashboard/super-admin/edit-system-info/${systemInfo.id}`}
+                    href={`/dashboard/super-admin/system-info/edit/${systemInfo.id}`}
                   >
                     編集
                   </Link>
                 </Button>
                 <Button asChild size="sm" variant="danger">
                   <Link
-                    href={`/dashboard/super-admin/delete-system-info/${systemInfo.id}`}
+                    href={`/dashboard/super-admin/system-info/delete/${systemInfo.id}`}
                   >
                     削除
                   </Link>

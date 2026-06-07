@@ -1,8 +1,9 @@
-import CreatePdfDocumentForm from "@/features/pdf/create";
 import { PdfDocumentList } from "@/features/pdf/list";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requirePdfManagerUser } from "@/lib/auth-guard";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default async function PdfDocumentsDashboardPage() {
   await requirePdfManagerUser();
@@ -10,26 +11,22 @@ export default async function PdfDocumentsDashboardPage() {
   return (
     <DashboardPageShell
       title="PDFドキュメント管理"
-      description="公開PDFのアップロード、更新、削除を行います。閲覧ページは未ログインユーザーでもアクセスできます。"
+      description="更新、削除を行います。閲覧ページは未ログインユーザーでもアクセスできます。"
     >
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+      <div className="space-y-4">
         <Card className="border-main-200/80 shadow-sm">
           <CardHeader>
-            <CardTitle>PDFをアップロード</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CreatePdfDocumentForm />
-          </CardContent>
-        </Card>
-
-        <Card className="border-main-200/80 shadow-sm">
-          <CardHeader>
-            <CardTitle>PDF管理テーブル</CardTitle>
+            <CardTitle>PDFの管理</CardTitle>
           </CardHeader>
           <CardContent>
             <PdfDocumentList />
           </CardContent>
         </Card>
+        <Button asChild variant="card">
+          <Link href="/dashboard/super-admin/pdf-documents/upload">
+            PDFのアップロード
+          </Link>
+        </Button>
       </div>
     </DashboardPageShell>
   );

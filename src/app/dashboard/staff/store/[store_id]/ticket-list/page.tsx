@@ -1,5 +1,4 @@
 import AttractionTicketList from "@/features/store/attraction/ticket/attraction-list";
-import CompletePaperTicket from "@/features/store/attraction/ticket/complete-paper";
 import { getDb } from "@/lib/db/drizzle";
 import { attractions, tickets } from "@/lib/db/schema";
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";

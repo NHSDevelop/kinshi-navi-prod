@@ -37,19 +37,6 @@ export default async function SuperAdminHomePage() {
       <div className="space-y-4 lg:space-y-8">
         <Card className="border-main-200/80 shadow-sm">
           <CardHeader>
-            <CardTitle>お知らせの作成</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Button variant="card" asChild>
-              <Link href="/dashboard/super-admin/create-system-info">
-                お知らせを作成
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-        <Separator />
-        <Card className="border-main-200/80 shadow-sm">
-          <CardHeader>
             <CardTitle>お知らせの管理</CardTitle>
           </CardHeader>
           <CardContent>

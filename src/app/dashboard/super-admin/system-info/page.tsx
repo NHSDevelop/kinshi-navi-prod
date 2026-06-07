@@ -20,13 +20,12 @@ export default async function SuperAdminSystemInfoPage() {
           </CardHeader>
           <CardContent>
             <Button variant="card" asChild>
-              <Link href="/dashboard/super-admin/create-system-info">
+              <Link href="/dashboard/super-admin/system-info/create">
                 お知らせを作成
               </Link>
             </Button>
           </CardContent>
         </Card>
-
         <Card className="border-main-200/80 shadow-sm">
           <CardHeader>
             <CardTitle>お知らせ一覧</CardTitle>
