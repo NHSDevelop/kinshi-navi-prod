@@ -272,7 +272,7 @@ export const registerLanes = sqliteTable(
       .notNull()
       .references(() => events.id, { onDelete: "cascade" }),
     foodId: text("foodId").references(() => foods.id, { onDelete: "set null" }),
-    laneNumber: integer("laneNumber").notNull(),
+    laneNumber: integer("laneNumber"),
     name: text("name"),
     isActive: integer("isActive", { mode: "boolean" }).notNull().default(true),
     createdAt: integer("createdAt", { mode: "timestamp_ms" })

@@ -10,7 +10,7 @@ import {
   registerLanes,
   stockLogs,
 } from "@/lib/db/schema";
-import { asc, desc, eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 
 type SaleStockChange = {
   id: string;
@@ -126,7 +126,7 @@ export default async function CombinedHistoryList({
       difference: log.difference,
       meta: log.meta,
     })),
-  ].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
   const historyBlocks: HistoryBlock[] = [];
 

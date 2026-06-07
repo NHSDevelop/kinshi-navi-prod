@@ -1,14 +1,27 @@
 "use server";
 
 import { getDb } from "@/lib/db/drizzle";
-import { registerLanes } from "@/lib/db/schema";
+import { registerLanes, stores } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 import z from "zod";
 import { revalidatePath } from "next/cache";
 
-function invalidateRegisterLanePages(eventId: string) {
+async function invalidateRegisterLanePages(eventId: string) {
   revalidatePath(`/dashboard/admin/event/${eventId}`);
+  try {
+    const db = await getDb();
+    const storesInEvent = await db
+      .select({ id: stores.id })
+      .from(stores)
+      .where(eq(stores.eventId, eventId));
+    for (const store of storesInEvent) {
+      revalidatePath(`/dashboard/admin/store/${store.id}/register`);
+      revalidatePath(`/dashboard/staff/store/${store.id}/register`);
+    }
+  } catch (error) {
+    throw error;
+  }
 }
 
 const createRegisterLaneSchema = z.object({
@@ -80,7 +93,7 @@ export async function createRegisterLane(
 
     await db.insert(registerLanes).values(values);
 
-    invalidateRegisterLanePages(eventId);
+    await invalidateRegisterLanePages(eventId);
 
     return {
       eventId,

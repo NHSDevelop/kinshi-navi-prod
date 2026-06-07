@@ -54,7 +54,7 @@ export type RegisterLogState = {
   totalAmount: string;
   amountPaid: string;
   meta: string;
-  laneId: string;
+  laneId: string | null;
   zodErrors: ZodErrors;
   message: string | null;
   success: boolean;
@@ -64,7 +64,7 @@ export type RegisterAndStockState = {
   quantities: Record<string, number>;
   totalAmount: number;
   amountPaid: string;
-  laneId: string;
+  laneId: string | null;
   zodErrors: {
     quantities?: Record<string, string[]>;
     totalAmount?: string[];
@@ -83,7 +83,7 @@ export async function createRegisterLog(
     totalAmount: formData.get("totalAmount") as string,
     amountPaid: formData.get("amountPaid") as string,
     meta: formData.get("meta") as string | undefined,
-    laneId: formData.get("laneId") as string,
+    laneId: formData.get("laneId") as string | undefined,
   });
 
   if (!validationResult.success) {
@@ -104,7 +104,6 @@ export async function createRegisterLog(
   const db = await getDb();
 
   try {
-    // laneId is optional for register; record register log directly.
     await db.insert(registerLogs).values({
       foodId,
       totalAmount,
@@ -171,9 +170,6 @@ export async function processRegisterAndStock(
   const db = await getDb();
 
   try {
-    // laneId is optional. Proceed with stock updates and register log using foodId.
-
-    // Parse quantities from formData (format: quantity_<itemId>)
     const quantitiesToRecord: Record<string, number> = {};
     formData.forEach((value, key) => {
       if (key.startsWith("quantity_")) {
@@ -185,11 +181,10 @@ export async function processRegisterAndStock(
       }
     });
 
-    // Record stock logs for each item (negative difference)
     const stockLogRecords = Object.entries(quantitiesToRecord).map(
       ([itemId, qty]) => ({
         itemId,
-        difference: -qty, // Negative to reduce stock
+        difference: -qty,
         meta: `会計時に販売: ${qty}個`,
       }),
     );
@@ -215,7 +210,7 @@ export async function processRegisterAndStock(
       foodId,
       totalAmount,
       amountPaid,
-      laneId,
+      laneId: laneId || null,
       meta: `販売${Object.values(quantitiesToRecord).reduce((a, b) => a + b, 0)}個`,
     });
 
