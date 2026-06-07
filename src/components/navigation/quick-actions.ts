@@ -32,7 +32,7 @@ export type QuickAction = {
 export const quickActions: QuickAction[] = [
   {
     href: "/anonymous-user",
-    title: "ユーザーページ",
+    title: "ゲストユーザーページ",
     description: "取得した整理券や通知設定を確認",
     iconName: "user",
   },

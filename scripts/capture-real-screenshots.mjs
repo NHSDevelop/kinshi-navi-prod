@@ -76,7 +76,7 @@ async function ensureDashboardAuth(page) {
     timeout: 90000,
   });
   await bypassSecurityWarningIfPresent(page);
-  return !page.url().includes("/signin");
+  return !page.url().includes("/login");
 }
 
 async function findFirstEventPath(page) {
@@ -127,7 +127,7 @@ async function main() {
 
   await capturePage(page, report, "home", "/");
   await capturePage(page, report, "event-list", "/event-list");
-  await capturePage(page, report, "signin", "/signin");
+  await capturePage(page, report, "login", "/login");
 
   if (signedIn) {
     await capturePage(page, report, "dashboard", "/dashboard");

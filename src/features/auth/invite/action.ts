@@ -126,7 +126,7 @@ export async function createInvite(prevState: unknown, formData: FormData) {
 export async function acceptInvite(token: string) {
   const session = await getSessionFromRequestHeaders();
   if (!session?.user) {
-    redirect(`/signin?token=${token}`);
+    redirect(`/login?token=${token}`);
   }
   try {
     const db = await getDb();
@@ -268,7 +268,7 @@ export async function acceptInvite(token: string) {
           role: "STORE_ADMIN",
           storeId: invite.storeId,
         });
-        return { success: true };
+        return { success: true, storeId: invite.storeId };
       }
     }
     return {

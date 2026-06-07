@@ -18,7 +18,7 @@ interface Props {
   searchParams: Promise<{ token?: string }>;
 }
 
-export default async function SignInPage(props: Props) {
+export default async function LoginPage(props: Props) {
   const searchParams = await props.searchParams;
   const token = searchParams.token;
   const callbackURL = token ? `/accept-invite?token=${token}` : "/dashboard";

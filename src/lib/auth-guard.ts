@@ -28,7 +28,7 @@ export async function requireSignedInUser() {
   const user = await getSignedInUser();
 
   if (!user) {
-    redirect("/signin");
+    redirect("/login");
   }
 
   return user;
@@ -38,7 +38,7 @@ export async function requireSuperAdminUser() {
   const user = await requireSignedInUser();
 
   if (!(await canSuperAdmin(user.id))) {
-    redirect("/signin");
+    redirect("/login");
   }
 
   return user;
@@ -48,7 +48,7 @@ export async function requireEventAdminUser(eventId: string) {
   const user = await requireSignedInUser();
 
   if (!(await canManageEvent(user.id, eventId))) {
-    redirect("/signin");
+    redirect("/login");
   }
 
   return user;
@@ -58,7 +58,7 @@ export async function requireStoreAdminUser(storeId: string) {
   const user = await requireSignedInUser();
 
   if (!(await canManageStore(user.id, storeId))) {
-    redirect("/signin");
+    redirect("/login");
   }
 
   return user;
@@ -68,7 +68,7 @@ export async function requireStaffOrManageStoreUser(storeId: string) {
   const user = await requireSignedInUser();
 
   if (!(await canStaffOrManageStore(user.id, storeId))) {
-    redirect("/signin");
+    redirect("/login");
   }
 
   return user;
@@ -205,7 +205,7 @@ export async function requirePdfManagerUser() {
   const user = await requireSignedInUser();
 
   if (!(await canManagePdfDocuments(user.id))) {
-    redirect("/signin");
+    redirect("/login");
   }
 
   return user;
