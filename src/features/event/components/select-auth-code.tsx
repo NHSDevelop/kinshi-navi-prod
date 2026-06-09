@@ -27,7 +27,7 @@ export default function SelectEventAuthCode({
   return (
     <>
       {events.length > 0 ? (
-        <div className="flex flex-col gap-4 items-center">
+        <div className="flex flex-col gap-4">
           <Select onValueChange={setSelectedAuthCode}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="イベントを選択" />
