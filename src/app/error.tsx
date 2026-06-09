@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ErrorPrompt } from "@/components/prompt/error-prompt";
