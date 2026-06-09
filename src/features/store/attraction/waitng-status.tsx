@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/table";
 import { getDb } from "@/lib/db/drizzle";
 import { attractions, stores, tickets } from "@/lib/db/schema";
-import { and, eq } from "drizzle-orm";
+import { aliasedTable, and, eq, max } from "drizzle-orm";
 
 interface AttractionWaitngStatusProps {
   eventId: string;
@@ -18,6 +18,9 @@ interface AttractionWaitngStatusProps {
 export default async function AttractionWaitngStatus({
   eventId,
 }: AttractionWaitngStatusProps) {
+  const issuedTickets = aliasedTable(tickets, "issuedTickets");
+  const calledTickets = aliasedTable(tickets, "calledTickets");
+
   const db = await getDb();
   const rows = await db
     .select({
@@ -25,18 +28,34 @@ export default async function AttractionWaitngStatus({
       peopleCapacity: attractions.peopleCapacity,
       playTime: attractions.playTime,
       storeName: stores.name,
-      waitingPeople: tickets.numberOfPeople,
+      waitingPeople: issuedTickets.numberOfPeople,
+      maxCalledIndex: max(calledTickets.index),
     })
     .from(attractions)
     .innerJoin(stores, eq(stores.id, attractions.storeId))
     .leftJoin(
-      tickets,
+      issuedTickets,
       and(
-        eq(tickets.attractionId, attractions.id),
-        eq(tickets.status, "ISSUED"),
+        eq(issuedTickets.attractionId, attractions.id),
+        eq(issuedTickets.status, "ISSUED"),
       ),
     )
-    .where(eq(stores.eventId, eventId));
+    .leftJoin(
+      calledTickets,
+      and(
+        eq(calledTickets.attractionId, attractions.id),
+        eq(calledTickets.status, "CALLED"),
+      ),
+    )
+    .where(eq(stores.eventId, eventId))
+    .groupBy(
+      attractions.id,
+      attractions.peopleCapacity,
+      attractions.playTime,
+      stores.name,
+      issuedTickets.id,
+      issuedTickets.numberOfPeople,
+    );
 
   const attractionMap = new Map<
     string,
@@ -45,28 +64,39 @@ export default async function AttractionWaitngStatus({
       peopleCapacity: number | null;
       playTime: number | null;
       waitingPeople: number;
+      maxCalledIndex: number | null;
     }
   >();
 
   for (const row of rows) {
     const current = attractionMap.get(row.attractionId);
     const waiting = row.waitingPeople ?? 0;
+    const calledIndex = row.maxCalledIndex;
+
     if (!current) {
       attractionMap.set(row.attractionId, {
         storeName: row.storeName,
         peopleCapacity: row.peopleCapacity,
         playTime: row.playTime,
         waitingPeople: waiting,
+        maxCalledIndex: calledIndex,
       });
       continue;
     }
 
     current.waitingPeople += waiting;
+    if (
+      calledIndex !== null &&
+      (current.maxCalledIndex === null || calledIndex > current.maxCalledIndex)
+    ) {
+      current.maxCalledIndex = calledIndex;
+    }
   }
 
   const waitingStatusList = Array.from(attractionMap.entries()).map(
     ([id, value]) => ({ id, ...value }),
   );
+
   return (
     <>
       {rows.length > 0 ? (
@@ -74,6 +104,7 @@ export default async function AttractionWaitngStatus({
           <TableHeader>
             <TableRow>
               <TableHead>企画名</TableHead>
+              <TableHead>最新の呼び出し番号</TableHead>
               <TableHead>待ち人数（人）</TableHead>
               <TableHead>待ち時間（分）</TableHead>
             </TableRow>
@@ -88,6 +119,11 @@ export default async function AttractionWaitngStatus({
               return (
                 <TableRow key={attraction.id}>
                   <TableCell>{attraction.storeName}</TableCell>
+                  <TableCell>
+                    {attraction.maxCalledIndex !== null
+                      ? attraction.maxCalledIndex
+                      : "-"}
+                  </TableCell>
                   <TableCell>{waitingPeople}</TableCell>
                   <TableCell>{waitMinutes}</TableCell>
                 </TableRow>
