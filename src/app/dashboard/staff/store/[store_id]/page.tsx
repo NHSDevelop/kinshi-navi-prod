@@ -29,7 +29,7 @@ export default async function StoreStaffHomePage(props: {
 
   const db = await getDb();
 
-  const [, storeRows, staffRows, activeTicketRows] = await Promise.all([
+  const [, storeRows, staffRows] = await Promise.all([
     requireStaffOrManageStoreUser(store_id),
     db
       .select({
@@ -50,21 +50,6 @@ export default async function StoreStaffHomePage(props: {
       .from(staffs)
       .innerJoin(users, eq(users.id, staffs.userId))
       .where(eq(staffs.storeId, store_id)),
-    db
-      .select({ count: sql<number>`count(*)` })
-      .from(tickets)
-      .innerJoin(attractions, eq(tickets.attractionId, attractions.id))
-      .where(
-        and(
-          eq(attractions.storeId, store_id),
-          inArray(tickets.status, [
-            "ISSUED",
-            "CALLED",
-            "COMPLETED",
-            "CANCELED",
-          ]),
-        ),
-      ),
   ]);
 
   if (storeRows.length === 0) {
@@ -159,7 +144,6 @@ export default async function StoreStaffHomePage(props: {
         <ToActiveStore
           storeId={storeRows[0].id}
           isActive={storeRows[0].isActive}
-          activeTicketCount={Number(activeTicketRows[0]?.count ?? 0)}
         />
         <Separator />
         <Card>
