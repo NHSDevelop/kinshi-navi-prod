@@ -105,6 +105,7 @@ export const events = sqliteTable("events", {
   finishedAtDate: integer("finishedAtDate", { mode: "timestamp_ms" }),
   finishedAtTime: text("finishedAtTime"),
   description: text("description"),
+  adminCode: text("admin_code").$defaultFn(() => createId()),
   createdAt: integer("createdAt", { mode: "timestamp_ms" })
     .notNull()
     .$defaultFn(() => new Date()),
@@ -137,6 +138,8 @@ export const stores = sqliteTable("stores", {
     .references(() => events.id)
     .notNull(),
   canVoted: integer("can_voted", { mode: "boolean" }).notNull().default(true),
+  adminCode: text("admin_code").$defaultFn(() => createId()),
+  staffCode: text("staff_code").$defaultFn(() => createId()),
   createdAt: integer("createdAt", { mode: "timestamp_ms" })
     .notNull()
     .$defaultFn(() => new Date()),

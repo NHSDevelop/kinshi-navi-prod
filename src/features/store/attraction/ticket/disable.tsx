@@ -22,20 +22,18 @@ import { disableAttractionTickets } from "./action";
 type Props = {
   storeId: string;
   isActive: boolean;
-  activeTicketCount: number;
 };
 
 export default function DisableAttractionTickets({
   storeId,
   isActive,
-  activeTicketCount,
 }: Props) {
   const [state, formAction, isPending] = useActionState(
     disableAttractionTickets,
     null,
   );
 
-  if (isActive || activeTicketCount === 0) {
+  if (isActive) {
     return null;
   }
 

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { AiOutlineUser } from "react-icons/ai";
 import { QuickActionsSidebar } from "@/components/navigation/quick-actions-sidebar";
 import type { QuickAction } from "@/components/navigation/quick-actions";
 import {
@@ -50,12 +49,6 @@ export default async function DashBoardLayout({
               Dashboard | Kinshi Navi
             </Link>
           </div>
-          <Link
-            href={"/dashboard/user"}
-            className="bg-gray-50 border border-gray-950 rounded-full w-8 h-8 flex items-center justify-center"
-          >
-            <AiOutlineUser />
-          </Link>
         </header>
         <main className="px-4 md:px-16 lg:px-40 xl:px-60 flex-1 py-4 lg:py-8">
           {children}

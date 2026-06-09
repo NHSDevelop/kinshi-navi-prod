@@ -9,13 +9,11 @@ import DisableAttractionTickets from "@/features/store/attraction/ticket/disable
 type Props = {
   storeId: string;
   isActive: boolean;
-  activeTicketCount?: number;
 };
 
 export default function ToActiveStore({
   storeId,
   isActive,
-  activeTicketCount = 0,
 }: Props) {
   const [state, formAction, isPending] = useActionState(toActiveStore, null);
   const isActiveStore = state?.isActive ?? isActive;
@@ -25,7 +23,6 @@ export default function ToActiveStore({
       <DisableAttractionTickets
         storeId={storeId}
         isActive={isActiveStore}
-        activeTicketCount={activeTicketCount}
       />
       <form action={formAction}>
         <input type="hidden" name="storeId" value={storeId} />

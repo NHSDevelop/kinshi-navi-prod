@@ -54,15 +54,14 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
     foodRows,
     adminRows,
     staffRows,
-    activeTicketRows,
   ] = await Promise.all([
-    db.select().from(stores).where(eq(stores.id, store_id)).limit(1),
+    db.select({"id": stores.id, "staffCode": stores.staffCode, "isActive": stores.isActive}).from(stores).where(eq(stores.id, store_id)).limit(1),
     db
-      .select()
+      .select({"id": attractions.id})
       .from(attractions)
       .where(eq(attractions.storeId, store_id))
       .limit(1),
-    db.select().from(foods).where(eq(foods.storeId, store_id)).limit(1),
+    db.select({"id": foods.id}).from(foods).where(eq(foods.storeId, store_id)).limit(1),
     db
       .select({
         id: admins.id,
@@ -82,16 +81,6 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
       .from(staffs)
       .innerJoin(users, eq(users.id, staffs.userId))
       .where(eq(staffs.storeId, store_id)),
-    db
-      .select({ count: sql<number>`count(*)` })
-      .from(tickets)
-      .innerJoin(attractions, eq(tickets.attractionId, attractions.id))
-      .where(
-        and(
-          eq(attractions.storeId, store_id),
-          inArray(tickets.status, ["ISSUED", "CALLED"]),
-        ),
-      ),
   ]);
 
   if (!storeRows[0]) {
@@ -104,52 +93,9 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
       description="店舗の基本情報、企画情報、スタッフ情報をまとめて管理できます。"
     >
       <div className="space-y-4 lg:space-y-8">
-        <Card>
-          <CardHeader className="flex items-center justify-between">
-            <CardTitle>店舗の情報</CardTitle>
-            <Button asChild variant="card" className="max-w-32">
-              <div className="flex gap-2">
-                <AiFillEdit />
-                <Link
-                  href={`/dashboard/admin/store/${store_id}/edit-config/store`}
-                >
-                  設定を編集
-                </Link>
-              </div>
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <StoreInfo storeId={store_id} isShowCanVoted />
-          </CardContent>
-        </Card>
-        <ToActiveStore
-          storeId={storeRows[0].id}
-          isActive={storeRows[0].isActive}
-          activeTicketCount={Number(activeTicketRows[0]?.count ?? 0)}
-        />
-        <Separator />
-        {attractionRows?.length > 0 && (
-          <div className="space-y-4 lg:space-y-8">
-            <Card>
-              <CardHeader className="flex items-center justify-between">
-                <CardTitle>企画の情報</CardTitle>
-                <Button asChild variant="card" className="max-w-32">
-                  <div className="flex gap-2">
-                    <AiFillEdit />
-                    <Link
-                      href={`/dashboard/admin/store/${store_id}/edit-config/attraction`}
-                    >
-                      設定を編集
-                    </Link>
-                  </div>
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <AttractionInfo attractionId={attractionRows[0].id} />
-              </CardContent>
-            </Card>
-            <Separator />
-            <p className="text-lg">操作メニュー</p>
+        {attractionRows.length > 0 && (
+          <div>
+          <p className="text-lg">操作メニュー</p>
             <ScrollArea className="w-full whitespace-nowrap rounded-md">
               <div className="flex w-max gap-2 pb-4">
                 <Button asChild variant="card">
@@ -191,32 +137,18 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
               </div>
               <ScrollBar orientation="horizontal" />
             </ScrollArea>
-          </div>
+            </div>
         )}
-        {foodRows?.length > 0 && (
-          <div className="space-y-4 lg:space-y-8">
-            <Card>
-              <CardHeader className="flex items-center justify-between">
-                <CardTitle>模擬店の情報</CardTitle>
-                <Button asChild variant="card" className="max-w-32">
-                  <div className="flex gap-2">
-                    <AiFillEdit />
-                    <Link
-                      href={`/dashboard/admin/store/${store_id}/edit-config/food`}
-                    >
-                      設定を編集
-                    </Link>
-                  </div>
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <FoodInfo foodId={foodRows[0].id} />
-              </CardContent>
-            </Card>
-            <Separator />
-            <p className="text-lg">操作メニュー</p>
+        {foodRows.length > 0 && (
+          <div>
+<p className="text-lg">操作メニュー</p>
             <ScrollArea className="w-full whitespace-nowrap rounded-md">
               <div className="flex w-max gap-2 pb-4">
+                <Button asChild variant="card">
+                  <Link href={`/dashboard/staff/store/${store_id}/register`}>
+                    レジページ
+                  </Link>
+                </Button>
                 <Button asChild variant="card">
                   <div className="flex gap-4">
                     <AiFillPlusCircle />
@@ -241,14 +173,77 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
                     会計・在庫履歴
                   </Link>
                 </Button>
-                <Button asChild variant="card">
-                  <Link href={`/dashboard/staff/store/${store_id}/register`}>
-                    レジページ
-                  </Link>
-                </Button>
               </div>
               <ScrollBar orientation="horizontal" />
             </ScrollArea>
+            </div>
+        )}
+        <Card>
+          <CardHeader className="flex items-center justify-between">
+            <CardTitle>店舗の情報</CardTitle>
+            <Button asChild variant="card" className="max-w-32">
+              <div className="flex gap-2">
+                <AiFillEdit />
+                <Link
+                  href={`/dashboard/admin/store/${store_id}/edit-config/store`}
+                >
+                  設定を編集
+                </Link>
+              </div>
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <StoreInfo storeId={store_id} isShowCanVoted />
+          </CardContent>
+        </Card>
+        <ToActiveStore
+          storeId={storeRows[0].id}
+          isActive={storeRows[0].isActive}
+        />
+        <Separator />
+        {attractionRows?.length > 0 && (
+          <div className="space-y-4 lg:space-y-8">
+            <Card>
+              <CardHeader className="flex items-center justify-between">
+                <CardTitle>企画の情報</CardTitle>
+                <Button asChild variant="card" className="max-w-32">
+                  <div className="flex gap-2">
+                    <AiFillEdit />
+                    <Link
+                      href={`/dashboard/admin/store/${store_id}/edit-config/attraction`}
+                    >
+                      設定を編集
+                    </Link>
+                  </div>
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <AttractionInfo attractionId={attractionRows[0].id} />
+              </CardContent>
+            </Card>
+            <Separator />
+          </div>
+        )}
+        {foodRows?.length > 0 && (
+          <div className="space-y-4 lg:space-y-8">
+            <Card>
+              <CardHeader className="flex items-center justify-between">
+                <CardTitle>模擬店の情報</CardTitle>
+                <Button asChild variant="card" className="max-w-32">
+                  <div className="flex gap-2">
+                    <AiFillEdit />
+                    <Link
+                      href={`/dashboard/admin/store/${store_id}/edit-config/food`}
+                    >
+                      設定を編集
+                    </Link>
+                  </div>
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <FoodInfo foodId={foodRows[0].id} />
+              </CardContent>
+            </Card>
             <Separator />
             <h3 className="text-lg">商品一覧</h3>
             <ItemList foodId={foodRows[0].id} storeId={store_id} />
@@ -265,12 +260,8 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
           </div>
         )}
         <Separator />
-        <p className="text-lg">店舗のスタッフを招待</p>
-        <Button asChild variant="card">
-          <Link href={`/dashboard/admin/store/${store_id}/issue-invite`}>
-            招待リンクを発行
-          </Link>
-        </Button>
+        <p className="text-lg">店舗のスタッフ用認証コード</p>
+        <p>認証コード:{storeRows[0].staffCode}</p>
         <Separator />
         <p className="text-lg">店舗の管理者一覧</p>
         {adminRows.length > 0 ? (

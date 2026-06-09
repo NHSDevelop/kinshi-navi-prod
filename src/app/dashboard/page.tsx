@@ -1,11 +1,12 @@
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import { getDb } from "@/lib/db/drizzle";
 import { admins, staffs } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { getSessionFromRequestHeaders } from "@/lib/auth-session";
 import { Redirector } from "@/components/navigation/redirector";
+import ConnectAuthUser from "@/features/auth/connect";
 
 export const dynamic = "force-dynamic";
 
@@ -61,10 +62,11 @@ export default async function DashBoardPage() {
     >
       <Card className="border-main-200/80 shadow-sm">
         <CardHeader>
-          <CardTitle>ユーザー権限の確認</CardTitle>
+          <CardTitle>ユーザーの権限紐付け</CardTitle>
+          <CardDescription>ユーザーに紐づいたイベントや店舗が存在しません。認証コードを入力して紐付けを行ってください。</CardDescription>
         </CardHeader>
         <CardContent>
-          <NotFoundPrompt context="ユーザーに紐づいた権限" />
+          <ConnectAuthUser />
         </CardContent>
       </Card>
     </DashboardPageShell>

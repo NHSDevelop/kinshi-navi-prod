@@ -21,6 +21,7 @@ import { notFound } from "next/navigation";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import { requireEventAdminUser } from "@/lib/auth-guard";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import SelectStoreAuthCode from "@/features/store/components/select-auth-code";
 
 export const dynamic = "force-dynamic";
 
@@ -35,7 +36,7 @@ export default async function AdminEventPage(props: {
   const [eventRows, storeRows, adminRows] = await Promise.all([
     db.select().from(events).where(eq(events.id, event_id)).limit(1),
     db
-      .select({ id: stores.id, name: stores.name, storeType: stores.storeType })
+      .select({ id: stores.id, name: stores.name, authCode: stores.adminCode })
       .from(stores)
       .where(eq(stores.eventId, event_id)),
     db
@@ -88,7 +89,7 @@ export default async function AdminEventPage(props: {
                 className="flex items-center gap-2"
               >
                 <AiFillPlusCircle />
-                店舗を作成
+                <p>店舗を作成</p>
               </Link>
             </Button>
           </CardHeader>
@@ -122,13 +123,10 @@ export default async function AdminEventPage(props: {
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
         <Separator />
-        <p className="text-lg">イベント内の店舗の管理者を招待</p>
+        <p className="text-lg">イベント内の店舗の管理者の認証コード
+        </p>
         {storeRows.length > 0 ? (
-          <StoreSelectLink
-            href={`/dashboard/admin/event/${event_id}/issue-invite`}
-            stores={storeRows}
-            context="招待リンクを発行"
-          />
+          <SelectStoreAuthCode stores={storeRows} />
         ) : (
           <p>イベント内の店舗が存在しません。</p>
         )}
