@@ -20,15 +20,17 @@ export default function ConnectAuthUser() {
             </Field>
             <Button type="submit" variant="card">紐付ける</Button>
         </form>
-        {state?.success && state?.message (
-            <div className="flex flex-col gap-4">
-                <MessagePrompt message={state?.message}/>
-                <Button asChild variant="card"><Link href="/dashboard">管理画面</Link></Button>
-            </div>
-        )}
-        {!state?.success && state.message (
-            <ErrorPrompt error={state?.message} />
-         )}
+        {state?.success && <MessagePrompt message={state.message} />}
+                {!state?.success && state?.message && (
+                  <ErrorPrompt error={state.message} />
+                )}
+                {state?.success && (
+                  <Button
+                    asChild variant="card"
+                  >
+                    <Link href="/dashboard">管理画面へ</Link>
+                  </Button>
+                )}
         </div>
     )
 }
