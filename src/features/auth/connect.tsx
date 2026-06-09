@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 export default function ConnectAuthUser() {
     const[state, formAction, isPending] = useActionState(connectStoreOrEvent, null);
     return (
-        <form action={formAction} className="flex gap-4">
+        <form action={formAction} className="flex gap-4 items-baseline">
             <Field>
                 <FieldDescription>認証コードを入力</FieldDescription>
                 <Input name="authCode" required disabled={isPending} />
