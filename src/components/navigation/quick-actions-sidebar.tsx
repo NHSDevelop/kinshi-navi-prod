@@ -12,7 +12,6 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -35,15 +34,10 @@ export function QuickActionsSidebar({ actions }: QuickActionsSidebarProps) {
       className="border-r border-main-200 bg-main-50/20"
     >
       <SidebarHeader className="flex h-16 justify-center border-b border-main-200 px-4 py-4">
-        <Link href="/" className="text-sm font-bold tracking-wider text-main-950 uppercase">
-          Dashboard
-        </Link>
+        Menu
       </SidebarHeader>
       <SidebarContent className="px-3 py-4">
         <SidebarGroup className="p-0">
-          <SidebarGroupLabel className="px-2 text-xs font-semibold text-main-700">
-            クイックアクセス
-          </SidebarGroupLabel>
           <SidebarGroupContent className="mt-2">
             <SidebarMenu className="gap-1.5">
               {actions.map((action) => {

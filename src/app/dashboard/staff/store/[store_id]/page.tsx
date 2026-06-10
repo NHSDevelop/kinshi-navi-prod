@@ -3,7 +3,7 @@ import ToActiveStore from "@/features/store/to-active";
 import { getDb } from "@/lib/db/drizzle";
 import { stores, users, staffs } from "@/lib/db/schema";
 import { Separator } from "@/components/ui/separator";
-import { eq} from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import Link from "next/link";
 import {
   Table,
@@ -18,6 +18,16 @@ import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import { requireStaffOrManageStoreUser } from "@/lib/auth-guard";
 import StoreInfo from "@/features/store/info";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import {
+  Banknote,
+  CirclePlus,
+  ConciergeBell,
+  History,
+  List,
+  Monitor,
+  ScanLine,
+  Ticket,
+} from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -70,12 +80,16 @@ export default async function StoreStaffHomePage(props: {
       <div className="space-y-4 lg:space-y-8">
         {storeRows[0].storeType === "ATTRACTION" && (
           <div className="space-y-4 lg:space-y-8">
-            <h2 className="text-sm font-bold text-titan-white-950 tracking-wide">
+            <h2 className="text-sm font-bold main-950 tracking-wide">
               操作メニュー
             </h2>
             <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4">
               <Button asChild variant="default" className="w-full">
-                <Link href={`/dashboard/admin/store/${store_id}/call-ticket`}>
+                <Link
+                  href={`/dashboard/admin/store/${store_id}/call-ticket`}
+                  className="flex items-center gap-2 w-full h-full"
+                >
+                  <ConciergeBell />
                   整理券の呼び出し
                 </Link>
               </Button>
@@ -83,19 +97,29 @@ export default async function StoreStaffHomePage(props: {
               <Button asChild variant="default" className="w-full">
                 <Link
                   href={`/dashboard/admin/store/${store_id}/complete-ticket`}
+                  className="flex items-center gap-2 w-full h-full"
                 >
+                  <ScanLine />
                   整理券の受付
                 </Link>
               </Button>
 
               <Button asChild variant="card" className="w-full">
-                <Link href={`/dashboard/admin/store/${store_id}/ticket-list`}>
+                <Link
+                  href={`/dashboard/admin/store/${store_id}/ticket-list`}
+                  className="flex items-center gap-2 w-full h-full"
+                >
+                  <List />
                   整理券の一覧
                 </Link>
               </Button>
 
               <Button asChild variant="card" className="w-full">
-                <Link href={`/dashboard/admin/store/${store_id}/issue-ticket`}>
+                <Link
+                  href={`/dashboard/admin/store/${store_id}/issue-ticket`}
+                  className="flex items-center gap-2 w-full h-full"
+                >
+                  <Ticket />
                   紙の整理券の発行
                 </Link>
               </Button>
@@ -103,13 +127,19 @@ export default async function StoreStaffHomePage(props: {
               <Button asChild variant="card" className="w-full">
                 <Link
                   href={`/dashboard/admin/store/${store_id}/complete-paper-ticket`}
+                  className="flex items-center gap-2 w-full h-full"
                 >
+                  <ScanLine />
                   紙の整理券の受付
                 </Link>
               </Button>
 
               <Button asChild variant="card" className="w-full">
-                <Link href={`/dashboard/admin/store/${store_id}/show-status`}>
+                <Link
+                  href={`/dashboard/admin/store/${store_id}/show-status`}
+                  className="flex items-center gap-2 w-full h-full"
+                >
+                  <Monitor />
                   待機状況を表示
                 </Link>
               </Button>
@@ -119,19 +149,31 @@ export default async function StoreStaffHomePage(props: {
         {storeRows[0].storeType === "FOOD" && (
           <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4">
             <Button asChild variant="default" className="w-full">
-              <Link href={`/dashboard/staff/store/${store_id}/register`}>
+              <Link
+                href={`/dashboard/staff/store/${store_id}/register`}
+                className="flex items-center gap-2 w-full h-full"
+              >
+                <Banknote />
                 レジページ
               </Link>
             </Button>
 
             <Button asChild variant="card" className="w-full">
-              <Link href={`/dashboard/staff/store/${store_id}/item-list`}>
+              <Link
+                href={`/dashboard/staff/store/${store_id}/item-list`}
+                className="flex items-center gap-2 w-full h-full"
+              >
+                <List />
                 商品一覧
               </Link>
             </Button>
 
             <Button asChild variant="card" className="w-full">
-              <Link href={`/dashboard/staff/store/${store_id}/add-stock`}>
+              <Link
+                href={`/dashboard/staff/store/${store_id}/add-stock`}
+                className="flex items-center gap-2 w-full h-full"
+              >
+                <CirclePlus />
                 商品の在庫を追加
               </Link>
             </Button>
@@ -139,7 +181,9 @@ export default async function StoreStaffHomePage(props: {
             <Button asChild variant="card" className="w-full">
               <Link
                 href={`/dashboard/staff/store/${store_id}/register-log-history`}
+                className="flex items-center gap-2 w-full h-full"
               >
+                <History />
                 会計・在庫履歴
               </Link>
             </Button>

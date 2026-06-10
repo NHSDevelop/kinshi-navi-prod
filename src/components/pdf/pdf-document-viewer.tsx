@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 
 type PdfDocumentViewerProps = {
   title: string;
@@ -52,7 +53,8 @@ export function PdfDocumentViewer({
       <div className="flex flex-col gap-2 border-t border-main-100 px-6 py-4 text-sm text-main-900/80 md:flex-row md:items-center md:justify-between md:px-8">
         <p>ファイル名: {fileName}</p>
         <Button asChild size="sm" variant="ghost" className="w-fit px-0">
-          <Link href={fileUrl} download>
+          <Link href={fileUrl} download className="flex items-center gap-2 w-full h-full">
+            <Download />
             ダウンロード
           </Link>
         </Button>

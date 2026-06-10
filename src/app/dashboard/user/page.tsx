@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { getSessionFromRequestHeaders } from "@/lib/auth-session";
 import { Card, CardContent } from "@/components/ui/card";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
+import { LogIn, Settings } from "lucide-react";
 
 export default async function ManagedUserPage() {
   const session = await getSessionFromRequestHeaders();
@@ -20,7 +21,7 @@ export default async function ManagedUserPage() {
           <Separator />
           <div className="flex gap-4">
             <Button asChild variant="card">
-              <Link href={"/dashboard/user/settings"}>ユーザー設定</Link>
+              <Link href={"/dashboard/user/settings"} className="flex items-center gap-2 w-full h-full"><Settings />ユーザー設定</Link>
             </Button>
             {!user.isAnonymous && <Signout />}
           </div>
@@ -34,8 +35,8 @@ export default async function ManagedUserPage() {
         <Card>
           <CardContent>
             <p>設定を編集するにはログインしてください。</p>
-            <Button asChild variant="card">
-              <Link href="/login">ログイン</Link>
+            <Button asChild variant="card" >
+              <Link href="/login" className="flex items-center gap-2 w-full h-full"><LogIn />ログイン</Link>
             </Button>
           </CardContent>
         </Card>

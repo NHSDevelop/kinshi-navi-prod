@@ -8,16 +8,14 @@ const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
   {
     variants: {
-        variant: {
-    default:
-      "bg-titan-white-500 text-white font-bold shadow-xs hover:bg-titan-white-600 transition-colors",
-    outline:
-      "bg-main-100 text-main-800 font-medium hover:bg-main-200 transition-colors",
-    card:
-      "border border-titan-white-200 bg-white text-titan-white-800 font-medium hover:bg-titan-white-50 transition-colors",
-    ghost:
-      "hover:bg-titan-white-100 hover:text-titan-white-950",
-      warn: "bg-amber-100 text-amber-950 hover:bg-amber-300/90",
+      variant: {
+        default:
+          "bg-biloba-flower-400 text-white font-bold shadow-xs hover:bg-biloba-flower-600 transition-colors",
+        outline:
+          "bg-main-100 text-main-800 font-medium hover:bg-main-200 transition-colors",
+        card: "border border-biloba-flower-200 bg-white text-biloba-flower-950 font-medium hover:bg-biloba-flower-50 transition-colors",
+        ghost: "hover:bg-biloba-flower-100 hover:text-biloba-flower-950",
+        warn: "bg-amber-100 text-amber-950 hover:bg-amber-300/90",
         danger: "bg-rose-600  text-white hover:bg-red-300/90",
         success: "bg-emerald-600 text-white hover:bg-green-300/90",
       },

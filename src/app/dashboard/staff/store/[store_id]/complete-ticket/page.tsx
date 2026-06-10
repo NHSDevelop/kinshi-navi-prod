@@ -10,7 +10,7 @@ import { requireStaffOrManageStoreUser } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
-export default async function CallTicketPage(props: {
+export default async function CompleteTicketStaffPage(props: {
   params: Promise<{ store_id: string }>;
 }) {
   const { store_id } = await props.params;
@@ -43,7 +43,8 @@ export default async function CallTicketPage(props: {
     >
       <CompleteTicket />
       <Button asChild variant="warn">
-        <Link href={`/dashboard/staff/store/${store_id}/ticket-list`}>
+        <Link href={`/dashboard/staff/store/${store_id}/ticket-list`} className="flex items-center gap-2 w-full h-full">
+          
           紙の整理券の受付
         </Link>
       </Button>

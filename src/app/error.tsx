@@ -5,10 +5,9 @@ import { Button } from "@/components/ui/button";
 import { ErrorPrompt } from "@/components/prompt/error-prompt";
 
 export default function ErrorPage() {
-
   return (
     <div>
-      <header className="border-b-2 w-full flex h-20 items-center px-4 sm:px-6 lg:px-8 justify-between bg-main-100">
+      <header className="border-b-2 w-full flex h-16 items-center px-4 sm:px-6 lg:px-8 justify-between bg-main-100">
         <Link href={"/"} className="text-2xl font-bold">
           Kinshi Navi
         </Link>

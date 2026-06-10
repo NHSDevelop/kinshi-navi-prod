@@ -23,7 +23,7 @@ export default async function PdfDocumentsDashboardPage() {
           </CardContent>
         </Card>
         <Button asChild variant="card">
-          <Link href="/dashboard/super-admin/pdf-documents/upload">
+          <Link href="/dashboard/super-admin/pdf-documents/upload" className="flex items-center gap-2 w-full h-full">
             PDFのアップロード
           </Link>
         </Button>

@@ -5,7 +5,6 @@ import { getDb } from "@/lib/db/drizzle";
 import { admins, events, stores, users } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 import Link from "next/link";
-import { AiFillEdit, AiFillPlusCircle } from "react-icons/ai";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -22,6 +21,7 @@ import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import { requireEventAdminUser } from "@/lib/auth-guard";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import SelectStoreAuthCode from "@/features/store/components/select-auth-code";
+import { SquarePen, CirclePlus } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -70,7 +70,7 @@ export default async function AdminEventPage(props: {
                 href={`/dashboard/admin/event/${event_id}/edit-config`}
                 className="flex items-center gap-2"
               >
-                <AiFillEdit />
+                <SquarePen />
                 設定を編集
               </Link>
             </Button>
@@ -88,7 +88,7 @@ export default async function AdminEventPage(props: {
                 href={`/dashboard/admin/event/${event_id}/create-store`}
                 className="flex items-center gap-2"
               >
-                <AiFillPlusCircle />
+                <CirclePlus />
                 <p>店舗を作成</p>
               </Link>
             </Button>
@@ -123,8 +123,7 @@ export default async function AdminEventPage(props: {
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
         <Separator />
-        <p className="text-lg">イベント内の店舗の管理者の認証コード
-        </p>
+        <p className="text-lg">イベント内の店舗の管理者の認証コード</p>
         {storeRows.length > 0 ? (
           <SelectStoreAuthCode stores={storeRows} />
         ) : (

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
-import { AiOutlineReload } from "react-icons/ai";
+import { RotateCw } from "lucide-react";
 
 export default function ReloadButton() {
   const router = useRouter();
@@ -11,8 +11,8 @@ export default function ReloadButton() {
   };
   return (
     <Button onClick={handleClick} asChild>
-      <div className="flex max-w-xs">
-        <AiOutlineReload />
+      <div className="flex items-center gap-2 w-full h-full">
+        <RotateCw />
         <p>再読み込みする</p>
       </div>
     </Button>

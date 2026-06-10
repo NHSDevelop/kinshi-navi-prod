@@ -5,12 +5,12 @@ import { getDb } from "@/lib/db/drizzle";
 import EventSelectLink from "@/features/event/components/select-link";
 import StoreSelectLink from "@/features/store/components/select-link";
 import Link from "next/link";
-import { AiFillPlusCircle } from "react-icons/ai";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import { requireSuperAdminUser } from "@/lib/auth-guard";
 import ToMainEvent from "@/features/event/to-main";
 import SelectEventAuthCode from "@/features/event/components/select-auth-code";
+import { CirclePlus } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +25,7 @@ export default async function SuperAdminHomePage() {
         name: events.name,
         isActive: events.isActive,
         isMain: events.isMain,
-        authCode: events.adminCode
+        authCode: events.adminCode,
       })
       .from(events),
     db.select({ id: stores.id, name: stores.name }).from(stores),
@@ -69,7 +69,7 @@ export default async function SuperAdminHomePage() {
                 href="/dashboard/super-admin/create-event"
                 className="flex items-center gap-2"
               >
-                <AiFillPlusCircle />
+                <CirclePlus />
                 イベントを作成
               </Link>
             </Button>
@@ -114,8 +114,7 @@ export default async function SuperAdminHomePage() {
         <Separator />
         <Card className="border-main-200/80 shadow-sm">
           <CardHeader>
-            <CardTitle>イベントの管理者の招待コード
-            </CardTitle>
+            <CardTitle>イベントの管理者の招待コード</CardTitle>
           </CardHeader>
           <CardContent>
             {eventRows.length > 0 ? (

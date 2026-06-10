@@ -17,7 +17,7 @@ export default async function MainLayout({
     <SidebarProvider defaultOpen>
       <QuickActionsSidebar actions={quickActions} />
       <SidebarInset>
-        <header className="border-b-2 w-full flex h-20 items-center px-4 sm:px-6 lg:px-8  bg-main-100">
+        <header className="border-b-2 w-full flex h-16 items-center px-4 sm:px-6 lg:px-8  bg-main-100">
           <div className="flex items-center gap-3">
             <SidebarTrigger className="md:hidden size-9   hover:bg-main-50" />
             <Link href="/" className="text-lg md:text-xl font-bold">
