@@ -1,13 +1,23 @@
-import defaultExport from "./.open-next/worker.js";
-export * from "./.open-next/worker.js"; 
-export default defaultExport;
-
+// @ts-ignore `.open-next/worker.ts` is generated at build time
+import { default as handler } from "./.open-next/worker.js";
 import { DurableObject } from "cloudflare:workers";
 
 interface Env {
   TICKET_SESSION: DurableObjectNamespace;
 }
 
+// 1. メインのエントリポイント（OpenNextの推奨スタイル）
+export default {
+  // 通常のWebアクセスやAPIリクエストはすべてNext.js（OpenNext）に流す
+  fetch: handler.fetch,
+} satisfies ExportedHandler<Env>;
+
+// OpenNextがキャッシュ等で内部利用するハンドラーを一括再エクスポート
+// @ts-ignore
+export { DOQueueHandler, DOShardedTagCache } from "./.open-next/worker.js";
+
+
+// 2. Durable Object のクラス定義（Wranglerが検知できるように名前付きエクスポート）
 export class TicketSession extends DurableObject<Env> {
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
