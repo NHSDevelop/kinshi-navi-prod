@@ -69,87 +69,77 @@ export default async function StoreStaffHomePage(props: {
       description="担当店舗の操作メニューとスタッフ一覧を表示します。"
     >
       <div className="space-y-4 lg:space-y-8">
-        <Separator />
-        <h2 className="text-lg">操作メニュー</h2>
+        
         {storeRows[0].storeType === "ATTRACTION" && (
-          <ScrollArea className="w-full whitespace-nowrap rounded-md">
-            <div className="space-y-4">
-            <div className="flex w-max gap-2 pb-4">
-              <Button asChild variant="default">
-                <Link href={`/dashboard/staff/store/${store_id}/call-ticket`}>
-                  整理券の呼び出し
-                </Link>
-              </Button>
-              <Button asChild variant="default">
-                <Link
-                  href={`/dashboard/staff/store/${store_id}/complete-ticket`}
-                >
-                  整理券の受付
-                </Link>
-              </Button>
-              <Button asChild variant="card">
-                <Link href={`/dashboard/staff/store/${store_id}/ticket-list`}>
-                  整理券の一覧
-                </Link>
-              </Button>
-              </div>
-              <div className="flex w-max gap-2 pb-4">
-              <Button asChild variant="card">
-                <Link href={`/dashboard/staff/store/${store_id}/issue-ticket`}>
-                  紙の整理券の発行
-                </Link>
-              </Button>
-              <Button asChild variant="card">
-                <Link
-                  href={`/dashboard/staff/store/${store_id}/complete-paper-ticket`}
-                >
-                  紙の整理券の受付
-                </Link>
-              </Button>
-              </div>
-              <div className="flex w-max gap-2 pb-4">
-              <Button asChild variant="card">
-                <Link href={`/dashboard/staff/store/${store_id}/show-status`}>
-                  待機状況を表示
-                </Link>
-              </Button>
-            </div>
-            </div>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
+          <div className="space-y-4 lg:space-y-8">
+      <h2 className="text-sm font-bold text-titan-white-950 tracking-wide">
+        操作メニュー
+      </h2>
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4">
+        <Button asChild variant="default" className="w-full">
+          <Link href={`/dashboard/admin/store/${store_id}/call-ticket`}>
+            整理券の呼び出し
+          </Link>
+        </Button>
+        
+        <Button asChild variant="default" className="w-full">
+          <Link href={`/dashboard/admin/store/${store_id}/complete-ticket`}>
+            整理券の受付
+          </Link>
+        </Button>
+        
+        <Button asChild variant="card" className="w-full">
+          <Link href={`/dashboard/admin/store/${store_id}/ticket-list`}>
+            整理券の一覧
+          </Link>
+        </Button>
+        
+        <Button asChild variant="card" className="w-full">
+          <Link href={`/dashboard/admin/store/${store_id}/issue-ticket`}>
+            紙の整理券の発行
+          </Link>
+        </Button>
+        
+        <Button asChild variant="card" className="w-full">
+          <Link href={`/dashboard/admin/store/${store_id}/complete-paper-ticket`}>
+            紙の整理券の受付
+          </Link>
+        </Button>
+        
+        <Button asChild variant="card" className="w-full">
+          <Link href={`/dashboard/admin/store/${store_id}/show-status`}>
+            待機状況を表示
+          </Link>
+        </Button>
+      </div>
+    </div>
         )}
         {storeRows[0].storeType === "FOOD" && (
-          <ScrollArea className="w-full whitespace-nowrap rounded-md">
-            <div className="space-y-4">
-            <div>
-              <Button asChild variant="card">
-                <Link href={`/dashboard/staff/store/${store_id}/register`}>
-                  レジページ
-                </Link>
-              </Button>
-            </div>
-            <div className="flex w-max gap-2 pb-4">
-              <Button asChild variant="card">
-                <Link href={`/dashboard/staff/store/${store_id}/item-list`}>
-                  商品一覧
-                </Link>
-              </Button>
-              <Button asChild variant="card">
-                <Link href={`/dashboard/staff/store/${store_id}/add-stock`}>
-                  商品の在庫を追加
-                </Link>
-              </Button>
-              <Button asChild variant="card">
-                <Link
-                  href={`/dashboard/staff/store/${store_id}/register-log-history`}
-                >
-                  会計・在庫履歴
-                </Link>
-              </Button>
-            </div>
-            </div>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
+          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4">
+      <Button asChild variant="default" className="w-full">
+        <Link href={`/dashboard/staff/store/${store_id}/register`}>
+          レジページ
+        </Link>
+      </Button>
+
+      <Button asChild variant="card" className="w-full">
+        <Link href={`/dashboard/staff/store/${store_id}/item-list`}>
+          商品一覧
+        </Link>
+      </Button>
+
+      <Button asChild variant="card" className="w-full">
+        <Link href={`/dashboard/staff/store/${store_id}/add-stock`}>
+          商品の在庫を追加
+        </Link>
+      </Button>
+
+      <Button asChild variant="card" className="w-full">
+        <Link href={`/dashboard/staff/store/${store_id}/register-log-history`}>
+          会計・在庫履歴
+        </Link>
+      </Button>
+    </div>
         )}
         <ToActiveStore
           storeId={storeRows[0].id}
