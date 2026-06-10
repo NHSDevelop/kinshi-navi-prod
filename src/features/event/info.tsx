@@ -61,12 +61,16 @@ export default async function EventInfo({ eventId }: EventInfoProps) {
           <p>開催日：</p>
           <p>開催時間：</p>
           <p>詳細：</p>
+          <p>投票受付中か：</p>
+          <p>投票結果の公開中か：</p>
         </div>
         <div className="flex flex-col items-start gap-4">
           <p>{event.name}</p>
           <p>{dateRange}</p>
           <p>{timeRange}</p>
           <p>{event.description ?? "なし"}</p>
+          <p>{event.isVoting ? "はい" : "いいえ"}</p>
+          <p>{event.isVoteShowing ? "はい" : "いいえ"}</p>
         </div>
       </CardContent>
     </Card>

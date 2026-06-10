@@ -87,7 +87,7 @@ export default async function StoreStaffHomePage(props: {
               <Button asChild variant="default" className="w-full">
                 <Link
                   href={`/dashboard/admin/store/${store_id}/call-ticket`}
-                  className="flex items-center gap-2 w-full h-full"
+                  className="flex items-center gap-2 h-full"
                 >
                   <ConciergeBell />
                   整理券の呼び出し
@@ -97,7 +97,7 @@ export default async function StoreStaffHomePage(props: {
               <Button asChild variant="default" className="w-full">
                 <Link
                   href={`/dashboard/admin/store/${store_id}/complete-ticket`}
-                  className="flex items-center gap-2 w-full h-full"
+                  className="flex items-center gap-2 h-full"
                 >
                   <ScanLine />
                   整理券の受付
@@ -107,7 +107,7 @@ export default async function StoreStaffHomePage(props: {
               <Button asChild variant="card" className="w-full">
                 <Link
                   href={`/dashboard/admin/store/${store_id}/ticket-list`}
-                  className="flex items-center gap-2 w-full h-full"
+                  className="flex items-center gap-2 h-full"
                 >
                   <List />
                   整理券の一覧
@@ -117,7 +117,7 @@ export default async function StoreStaffHomePage(props: {
               <Button asChild variant="card" className="w-full">
                 <Link
                   href={`/dashboard/admin/store/${store_id}/issue-ticket`}
-                  className="flex items-center gap-2 w-full h-full"
+                  className="flex items-center gap-2 h-full"
                 >
                   <Ticket />
                   紙の整理券の発行
@@ -127,7 +127,7 @@ export default async function StoreStaffHomePage(props: {
               <Button asChild variant="card" className="w-full">
                 <Link
                   href={`/dashboard/admin/store/${store_id}/complete-paper-ticket`}
-                  className="flex items-center gap-2 w-full h-full"
+                  className="flex items-center gap-2 h-full"
                 >
                   <ScanLine />
                   紙の整理券の受付
@@ -137,7 +137,7 @@ export default async function StoreStaffHomePage(props: {
               <Button asChild variant="card" className="w-full">
                 <Link
                   href={`/dashboard/admin/store/${store_id}/show-status`}
-                  className="flex items-center gap-2 w-full h-full"
+                  className="flex items-center gap-2 h-full"
                 >
                   <Monitor />
                   待機状況を表示
@@ -151,7 +151,7 @@ export default async function StoreStaffHomePage(props: {
             <Button asChild variant="default" className="w-full">
               <Link
                 href={`/dashboard/staff/store/${store_id}/register`}
-                className="flex items-center gap-2 w-full h-full"
+                className="flex items-center gap-2 h-full"
               >
                 <Banknote />
                 レジページ
@@ -161,7 +161,7 @@ export default async function StoreStaffHomePage(props: {
             <Button asChild variant="card" className="w-full">
               <Link
                 href={`/dashboard/staff/store/${store_id}/item-list`}
-                className="flex items-center gap-2 w-full h-full"
+                className="flex items-center gap-2 h-full"
               >
                 <List />
                 商品一覧
@@ -171,7 +171,7 @@ export default async function StoreStaffHomePage(props: {
             <Button asChild variant="card" className="w-full">
               <Link
                 href={`/dashboard/staff/store/${store_id}/add-stock`}
-                className="flex items-center gap-2 w-full h-full"
+                className="flex items-center gap-2 h-full"
               >
                 <CirclePlus />
                 商品の在庫を追加
@@ -181,7 +181,7 @@ export default async function StoreStaffHomePage(props: {
             <Button asChild variant="card" className="w-full">
               <Link
                 href={`/dashboard/staff/store/${store_id}/register-log-history`}
-                className="flex items-center gap-2 w-full h-full"
+                className="flex items-center gap-2 h-full"
               >
                 <History />
                 会計・在庫履歴

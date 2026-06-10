@@ -21,7 +21,9 @@ import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import { requireEventAdminUser } from "@/lib/auth-guard";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import SelectStoreAuthCode from "@/features/store/components/select-auth-code";
-import { SquarePen, CirclePlus } from "lucide-react";
+import { SquarePen, CirclePlus, List, Medal } from "lucide-react";
+import ChangeEventIsVoteShowing from "@/features/store/vote/change-showing";
+import ChangeEventIsVoting from "@/features/store/vote/change-voting";
 
 export const dynamic = "force-dynamic";
 
@@ -68,7 +70,7 @@ export default async function AdminEventPage(props: {
             <Button asChild variant="card">
               <Link
                 href={`/dashboard/admin/event/${event_id}/edit-config`}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 h-full"
               >
                 <SquarePen />
                 設定を編集
@@ -86,7 +88,7 @@ export default async function AdminEventPage(props: {
             <Button asChild variant="card">
               <Link
                 href={`/dashboard/admin/event/${event_id}/create-store`}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 h-full"
               >
                 <CirclePlus />
                 <p>店舗を作成</p>
@@ -110,15 +112,31 @@ export default async function AdminEventPage(props: {
         <ScrollArea className="w-full whitespace-nowrap rounded-md">
           <div className="flex w-max gap-2 pb-4">
             <Button asChild variant="card">
-              <Link href={`/dashboard/admin/event/${event_id}/register-lane`}>
+              <Link
+                href={`/dashboard/admin/event/${event_id}/register-lane`}
+                className="flex items-center gap-2 h-full"
+              >
+                <List />
                 レジレーンの管理
               </Link>
             </Button>
             <Button asChild variant="card">
-              <Link href={`/dashboard/admin/event/${event_id}/vote-result`}>
+              <Link
+                href={`/dashboard/admin/event/${event_id}/vote-result`}
+                className="flex items-center gap-2 h-full"
+              >
+                <Medal />
                 投票結果を見る
               </Link>
             </Button>
+            <ChangeEventIsVoting
+              eventId={event_id}
+              isVoting={eventRows[0].isVoting ?? true}
+            />
+            <ChangeEventIsVoteShowing
+              eventId={event_id}
+              isVoteShowing={eventRows[0].isVoteShowing ?? true}
+            />
           </div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>

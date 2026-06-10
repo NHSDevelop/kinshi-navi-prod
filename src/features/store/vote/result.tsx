@@ -11,12 +11,17 @@ import {
 } from "@/components/ui/table";
 import { and, eq } from "drizzle-orm";
 import { getMainEvent } from "@/features/event/action";
+import { Card, CardContent } from "@/components/ui/card";
 
 type Props = {
   storeType: StoreType;
+  canSeenAllUser: boolean;
 };
 
-export default async function StoreVoteResult({ storeType }: Props) {
+export default async function StoreVoteResult({
+  storeType,
+  canSeenAllUser,
+}: Props) {
   const db = await getDb();
   const mainEvent = await getMainEvent();
 
@@ -56,6 +61,16 @@ export default async function StoreVoteResult({ storeType }: Props) {
   )
     .map(([, value]) => value)
     .sort((a, b) => b.voteCount - a.voteCount);
+
+  if (canSeenAllUser && !mainEvent.isVoteShowing) {
+    return (
+      <Card>
+        <CardContent>
+          <p>現在投票の結果を見ることはできません。</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <>

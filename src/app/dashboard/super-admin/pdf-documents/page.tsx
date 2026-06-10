@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requirePdfManagerUser } from "@/lib/auth-guard";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { Upload } from "lucide-react";
 
 export default async function PdfDocumentsDashboardPage() {
   await requirePdfManagerUser();
@@ -23,7 +24,11 @@ export default async function PdfDocumentsDashboardPage() {
           </CardContent>
         </Card>
         <Button asChild variant="card">
-          <Link href="/dashboard/super-admin/pdf-documents/upload" className="flex items-center gap-2 w-full h-full">
+          <Link
+            href="/dashboard/super-admin/pdf-documents/upload"
+            className="flex items-center gap-2 h-full"
+          >
+            <Upload />
             PDFのアップロード
           </Link>
         </Button>

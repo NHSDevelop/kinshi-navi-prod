@@ -100,6 +100,8 @@ export const events = sqliteTable("events", {
   imageUrl: text("imageUrl"),
   isActive: integer("isActive", { mode: "boolean" }).notNull().default(false),
   isMain: integer("isMain", { mode: "boolean" }).notNull().default(false),
+  isVoting: integer("isVoting", { mode: "boolean" }).default(true),
+  isVoteShowing: integer("isVoteShowing", { mode: "boolean" }).default(true),
   startedAtDate: integer("startedAtDate", { mode: "timestamp_ms" }),
   startedAtTime: text("startedAtTime"),
   finishedAtDate: integer("finishedAtDate", { mode: "timestamp_ms" }),

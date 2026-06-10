@@ -43,8 +43,10 @@ export default async function CompleteTicketStaffPage(props: {
     >
       <CompleteTicket />
       <Button asChild variant="warn">
-        <Link href={`/dashboard/staff/store/${store_id}/ticket-list`} className="flex items-center gap-2 w-full h-full">
-          
+        <Link
+          href={`/dashboard/staff/store/${store_id}/ticket-list`}
+          className="flex items-center gap-2 h-full"
+        >
           紙の整理券の受付
         </Link>
       </Button>

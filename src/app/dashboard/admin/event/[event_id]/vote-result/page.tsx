@@ -15,10 +15,10 @@ export default async function VoteResultAdminPage(props: {
     <DashboardPageShell title="店舗の投票結果">
       <div className="flex flex-col gap-4">
         <h2 className="text-lg">クラス企画の投票結果</h2>
-        <StoreVoteResult storeType="ATTRACTION" />
+        <StoreVoteResult storeType="ATTRACTION" canSeenAllUser={false} />
         <Separator />
         <h2 className="text-lg">クラス販売の投票結果</h2>
-        <StoreVoteResult storeType="FOOD" />
+        <StoreVoteResult storeType="FOOD" canSeenAllUser={false} />
         <Separator />
       </div>
     </DashboardPageShell>

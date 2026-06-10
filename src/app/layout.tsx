@@ -129,7 +129,7 @@ export default function RootLayout({
                         className="text-xs md:text-base"
                         prefetch={false}
                       >
-                        管理画面
+                        管理画面へ
                       </Link>
                     </li>
                   </ul>

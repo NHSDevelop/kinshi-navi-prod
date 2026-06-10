@@ -7,9 +7,11 @@ import {
   type StoreType,
   stores,
   storeVotes,
+  events,
 } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getMainEvent } from "@/features/event/action";
+import { revalidatePath } from "next/cache";
 
 function isStoreType(value: unknown): value is StoreType {
   return (
@@ -33,6 +35,13 @@ export async function createStoreVote(prevState: unknown, formData: FormData) {
       return {
         success: false,
         message: "メインイベントが設定されていません。",
+      };
+    }
+
+    if(!mainEvent.isVoting) {
+      return {
+        success: false,
+        message: "現在投票は行えません。",
       };
     }
 
@@ -92,6 +101,77 @@ export async function createStoreVote(prevState: unknown, formData: FormData) {
     return {
       success: true,
       message: "操作が完了しました。",
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      success: false,
+      message: "サーバーエラーが発生しました。",
+    };
+  }
+}
+
+export async function changeEventIsVoting(prevState: unknown, formData: FormData) {
+  const eventId = formData.get("eventId") as string;
+  if(!eventId) {
+    return {
+      success: false,
+      message: "指定されたイベントがありません",
+    };
+  }
+  try {
+    const db = await getDb();
+    const eventRows = await db.select({"isVoting": events.isVoting}).from(events).where(eq(events.id, eventId));
+    const event = eventRows[0]
+    if(!event) {
+      return {
+      success: false,
+      message: "指定されたイベントがありません",
+    };
+    }
+    
+    await db.update(events).set({isVoting: !event.isVoting});
+    revalidatePath("/vote/attraction");
+    revalidatePath("/vote/food");
+    return {
+      success: true,
+      message: "操作が完了しました。",
+      isVoting: !event.isVoting,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      success: false,
+      message: "サーバーエラーが発生しました。",
+    };
+  }
+}
+
+export async function changeEventIsVoteShowing(prevState: unknown, formData: FormData) {
+  const eventId = formData.get("eventId") as string;
+  if(!eventId) {
+    return {
+      success: false,
+      message: "指定されたイベントがありません",
+    };
+  }
+  try {
+    const db = await getDb();
+    const eventRows = await db.select({"isVoteShowing": events.isVoteShowing}).from(events).where(eq(events.id, eventId));
+    const event = eventRows[0]
+    if(!event) {
+      return {
+      success: false,
+      message: "指定されたイベントがありません",
+    };
+    }
+    
+    await db.update(events).set({isVoteShowing: !event.isVoteShowing});
+    revalidatePath("/vote/result");
+    return {
+      success: true,
+      message: "操作が完了しました。",
+      isVoteShowing: !event.isVoteShowing,
     };
   } catch (error) {
     console.log(error);

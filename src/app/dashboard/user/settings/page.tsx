@@ -28,8 +28,11 @@ export default async function UserSettingsPage() {
         <Card>
           <CardContent>
             <p>設定を編集するにはログインしてください。</p>
-            <Button asChild variant="card" >
-              <Link href="/login" className="flex items-center gap-2 w-full h-full"><LogIn />ログイン</Link>
+            <Button asChild variant="card">
+              <Link href="/login" className="flex items-center gap-2 h-full">
+                <LogIn />
+                ログイン
+              </Link>
             </Button>
           </CardContent>
         </Card>
