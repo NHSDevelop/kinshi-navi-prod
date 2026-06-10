@@ -27,7 +27,6 @@ export default async function LoginPage(props: Props) {
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 lg:gap-8">
       <PageBunner
         title="管理者ログイン"
-        description="管理者機能を利用するため、Googleアカウントでログインしてください。"
       />
       <div className="flex flex-col gap-4">
         <Card className="w-full border-main-200 bg-white/95 shadow-sm">

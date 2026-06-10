@@ -61,7 +61,6 @@ export default async function StorePage(props: {
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 lg:gap-8">
       <PageBunner
         title={storeRows[0].name}
-        description="店舗の基本情報と詳細を確認できます。"
       />
 
       <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">

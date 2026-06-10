@@ -55,7 +55,10 @@ export default async function AttractionWaitngStatus({
       stores.name,
       issuedTickets.id,
       issuedTickets.numberOfPeople,
-    );
+    )
+    .orderBy(
+      
+    )
 
   const attractionMap = new Map<
     string,

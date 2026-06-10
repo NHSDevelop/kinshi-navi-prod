@@ -29,7 +29,6 @@ export default async function TicketIssuePage() {
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 lg:gap-8">
         <PageBunner
           title="整理券を発行する"
-          description="ゲストユーザーとしてログインして、整理券を発行できます。"
         />
         <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
           <Suspense
@@ -46,7 +45,6 @@ export default async function TicketIssuePage() {
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 lg:gap-8">
       <PageBunner
         title="整理券を発行する"
-        description="混雑時の呼び出しをスムーズにするため、受付用整理券をこの画面から発行できます。"
       />
       {user.isAnonymous ? (
         <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">

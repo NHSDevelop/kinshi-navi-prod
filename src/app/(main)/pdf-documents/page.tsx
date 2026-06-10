@@ -13,7 +13,6 @@ export default async function PdfDocumentsIndexPage() {
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 lg:gap-8">
       <PageBunner
         title="PDF一覧"
-        description="公開中のPDFドキュメントを一覧表示します。タイトルを選ぶと閲覧ページを開けます。"
       />
       <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
         <PublicPdfDocumentList />

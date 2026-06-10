@@ -25,7 +25,6 @@ export default async function FoodStockStatusPage() {
       <RoutePollingRefresh intervalMs={5 * 60 * 1000} />
       <PageBunner
         title="模擬店の商品在庫状況"
-        description="売り切れや在庫数を一覧で確認できます。5分ごと、または画面に戻ったときに更新します。"
       />
       <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
         <Suspense fallback={<LoadingPrompt context="在庫状況" />}>

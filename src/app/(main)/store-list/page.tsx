@@ -13,7 +13,6 @@ export default async function StoreListPage() {
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 lg:gap-8">
       <PageBunner
         title="店舗一覧"
-        description="企画と模擬店をまとめて確認できます。店舗名をクリックすると、詳細を確認できます。"
       />
       <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
         <Suspense fallback={<LoadingPrompt context="店舗の一覧" />}>
