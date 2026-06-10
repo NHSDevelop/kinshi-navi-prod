@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getCloudflareBindings } from "@/lib/runtime-env"; 
+export const runtime = 'edge';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -7,6 +8,11 @@ export async function GET(request: NextRequest) {
 
   if (!ticketId) {
     return new Response('Missing ticketId', { status: 400 });
+  }
+
+  // WebSocketリクエストでない場合は早期リターン
+  if (request.headers.get("Upgrade") !== "websocket") {
+    return new Response("Expected WebSocket connection", { status: 426 });
   }
 
   const env = getCloudflareBindings();
@@ -17,7 +23,9 @@ export async function GET(request: NextRequest) {
   const id = env.TICKET_SESSION.idFromName(ticketId);
   const doStub = env.TICKET_SESSION.get(id);
 
-  return doStub.fetch(new Request(`http://do/connect`, {
+  const doResponse = await doStub.fetch(new Request(`http://do/connect`, {
     headers: request.headers,
   }));
+  
+  return doResponse;
 }
