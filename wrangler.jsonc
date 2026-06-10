@@ -22,7 +22,7 @@
     {
       "binding": "IMG_BUCKET",
       "bucket_name": "kinshi-navi-img"
-    }
+    },
     {
       "binding": "NEXT_INC_CACHE_R2_BUCKET",
       "bucket_name": "kinshi-navi-cache"
