@@ -97,19 +97,27 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
           <div>
           <p className="text-lg">操作メニュー</p>
             <ScrollArea className="w-full whitespace-nowrap rounded-md">
+              <div className="space-y-4 lg:space-y-8">
               <div className="flex w-max gap-2 pb-4">
-                <Button asChild variant="card">
+                <Button asChild variant="default">
                   <Link href={`/dashboard/admin/store/${store_id}/call-ticket`}>
                     整理券の呼び出し
                   </Link>
                 </Button>
-                <Button asChild variant="card">
+                <Button asChild variant="default">
                   <Link
                     href={`/dashboard/admin/store/${store_id}/complete-ticket`}
                   >
                     整理券の受付
                   </Link>
                 </Button>
+                <Button asChild variant="card">
+                  <Link href={`/dashboard/admin/store/${store_id}/ticket-list`}>
+                    整理券の一覧
+                  </Link>
+                </Button>
+                </div>
+                <div className="flex w-max gap-2 pb-4">
                 <Button asChild variant="card">
                   <Link
                     href={`/dashboard/admin/store/${store_id}/issue-ticket`}
@@ -124,16 +132,14 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
                     紙の整理券の受付
                   </Link>
                 </Button>
-                <Button asChild variant="card">
-                  <Link href={`/dashboard/admin/store/${store_id}/ticket-list`}>
-                    整理券の一覧
-                  </Link>
-                </Button>
+                </div>
+                <div className="flex w-max gap-2 pb-4">
                 <Button asChild variant="card">
                   <Link href={`/dashboard/admin/store/${store_id}/show-status`}>
                     待機状況を表示
                   </Link>
                 </Button>
+              </div>
               </div>
               <ScrollBar orientation="horizontal" />
             </ScrollArea>
@@ -143,12 +149,15 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
           <div>
 <p className="text-lg">操作メニュー</p>
             <ScrollArea className="w-full whitespace-nowrap rounded-md">
-              <div className="flex w-max gap-2 pb-4">
-                <Button asChild variant="card">
+              <div className="space-y-4 lg:space-y-8">
+                <div>
+                <Button asChild variant="default">
                   <Link href={`/dashboard/staff/store/${store_id}/register`}>
                     レジページ
                   </Link>
                 </Button>
+                </div>
+                <div className="flex w-max gap-2 pb-4">
                 <Button asChild variant="card">
                   <div className="flex gap-4">
                     <AiFillPlusCircle />
@@ -174,10 +183,12 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
                   </Link>
                 </Button>
               </div>
+              </div>
               <ScrollBar orientation="horizontal" />
             </ScrollArea>
             </div>
         )}
+        <Separator />
         <Card>
           <CardHeader className="flex items-center justify-between">
             <CardTitle>店舗の情報</CardTitle>

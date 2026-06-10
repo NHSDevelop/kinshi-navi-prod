@@ -73,19 +73,27 @@ export default async function StoreStaffHomePage(props: {
         <h2 className="text-lg">操作メニュー</h2>
         {storeRows[0].storeType === "ATTRACTION" && (
           <ScrollArea className="w-full whitespace-nowrap rounded-md">
+            <div className="space-y-4">
             <div className="flex w-max gap-2 pb-4">
-              <Button asChild variant="card">
+              <Button asChild variant="default">
                 <Link href={`/dashboard/staff/store/${store_id}/call-ticket`}>
                   整理券の呼び出し
                 </Link>
               </Button>
-              <Button asChild variant="card">
+              <Button asChild variant="default">
                 <Link
                   href={`/dashboard/staff/store/${store_id}/complete-ticket`}
                 >
                   整理券の受付
                 </Link>
               </Button>
+              <Button asChild variant="card">
+                <Link href={`/dashboard/staff/store/${store_id}/ticket-list`}>
+                  整理券の一覧
+                </Link>
+              </Button>
+              </div>
+              <div className="flex w-max gap-2 pb-4">
               <Button asChild variant="card">
                 <Link href={`/dashboard/staff/store/${store_id}/issue-ticket`}>
                   紙の整理券の発行
@@ -98,22 +106,28 @@ export default async function StoreStaffHomePage(props: {
                   紙の整理券の受付
                 </Link>
               </Button>
-              <Button asChild variant="card">
-                <Link href={`/dashboard/staff/store/${store_id}/ticket-list`}>
-                  整理券の一覧
-                </Link>
-              </Button>
+              </div>
+              <div className="flex w-max gap-2 pb-4">
               <Button asChild variant="card">
                 <Link href={`/dashboard/staff/store/${store_id}/show-status`}>
                   待機状況を表示
                 </Link>
               </Button>
             </div>
+            </div>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
         )}
         {storeRows[0].storeType === "FOOD" && (
           <ScrollArea className="w-full whitespace-nowrap rounded-md">
+            <div className="space-y-4">
+            <div>
+              <Button asChild variant="card">
+                <Link href={`/dashboard/staff/store/${store_id}/register`}>
+                  レジページ
+                </Link>
+              </Button>
+            </div>
             <div className="flex w-max gap-2 pb-4">
               <Button asChild variant="card">
                 <Link href={`/dashboard/staff/store/${store_id}/item-list`}>
@@ -126,17 +140,13 @@ export default async function StoreStaffHomePage(props: {
                 </Link>
               </Button>
               <Button asChild variant="card">
-                <Link href={`/dashboard/staff/store/${store_id}/register`}>
-                  レジページ
-                </Link>
-              </Button>
-              <Button asChild variant="card">
                 <Link
                   href={`/dashboard/staff/store/${store_id}/register-log-history`}
                 >
                   会計・在庫履歴
                 </Link>
               </Button>
+            </div>
             </div>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
