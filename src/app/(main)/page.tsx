@@ -2,6 +2,9 @@ import { LoadingPrompt } from "@/components/prompt/loading-prompt";
 import { SystemInfoList } from "@/features/system-info/list";
 import { Suspense } from "react";
 import { Metadata } from "next";
+import { Separator } from "@/components/ui/separator";
+import { InstallPrompt } from "@/features/push/install";
+import { HelpPrompt } from "@/components/prompt/help";
 
 export const metadata: Metadata = {
   title: "トップページ",
@@ -20,21 +23,21 @@ export default async function EventTopPage() {
           <div className="max-w-2xl space-y-2">
             <h1 className="text-xl font-bold tracking-tight text-titan-white-950 md:text-2xl lg:text-3xl">
               Kinshi Navi
-              <span className="block text-xs font-medium text-titan-white-600 tracking-wider mt-1 md:text-sm lg:inline lg:mt-0 lg:ml-2">
+              <span className="block text-xs font-medium text-titan-white-950 tracking-wider mt-1 md:text-sm lg:inline lg:mt-0 lg:ml-2">
                 ー長野高校金鵄祭システムー
               </span>
             </h1>
-            <p className="text-xs leading-relaxed text-titan-white-900/80 md:text-sm">
+            <p className="text-xs leading-relaxed text-titan-white-950 md:text-sm">
               第78回金鵄祭へようこそ。
               <br />
-              Kinshi Naviでは、整理券の取得、在庫やイベントの確認、人気投票などが行えます。
+              Kinshi
+              Naviでは、整理券の取得、在庫やイベントの確認、人気投票などが行えます。
               <br />
               スマホで利用される方は、画面左上のメニューバーを押すと、各ページに移動できます。
             </p>
           </div>
         </div>
       </section>
-
       <section className="rounded-2xl border border-main-200 bg-white p-5 shadow-xs md:p-6">
         <h2 className="text-base font-bold text-titan-white-950 md:text-lg mb-4">
           運営からのお知らせ
@@ -43,6 +46,28 @@ export default async function EventTopPage() {
           <SystemInfoList />
         </Suspense>
       </section>
+      <div className="flex items-center justify-between gap-3">
+        <h3 className=" text-main-950 md:text-lg">Webアプリのインストール</h3>
+        <HelpPrompt title="Webアプリのインストールについて">
+          <div>
+            <ul className="w-auto list-disc space-y-4">
+              <li className="text-sm">
+                ホーム画面に追加して、アプリのように素早く起動できます。
+              </li>
+              <li className="text-sm">
+                インストールは数十秒で終わり、通信料はほとんど発生しません。
+              </li>
+              <li className="text-sm">
+                インストールする際、整理券などのデータはブラウザから受け継がれませんのでご注意ください。
+              </li>
+            </ul>
+          </div>
+        </HelpPrompt>
+      </div>
+      <Suspense fallback={<LoadingPrompt context="インストールガイド" />}>
+        <InstallPrompt />
+      </Suspense>
+      <Separator />
     </div>
   );
 }

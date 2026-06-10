@@ -102,17 +102,17 @@ export default function RootLayout({
                   </h2>
                   <ul className="flex flex-col font-medium gap-2">
                     <li>
-                      <Link href={"/help"} className="text-xs md:text-base">
+                      <Link href={"/help"} className="text-xs md:text-base" prefetch={false}>
                         使い方ガイド
                       </Link>
                     </li>
                     <li>
-                      <Link href={"/terms"} className="text-xs md:text-base">
+                      <Link href={"/terms"} className="text-xs md:text-base" prefetch={false}>
                         利用規約
                       </Link>
                     </li>
                     <li>
-                      <Link href={"/policy"} className="text-xs md:text-base">
+                      <Link href={"/policy"} className="text-xs md:text-base" prefetch={false}>
                         プライバシーポリシー
                       </Link>
                     </li>
@@ -122,21 +122,14 @@ export default function RootLayout({
                   <h2 className="mb-6 text-sm md:text-lg font-semibold text-heading uppercase">
                     管理者の方へ
                   </h2>
-                  <ul className="flex flex-col font-medium gap-2">
+                  <ul className="flex flex-col font-medium gap-2" >
                     <li>
                       <Link
                         href={"/dashboard"}
                         className="text-xs md:text-base"
+                        prefetch={false}
                       >
-                        管理者ページ
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href={"/help/admin"}
-                        className="text-xs md:text-base"
-                      >
-                        管理者向けガイド
+                        管理画面
                       </Link>
                     </li>
                   </ul>

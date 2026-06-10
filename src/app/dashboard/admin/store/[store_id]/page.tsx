@@ -14,7 +14,6 @@ import { eq, and } from "drizzle-orm";
 import Link from "next/link";
 import { AiFillEdit } from "react-icons/ai";
 import { Separator } from "@/components/ui/separator";
-import { AiFillPlusCircle } from "react-icons/ai";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -32,9 +31,6 @@ import ItemSelectLink from "@/features/store/food/item/components/select-link";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import FoodInfo from "@/features/store/food/info";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { tickets } from "@/lib/db/schema";
-import { inArray, sql } from "drizzle-orm";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import DisabledItem from "@/features/store/food/item/disabled";
 
 export const dynamic = "force-dynamic";

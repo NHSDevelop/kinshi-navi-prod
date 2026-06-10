@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 import ToActiveStore from "@/features/store/to-active";
 import { getDb } from "@/lib/db/drizzle";
-import { attractions, stores, users, staffs, tickets } from "@/lib/db/schema";
+import { stores, users, staffs } from "@/lib/db/schema";
 import { Separator } from "@/components/ui/separator";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { eq} from "drizzle-orm";
 import Link from "next/link";
 import {
   Table,
@@ -14,7 +14,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import { requireStaffOrManageStoreUser } from "@/lib/auth-guard";
 import StoreInfo from "@/features/store/info";
@@ -69,77 +68,82 @@ export default async function StoreStaffHomePage(props: {
       description="担当店舗の操作メニューとスタッフ一覧を表示します。"
     >
       <div className="space-y-4 lg:space-y-8">
-        
         {storeRows[0].storeType === "ATTRACTION" && (
           <div className="space-y-4 lg:space-y-8">
-      <h2 className="text-sm font-bold text-titan-white-950 tracking-wide">
-        操作メニュー
-      </h2>
-      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4">
-        <Button asChild variant="default" className="w-full">
-          <Link href={`/dashboard/admin/store/${store_id}/call-ticket`}>
-            整理券の呼び出し
-          </Link>
-        </Button>
-        
-        <Button asChild variant="default" className="w-full">
-          <Link href={`/dashboard/admin/store/${store_id}/complete-ticket`}>
-            整理券の受付
-          </Link>
-        </Button>
-        
-        <Button asChild variant="card" className="w-full">
-          <Link href={`/dashboard/admin/store/${store_id}/ticket-list`}>
-            整理券の一覧
-          </Link>
-        </Button>
-        
-        <Button asChild variant="card" className="w-full">
-          <Link href={`/dashboard/admin/store/${store_id}/issue-ticket`}>
-            紙の整理券の発行
-          </Link>
-        </Button>
-        
-        <Button asChild variant="card" className="w-full">
-          <Link href={`/dashboard/admin/store/${store_id}/complete-paper-ticket`}>
-            紙の整理券の受付
-          </Link>
-        </Button>
-        
-        <Button asChild variant="card" className="w-full">
-          <Link href={`/dashboard/admin/store/${store_id}/show-status`}>
-            待機状況を表示
-          </Link>
-        </Button>
-      </div>
-    </div>
+            <h2 className="text-sm font-bold text-titan-white-950 tracking-wide">
+              操作メニュー
+            </h2>
+            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4">
+              <Button asChild variant="default" className="w-full">
+                <Link href={`/dashboard/admin/store/${store_id}/call-ticket`}>
+                  整理券の呼び出し
+                </Link>
+              </Button>
+
+              <Button asChild variant="default" className="w-full">
+                <Link
+                  href={`/dashboard/admin/store/${store_id}/complete-ticket`}
+                >
+                  整理券の受付
+                </Link>
+              </Button>
+
+              <Button asChild variant="card" className="w-full">
+                <Link href={`/dashboard/admin/store/${store_id}/ticket-list`}>
+                  整理券の一覧
+                </Link>
+              </Button>
+
+              <Button asChild variant="card" className="w-full">
+                <Link href={`/dashboard/admin/store/${store_id}/issue-ticket`}>
+                  紙の整理券の発行
+                </Link>
+              </Button>
+
+              <Button asChild variant="card" className="w-full">
+                <Link
+                  href={`/dashboard/admin/store/${store_id}/complete-paper-ticket`}
+                >
+                  紙の整理券の受付
+                </Link>
+              </Button>
+
+              <Button asChild variant="card" className="w-full">
+                <Link href={`/dashboard/admin/store/${store_id}/show-status`}>
+                  待機状況を表示
+                </Link>
+              </Button>
+            </div>
+          </div>
         )}
         {storeRows[0].storeType === "FOOD" && (
           <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4">
-      <Button asChild variant="default" className="w-full">
-        <Link href={`/dashboard/staff/store/${store_id}/register`}>
-          レジページ
-        </Link>
-      </Button>
+            <Button asChild variant="default" className="w-full">
+              <Link href={`/dashboard/staff/store/${store_id}/register`}>
+                レジページ
+              </Link>
+            </Button>
 
-      <Button asChild variant="card" className="w-full">
-        <Link href={`/dashboard/staff/store/${store_id}/item-list`}>
-          商品一覧
-        </Link>
-      </Button>
+            <Button asChild variant="card" className="w-full">
+              <Link href={`/dashboard/staff/store/${store_id}/item-list`}>
+                商品一覧
+              </Link>
+            </Button>
 
-      <Button asChild variant="card" className="w-full">
-        <Link href={`/dashboard/staff/store/${store_id}/add-stock`}>
-          商品の在庫を追加
-        </Link>
-      </Button>
+            <Button asChild variant="card" className="w-full">
+              <Link href={`/dashboard/staff/store/${store_id}/add-stock`}>
+                商品の在庫を追加
+              </Link>
+            </Button>
 
-      <Button asChild variant="card" className="w-full">
-        <Link href={`/dashboard/staff/store/${store_id}/register-log-history`}>
-          会計・在庫履歴
-        </Link>
-      </Button>
-    </div>
+            <Button asChild variant="card" className="w-full">
+              <Link
+                href={`/dashboard/staff/store/${store_id}/register-log-history`}
+              >
+                会計・在庫履歴
+              </Link>
+            </Button>
+          </div>
         )}
         <ToActiveStore
           storeId={storeRows[0].id}

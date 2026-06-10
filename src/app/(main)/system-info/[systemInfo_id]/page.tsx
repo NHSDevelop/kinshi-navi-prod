@@ -1,7 +1,7 @@
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import { getDb } from "@/lib/db/drizzle";
 import { systemInfos } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { Metadata } from "next";
 import { formatYMD } from "@/lib/formatDate";
 
@@ -25,6 +25,7 @@ export default async function SystemInfoPage(props: {
     })
     .from(systemInfos)
     .where(eq(systemInfos.id, systemInfo_id))
+    .orderBy(desc(systemInfos.createdAt))
     .limit(1);
   return (
     <div className="mx-auto w-full max-w-4xl">

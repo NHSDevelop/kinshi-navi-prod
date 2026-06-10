@@ -1,4 +1,4 @@
-// @ts-ignore `.open-next/worker.ts` is generated at build time
+// @ts-expect-error `.open-next/worker.ts` is generated at build time
 import { default as handler } from "./.open-next/worker.js";
 import { DurableObject } from "cloudflare:workers";
 
@@ -6,18 +6,36 @@ interface Env {
   TICKET_SESSION: DurableObjectNamespace;
 }
 
-// 1. メインのエントリポイント（OpenNextの推奨スタイル）
 export default {
-  // 通常のWebアクセスやAPIリクエストはすべてNext.js（OpenNext）に流す
-  fetch: handler.fetch,
+  async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+
+    if (url.pathname === "/ws/ticket") {
+      const ticketId = url.searchParams.get("ticketId");
+      if (!ticketId) {
+        return new Response("Missing ticketId", { status: 400 });
+      }
+      if (request.headers.get("Upgrade") !== "websocket") {
+        return new Response("Expected WebSocket connection", { status: 426 });
+      }
+
+      const id = env.TICKET_SESSION.idFromName(ticketId);
+      const doStub = env.TICKET_SESSION.get(id);
+
+      return doStub.fetch(
+        new Request(`http://do/connect`, {
+          headers: request.headers,
+        }),
+      );
+    }
+
+    return handler.fetch(request, env, ctx);
+  },
 } satisfies ExportedHandler<Env>;
 
-// OpenNextがキャッシュ等で内部利用するハンドラーを一括再エクスポート
-// @ts-ignore
+// @ts-expect-error  `.open-next/worker.ts` is generated at build time
 export { DOQueueHandler, DOShardedTagCache } from "./.open-next/worker.js";
 
-
-// 2. Durable Object のクラス定義（Wranglerが検知できるように名前付きエクスポート）
 export class TicketSession extends DurableObject<Env> {
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
@@ -40,7 +58,7 @@ export class TicketSession extends DurableObject<Env> {
     if (url.pathname === "/update" && request.method === "POST") {
       const websockets = this.ctx.getWebSockets("guests");
       for (const ws of websockets) {
-        ws.send("refresh");
+        ws.send("ticket_refresh");
       }
       return new Response("OK", { status: 200 });
     }
@@ -49,7 +67,12 @@ export class TicketSession extends DurableObject<Env> {
   }
 
   async webSocketMessage(ws: WebSocket, message: string | ArrayBuffer) {}
-  async webSocketClose(ws: WebSocket, code: number, reason: string, wasClean: boolean) {
+  async webSocketClose(
+    ws: WebSocket,
+    code: number,
+    reason: string,
+    wasClean: boolean,
+  ) {
     ws.close();
   }
   async webSocketError(ws: WebSocket, error: unknown) {

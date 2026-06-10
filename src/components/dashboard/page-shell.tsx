@@ -18,7 +18,7 @@ export function DashboardPageShell({
         <div className="absolute -bottom-16 left-8 h-40 w-40 rounded-full bg-titan-white-300/15 blur-3xl" />
         <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-main-300/40 to-transparent" />
         <div className="relative flex flex-col gap-2.5">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-titan-white-600">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-titan-white-950">
             Dashboard
           </p>
           <h1 className="text-xl font-bold tracking-tight text-titan-white-950 md:text-2xl lg:text-3xl">

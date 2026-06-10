@@ -17,6 +17,24 @@ import { revalidatePath } from "next/cache";
 import { getSessionFromRequestHeaders } from "@/lib/auth-session";
 import { getCloudflareBindings } from "@/lib/runtime-env";
 
+async function notifyDurableObject(ticketId: string) {
+  const env = getCloudflareBindings();
+
+  if (!env || !env.TICKET_SESSION) {
+    console.error("Durable Object Binding not found");
+    return;
+  }
+
+  try {
+    const id = env.TICKET_SESSION.idFromName(ticketId);
+    const doStub = env.TICKET_SESSION.get(id);
+
+    await doStub.fetch(new Request(`http://do/update`, { method: "POST" }));
+  } catch (e) {
+    console.error("Failed to notify Durable Object:", e);
+  }
+}
+
 const RegisterSchema = z.object({
   numberOfPeople: z.coerce
     .number()
@@ -264,13 +282,12 @@ export async function disableAttractionTickets(
       targetConditions.push(lte(tickets.createdAt, createdAtTo));
     }
 
-    const targetRows = await db
-      .select({ count: sql<number>`count(*)` })
+    const targetTickets = await db
+      .select({ id: tickets.id })
       .from(tickets)
       .where(and(...targetConditions));
 
-    const targetCount = Number(targetRows[0]?.count ?? 0);
-    if (targetCount === 0) {
+    if (targetTickets.length === 0) {
       invalidateTicketPages(storeId);
       return {
         success: true as const,
@@ -284,12 +301,16 @@ export async function disableAttractionTickets(
       .set({ status: "DISABLED" })
       .where(and(...targetConditions));
 
+    for (const ticket of targetTickets) {
+      await notifyDurableObject(ticket.id);
+    }
+
     invalidateTicketPages(storeId);
 
     return {
       success: true as const,
-      message: `${targetCount}件の整理券を無効化しました。`,
-      count: targetCount,
+      message: `${targetTickets.length}件の整理券を無効化しました。`,
+      count: targetTickets.length,
     };
   } catch (error) {
     console.log(error);
@@ -392,6 +413,10 @@ export async function callFirstTicket(
 
     invalidateTicketPages(access.storeId);
 
+    for (const id of ids) {
+      await notifyDurableObject(id);
+    }
+
     const digitalTickets = issuedTickets.filter((ticket) => !ticket.isPaper);
     const userIds = Array.from(
       new Set(digitalTickets.map((ticket) => ticket.userId)),
@@ -441,28 +466,6 @@ export async function callFirstTicket(
       message: "サーバーエラーが発生しました",
       success: false,
     };
-  }
-}
-
-// 管理者アクションファイル内
-
-async function notifyDurableObject(ticketId: string) {
-  // 1. 拡張したユーティリティから env を取得
-  const env = getCloudflareBindings();
-  
-  if (!env || !env.TICKET_SESSION) {
-    console.error("Durable Object Binding not found");
-    return;
-  }
-
-  try {
-    const id = env.TICKET_SESSION.idFromName(ticketId);
-    const doStub = env.TICKET_SESSION.get(id);
-    
-    // DO の /update エンドポイントを叩く
-    await doStub.fetch(new Request(`http://do/update`, { method: "POST" }));
-  } catch (e) {
-    console.error("Failed to notify Durable Object:", e);
   }
 }
 
@@ -519,11 +522,15 @@ export async function completeTicket(ticketId: string) {
       .set({ status: "COMPLETED" })
       .where(eq(tickets.id, ticketId));
 
+    await notifyDurableObject(ticketId);
+
     if (nextIssuedRows[0]) {
       await db
         .update(tickets)
         .set({ status: "CALLED" })
         .where(eq(tickets.id, nextIssuedRows[0].id));
+
+      await notifyDurableObject(nextIssuedRows[0].id);
     }
 
     invalidateTicketPages(storeId);
@@ -544,31 +551,31 @@ export async function completeTicket(ticketId: string) {
 
 const cancelTicketSchema = z.object({
   ticketId: z.string().min(1, "必須項目です"),
-})
+});
 
 export async function cancelTicket(prevState: unknown, formData: FormData) {
   const validationResult = cancelTicketSchema.safeParse({
     ticketId: formData.get("ticketId") as string,
-  })
-  if(!validationResult.success) {
-    return{
-      success:false,
-      message: "入力形式が間違っています"
-    }
+  });
+  if (!validationResult.success) {
+    return {
+      success: false,
+      message: "入力形式が間違っています",
+    };
   }
-  const {ticketId} = validationResult.data;
+  const { ticketId } = validationResult.data;
   try {
     const session = await getSessionFromRequestHeaders();
-    if(!session?.user) {
+    if (!session?.user) {
       return {
         success: false,
-        message: "ユーザーが存在しません"
-      }
+        message: "ユーザーが存在しません",
+      };
     }
 
     const db = await getDb();
     const fetchedRows = await db
-      .select({"userId": tickets.userId, "storeId": stores.id})
+      .select({ userId: tickets.userId, storeId: stores.id })
       .from(tickets)
       .where(eq(tickets.id, ticketId))
       .innerJoin(attractions, eq(attractions.id, tickets.attractionId))
@@ -580,12 +587,12 @@ export async function cancelTicket(prevState: unknown, formData: FormData) {
       return { success: false as const, message: "整理券が存在しません" };
     }
 
-    if(session?.user.id !== fetchedTicket.userId) {
+    if (session?.user.id !== fetchedTicket.userId) {
       return {
         success: false,
-        message: "他のユーザーの整理券をキャンセルすることはできません"
-      }
-    } 
+        message: "他のユーザーの整理券をキャンセルすることはできません",
+      };
+    }
 
     await db
       .update(tickets)
