@@ -9,20 +9,11 @@ import {
 } from "@/components/ui/card";
 import QRCode from "@/components/ui/qrcode";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { cancelTicket } from "./action";
 import { useRouter } from "next/navigation";
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-  DialogTitle,
-  DialogDescription,
-  DialogHeader,
-} from "@/components/ui/dialog";
 import { TicketStatus } from "@/lib/db/schema";
 import { TICKET_STATUS_MAP } from "@/lib/type";
+import CancelTicket from "./cancel";
 
 interface TicketCardProps {
   ticket: {
@@ -47,16 +38,6 @@ export function TicketCard({ ticket }: TicketCardProps) {
   const [loading, setLoading] = useState(false);
   const [isCanceled, setIsCanceled] = useState(false);
 
-  const handleCancel = async () => {
-    setLoading(true);
-    try {
-      await cancelTicket(ticket.id);
-      setIsCanceled(true);
-      router.refresh();
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (isCanceled) {
     return null;
@@ -111,22 +92,7 @@ export function TicketCard({ ticket }: TicketCardProps) {
             })}
           </p>
         </div>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="danger">キャンセルする</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>整理券をキャンセル</DialogTitle>
-              <DialogDescription>
-                整理券をキャンセルします。よろしいですか？
-              </DialogDescription>
-            </DialogHeader>
-            <Button variant="danger" disabled={loading} onClick={handleCancel}>
-              {loading ? "キャンセル中..." : "キャンセルする"}
-            </Button>
-          </DialogContent>
-        </Dialog>
+        <CancelTicket ticketId={ticket.id} />
       </CardFooter>
     </Card>
   );

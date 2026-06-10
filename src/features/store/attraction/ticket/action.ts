@@ -14,6 +14,7 @@ import { and, asc, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import { sendPushNotification } from "@/features/push/action";
 import { getDb } from "@/lib/db/drizzle";
 import { revalidatePath } from "next/cache";
+import { getSessionFromRequestHeaders } from "@/lib/auth-session";
 
 const RegisterSchema = z.object({
   numberOfPeople: z.coerce
@@ -518,18 +519,37 @@ export async function completeTicket(ticketId: string) {
   }
 }
 
-export async function cancelTicket(ticketId: string) {
+const cancelTicketSchema = z.object({
+  ticketId: z.string().min(1, "必須項目です"),
+})
+
+export async function cancelTicket(prevState: unknown, formData: FormData) {
+  const validationResult = cancelTicketSchema.safeParse({
+    ticketId: formData.get("ticketId") as string,
+  })
+  if(!validationResult.success) {
+    return{
+      success:false,
+      message: "入力形式が間違っています"
+    }
+  }
+  const {ticketId} = validationResult.data;
   try {
-    const user = await getAuthenticatedUser();
-    if (!user) {
-      return { success: false as const, message: "ログインが必要です" };
+    const session = await getSessionFromRequestHeaders();
+    if(!session?.user) {
+      return {
+        success: false,
+        message: "ユーザーが存在しません"
+      }
     }
 
     const db = await getDb();
     const fetchedRows = await db
-      .select()
+      .select({"userId": tickets.userId, "storeId": stores.id})
       .from(tickets)
       .where(eq(tickets.id, ticketId))
+      .innerJoin(attractions, eq(attractions.id, tickets.attractionId))
+      .innerJoin(stores, eq(stores.id, attractions.storeId))
       .limit(1);
     const fetchedTicket = fetchedRows[0];
 
@@ -537,23 +557,19 @@ export async function cancelTicket(ticketId: string) {
       return { success: false as const, message: "整理券が存在しません" };
     }
 
-    const storeRows = await db
-      .select({ storeId: attractions.storeId })
-      .from(attractions)
-      .innerJoin(stores, eq(attractions.storeId, stores.id))
-      .where(eq(attractions.id, fetchedTicket.attractionId))
-      .limit(1);
-    const storeId = storeRows[0]?.storeId;
-    if (!storeId || !(await canStaffOrManageStore(user.id, storeId))) {
-      return { success: false as const, message: "権限がありません" };
-    }
+    if(session?.user.id !== fetchedTicket.userId) {
+      return {
+        success: false,
+        message: "他のユーザーの整理券をキャンセルすることはできません"
+      }
+    } 
 
     await db
       .update(tickets)
       .set({ status: "CANCELED" })
       .where(eq(tickets.id, ticketId));
 
-    invalidateTicketPages(storeId);
+    invalidateTicketPages(fetchedTicket.storeId);
 
     return {
       success: true,

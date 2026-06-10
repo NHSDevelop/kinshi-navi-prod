@@ -142,14 +142,6 @@ export default async function AnonymousUserPage() {
           </Suspense>
         </div>
       </section>
-
-      {user.isAnonymous && (
-        <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
-          <Suspense fallback={<LoadingPrompt context="削除ボタン" />}>
-            <DeleteAnonymousUser />
-          </Suspense>
-        </section>
-      )}
     </div>
   );
 }
