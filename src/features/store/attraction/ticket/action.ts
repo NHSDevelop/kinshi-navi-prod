@@ -162,7 +162,7 @@ export async function createTicket(
       .where(
         and(
           eq(tickets.userId, user.id),
-          eq(tickets.status, "ISSUED"),
+          inArray(tickets.status,["ISSUED","CALLED"]),
           eq(tickets.isPaper, false),
         ),
       );

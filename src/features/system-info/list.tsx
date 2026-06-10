@@ -4,6 +4,7 @@ import { systemInfos } from "@/lib/db/schema";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import Link from "next/link";
 import { formatYMD } from "@/lib/formatDate";
+import { desc } from "drizzle-orm";
 
 export async function SystemInfoList() {
   const db = await getDb();
@@ -13,7 +14,9 @@ export async function SystemInfoList() {
       createdAt: systemInfos.createdAt,
       title: systemInfos.title,
     })
-    .from(systemInfos);
+    .from(systemInfos)
+    .orderBy(desc(systemInfos.createdAt));
+    
   return (
     <>
       {systemInfoRows.length > 0 ? (

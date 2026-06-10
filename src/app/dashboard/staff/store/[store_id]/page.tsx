@@ -83,7 +83,7 @@ export default async function StoreStaffHomePage(props: {
             <h2 className="text-sm font-bold main-950 tracking-wide">
               操作メニュー
             </h2>
-            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-3 xl:grid-cols-4">
               <Button asChild variant="default" className="w-full">
                 <Link
                   href={`/dashboard/admin/store/${store_id}/call-ticket`}
@@ -147,7 +147,7 @@ export default async function StoreStaffHomePage(props: {
           </div>
         )}
         {storeRows[0].storeType === "FOOD" && (
-          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-3 xl:grid-cols-4">
             <Button asChild variant="default" className="w-full">
               <Link
                 href={`/dashboard/staff/store/${store_id}/register`}
