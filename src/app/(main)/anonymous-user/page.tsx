@@ -10,6 +10,7 @@ import { LoadingPrompt } from "@/components/prompt/loading-prompt";
 import { Separator } from "@/components/ui/separator";
 import { PageBunner } from "@/components/navigation/page-bunner";
 import { Metadata } from "next";
+import { RealtimeTicketListener } from "@/features/store/attraction/ticket/realtime-listener";
 
 export const metadata: Metadata = {
   title: "ゲストユーザーページ ",

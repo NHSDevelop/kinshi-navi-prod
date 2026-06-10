@@ -3,6 +3,7 @@ import { attractions, events, stores, tickets } from "@/lib/db/schema";
 import { and, asc, eq, inArray } from "drizzle-orm";
 import { TicketCard } from "./ticket";
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
+import { RealtimeTicketListener } from "./realtime-listener";
 
 interface UserTicketListProps {
   userId: string;
@@ -50,5 +51,8 @@ export default async function UserTicketList({ userId }: UserTicketListProps) {
     },
   }));
 
-  return <TicketCard ticket={activeTickets[0]} />;
+  return (<>
+  <TicketCard ticket={activeTickets[0]} />
+  <RealtimeTicketListener ticketId={activeTickets[0].id}/>
+  </>)
 }

@@ -14,3 +14,13 @@ export function getRuntimeEnv(key: string): string | undefined {
 
   return process.env[key];
 }
+
+export function getCloudflareBindings(): any {
+  try {
+    const { env } = getCloudflareContext();
+    if (env) return env;
+  } catch {
+    // 取得失敗時のフォールバック
+  }
+  return (process.env as any).cloudflare?.env;
+}

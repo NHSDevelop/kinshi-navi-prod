@@ -15,6 +15,7 @@ import { sendPushNotification } from "@/features/push/action";
 import { getDb } from "@/lib/db/drizzle";
 import { revalidatePath } from "next/cache";
 import { getSessionFromRequestHeaders } from "@/lib/auth-session";
+import { getCloudflareBindings } from "@/lib/runtime-env";
 
 const RegisterSchema = z.object({
   numberOfPeople: z.coerce
@@ -440,6 +441,28 @@ export async function callFirstTicket(
       message: "サーバーエラーが発生しました",
       success: false,
     };
+  }
+}
+
+// 管理者アクションファイル内
+
+async function notifyDurableObject(ticketId: string) {
+  // 1. 拡張したユーティリティから env を取得
+  const env = getCloudflareBindings();
+  
+  if (!env || !env.TICKET_SESSION) {
+    console.error("Durable Object Binding not found");
+    return;
+  }
+
+  try {
+    const id = env.TICKET_SESSION.idFromName(ticketId);
+    const doStub = env.TICKET_SESSION.get(id);
+    
+    // DO の /update エンドポイントを叩く
+    await doStub.fetch(new Request(`http://do/update`, { method: "POST" }));
+  } catch (e) {
+    console.error("Failed to notify Durable Object:", e);
   }
 }
 
