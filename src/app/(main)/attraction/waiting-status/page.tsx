@@ -25,7 +25,6 @@ export default async function AttractionWaitStatusPage() {
       <RoutePollingRefresh intervalMs={5 * 60 * 1000} />
       <PageBunner
         title="企画の待機状況"
-        description="混雑状況をリアルタイムに確認できます。5分ごと、または画面に戻ったときに更新します。"
       />
       <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
         <Suspense fallback={<LoadingPrompt context="待機状況" />}>

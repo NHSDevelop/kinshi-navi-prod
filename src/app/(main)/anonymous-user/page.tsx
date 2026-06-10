@@ -24,7 +24,6 @@ export default async function AnonymousUserPage() {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 lg:gap-8">
         <PageBunner
           title="ゲストユーザーページ"
-          description="まずユーザーを作成して下さい。"
         />
         <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
           <Suspense fallback={<LoadingPrompt context="ユーザー作成ボタン" />}>
@@ -39,7 +38,6 @@ export default async function AnonymousUserPage() {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 lg:gap-8">
         <PageBunner
           title="ゲストユーザーページ"
-          description="管理者としてログイン済みの場合、ゲストユーザーは作成できません。"
         />
         <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
           <p>
@@ -53,7 +51,6 @@ export default async function AnonymousUserPage() {
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 lg:gap-8">
       <PageBunner
         title="ゲストユーザーページ"
-        description="通知設定、取得済み整理券の確認、ゲストユーザー管理をこのページで行えます。"
       />
       <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
         <h2 className="text-lg font-bold text-main-950 md:text-xl mb-4">
