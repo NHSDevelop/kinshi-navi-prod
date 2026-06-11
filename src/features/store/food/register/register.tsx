@@ -13,6 +13,7 @@ export default async function FoodRegister({ storeId }: Props) {
   const foodRows = await db
     .select({
       foodId: foods.id,
+      isUseLane: foods.isUseLane,
       storeName: stores.name,
     })
     .from(foods)
@@ -51,11 +52,17 @@ export default async function FoodRegister({ storeId }: Props) {
     return <NotFoundPrompt context="模擬店内の商品" />;
   }
 
+  const sanitizedFoodOptions = foodRows.map((food) => ({
+    foodId: food.foodId,
+    storeName: food.storeName,
+    isUseLane: food.isUseLane ?? true,
+  }));
+
   return (
     <FoodRegisterForm
       items={itemRows}
       lanes={laneRows}
-      foodOptions={foodRows}
+      foodOptions={sanitizedFoodOptions}
     />
   );
 }

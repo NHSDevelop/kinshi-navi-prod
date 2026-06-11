@@ -5,6 +5,7 @@ import { foods, foodTagValues } from "@/lib/db/schema";
 import { getDb } from "@/lib/db/drizzle";
 import { revalidatePath } from "next/cache";
 import z from "zod";
+import { eq } from "drizzle-orm";
 
 export async function createFoodWithForm(
   prevState: unknown,
@@ -53,10 +54,12 @@ export async function createFoodWithForm(
 
 type ZodErrors = {
   foodTag?: string[];
+  isUseLane?: string[];
 } | null;
 
 export type FoodConfigState = {
   foodTag?: string;
+  isUseLane?: boolean;
   zodErrors: ZodErrors;
   message?: string | null;
   success?: boolean;
@@ -64,7 +67,11 @@ export type FoodConfigState = {
 
 const UpdateFoodConfigSchema = z.object({
   storeId: z.string(),
+  foodId:z.string(),
   foodTag: z.enum(foodTagValues),
+  isUseLane: z
+    .enum(["true", "false"])
+    .transform((val: "true" | "false") => val === "true"),
 });
 
 export async function updateFoodConfig(
@@ -75,6 +82,7 @@ export async function updateFoodConfig(
   if (!user) {
     return {
       foodTag: (formData.get("foodTag") as string) || "",
+      isUseLane: (formData.get("isUseLane") as string) === "true",
       zodErrors: null,
       message: "ログインが必要です。",
       success: false,
@@ -83,20 +91,24 @@ export async function updateFoodConfig(
 
   const validationResult = UpdateFoodConfigSchema.safeParse({
     storeId: formData.get("storeId") as string,
+    foodId: formData.get("foodId") as string,
     foodTag: formData.get("foodTag") as string,
+    isUseLane: formData.get("isUseLane") as string,
   });
   if (!validationResult.success) {
     return {
       foodTag: (formData.get("foodTag") as string) || "",
       zodErrors: validationResult.error.flatten().fieldErrors,
+      isUseLane: (formData.get("isUseLane") as string) === "true",
       success: false,
       message: "入力形式が正しくありません。",
     };
   }
-  const { storeId, foodTag } = validationResult.data;
+  const { foodId, storeId, foodTag, isUseLane } = validationResult.data;
   if (!(await canStaffOrManageStore(user.id, storeId))) {
     return {
       foodTag: (formData.get("foodTag") as string) || "",
+      isUseLane: (formData.get("isUseLane") as string) === "true",
       zodErrors: null,
       success: false,
       message: "権限がありません。",
@@ -106,12 +118,15 @@ export async function updateFoodConfig(
   try {
     await db.update(foods).set({
       tag: foodTag,
-    });
+      isUseLane: isUseLane,
+    }).where(eq(foods.id, foodId));
     revalidatePath(`/dashboard/staff/store/${storeId}`);
     revalidatePath(`/dashboard/admin/store/${storeId}`);
     revalidatePath(`/dashboard/staff/store/${storeId}/item-list`);
     revalidatePath(`/dashboard/staff/store/${storeId}/call-ticket`);
     revalidatePath(`/dashboard/admin/store/${storeId}/create-item`);
+    revalidatePath(`/dashboard/admin/store/${storeId}/register`);
+    revalidatePath(`/dashboard/staff/store/${storeId}/register`);
     revalidatePath("/food/stock-status");
     revalidatePath("/vote/food");
     return {

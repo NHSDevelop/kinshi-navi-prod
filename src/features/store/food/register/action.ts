@@ -9,7 +9,6 @@ import { revalidatePath } from "next/cache";
 function invalidateRegisterPages(storeId: string) {
   revalidatePath(`/dashboard/staff/store/${storeId}`);
   revalidatePath(`/dashboard/staff/store/${storeId}/register`);
-  revalidatePath(`/dashboard/staff/store/${storeId}/register-log-history`);
   revalidatePath(`/dashboard/staff/store/${storeId}/item-list`);
   revalidatePath(`/dashboard/admin/store/${storeId}`);
   revalidatePath("/food/stock-status");
@@ -27,7 +26,7 @@ async function getStoreIdByFoodId(foodId: string) {
 }
 
 const CreateRegisterLogSchema = z.object({
-  foodId: z.string().min(1, "必須項目です"),
+  foodId: z.string().optional(),
   totalAmount: z.coerce.number().int("整数である必要があります"),
   amountPaid: z.coerce.number().int("整数である必要があります"),
   meta: z.string().optional(),
@@ -35,7 +34,7 @@ const CreateRegisterLogSchema = z.object({
 });
 
 const ProcessRegisterAndStockSchema = z.object({
-  foodId: z.string().min(1, "必須項目です"),
+  foodId: z.string().optional(),
   totalAmount: z.coerce.number().int("整数である必要があります"),
   amountPaid: z.coerce.number().int("整数である必要があります"),
   laneId: z.string().optional(),
@@ -79,7 +78,7 @@ export async function createRegisterLog(
   formData: FormData,
 ): Promise<RegisterLogState> {
   const validationResult = CreateRegisterLogSchema.safeParse({
-    foodId: formData.get("foodId") as string,
+    foodId: formData.get("foodId") as string || undefined,
     totalAmount: formData.get("totalAmount") as string,
     amountPaid: formData.get("amountPaid") as string,
     meta: formData.get("meta") as string | undefined,
@@ -105,16 +104,18 @@ export async function createRegisterLog(
 
   try {
     await db.insert(registerLogs).values({
-      foodId,
+      foodId: foodId || null,
       totalAmount,
       amountPaid,
       meta,
       laneId: laneId || null,
     });
 
-    const storeId = await getStoreIdByFoodId(foodId);
-    if (storeId) {
-      invalidateRegisterPages(storeId);
+    if (foodId) {
+      const storeId = await getStoreIdByFoodId(foodId);
+      if (storeId) {
+        invalidateRegisterPages(storeId);
+      }
     }
 
     return {
@@ -147,7 +148,7 @@ export async function processRegisterAndStock(
   formData: FormData,
 ): Promise<RegisterAndStockState> {
   const validationResult = ProcessRegisterAndStockSchema.safeParse({
-    foodId: formData.get("foodId") as string,
+    foodId: formData.get("foodId") as string || undefined,
     totalAmount: formData.get("totalAmount") as string,
     amountPaid: formData.get("amountPaid") as string,
     laneId: formData.get("laneId") as string,
@@ -207,16 +208,18 @@ export async function processRegisterAndStock(
     }
 
     await db.insert(registerLogs).values({
-      foodId,
+      foodId: foodId || null,
       totalAmount,
       amountPaid,
       laneId: laneId || null,
       meta: `販売${Object.values(quantitiesToRecord).reduce((a, b) => a + b, 0)}個`,
     });
 
-    const storeId = await getStoreIdByFoodId(foodId);
-    if (storeId) {
-      invalidateRegisterPages(storeId);
+    if (foodId) {
+      const storeId = await getStoreIdByFoodId(foodId);
+      if (storeId) {
+        invalidateRegisterPages(storeId);
+      }
     }
 
     return {

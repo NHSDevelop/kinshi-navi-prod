@@ -9,6 +9,7 @@ import {
   registerLogs,
   registerLanes,
   stockLogs,
+  stores,
 } from "@/lib/db/schema";
 import { asc, eq } from "drizzle-orm";
 
@@ -29,6 +30,7 @@ type HistoryBlock =
       laneNumber: number | null;
       meta: string | null;
       createdAt: Date;
+      storeName: string | null;
       relatedStockChanges: SaleStockChange[];
     }
   | {
@@ -40,25 +42,8 @@ type HistoryBlock =
       createdAt: Date;
     };
 
-interface CombinedHistoryListProps {
-  storeId: string;
-}
-
-export default async function CombinedHistoryList({
-  storeId,
-}: CombinedHistoryListProps) {
+export default async function CombinedHistoryList() {
   const db = await getDb();
-
-  const foodRows = await db
-    .select({ id: foods.id })
-    .from(foods)
-    .where(eq(foods.storeId, storeId))
-    .limit(1);
-
-  const food = foodRows[0];
-  if (!food) {
-    return <NotFoundPrompt context="模擬店" />;
-  }
 
   const [registerRows, stockRows] = await Promise.all([
     db
@@ -69,10 +54,12 @@ export default async function CombinedHistoryList({
         laneNumber: registerLanes.laneNumber,
         meta: registerLogs.meta,
         createdAt: registerLogs.createdAt,
+        storeName: stores.name,
       })
       .from(registerLogs)
       .leftJoin(registerLanes, eq(registerLanes.id, registerLogs.laneId))
-      .where(eq(registerLogs.foodId, food.id))
+      .leftJoin(foods, eq(foods.id, registerLogs.foodId))
+      .leftJoin(stores, eq(stores.id, foods.storeId))
       .orderBy(asc(registerLogs.createdAt)),
     db
       .select({
@@ -84,7 +71,6 @@ export default async function CombinedHistoryList({
       })
       .from(stockLogs)
       .innerJoin(items, eq(items.id, stockLogs.itemId))
-      .where(eq(items.foodId, food.id))
       .orderBy(asc(stockLogs.createdAt)),
   ]);
 
@@ -99,6 +85,7 @@ export default async function CombinedHistoryList({
         amountPaid: number;
         laneNumber: number | null;
         meta: string | null;
+        storeName: string | null;
       }
     | {
         type: "STOCK";
@@ -117,6 +104,7 @@ export default async function CombinedHistoryList({
       amountPaid: log.amountPaid,
       laneNumber: log.laneNumber,
       meta: log.meta,
+      storeName: log.storeName,
     })),
     ...stockRows.map((log) => ({
       type: "STOCK" as const,
@@ -156,6 +144,7 @@ export default async function CombinedHistoryList({
       laneNumber: event.laneNumber,
       meta: event.meta,
       createdAt: event.createdAt,
+      storeName: event.storeName,
       relatedStockChanges: pendingSaleStockChanges.splice(0),
     });
   }
@@ -198,7 +187,9 @@ export default async function CombinedHistoryList({
                     <Badge className="text-sm" variant="info">
                       会計
                     </Badge>
-                    <CardTitle className="text-lg">会計記録</CardTitle>
+                    <CardTitle className="text-lg">
+                      {block.storeName ? `${block.storeName} の会計記録` : "レーン会計"}
+                    </CardTitle>
                   </div>
                   <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                     <span>{new Date(block.createdAt).toLocaleString()}</span>

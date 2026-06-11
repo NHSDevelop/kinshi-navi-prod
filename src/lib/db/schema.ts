@@ -183,6 +183,7 @@ export const foods = sqliteTable("foods", {
     .unique()
     .references(() => stores.id, { onDelete: "cascade" }),
   tag: text("tag", { enum: foodTagValues }).default("OTHER"),
+  isUseLane: integer("isUseLane", { mode: "boolean" }).default(false),
   createdAt: integer("createdAt", { mode: "timestamp_ms" })
     .notNull()
     .$defaultFn(() => new Date()),
@@ -325,14 +326,13 @@ export const registerLaneFoods = sqliteTable(
 );
 
 export type RegisterLaneFood = typeof registerLaneFoods.$inferSelect;
+
 export const registerLogs = sqliteTable("register_logs", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => createId()),
   laneId: text("laneId").references(() => registerLanes.id),
-  foodId: text("foodId")
-    .notNull()
-    .references(() => foods.id),
+  foodId: text("foodId").references(() => foods.id),
   totalAmount: integer("total_amount").notNull(),
   amountPaid: integer("amount_paid").notNull(),
   meta: text("meta"),

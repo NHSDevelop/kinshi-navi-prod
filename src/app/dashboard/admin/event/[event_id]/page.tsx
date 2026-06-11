@@ -21,7 +21,7 @@ import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import { requireEventAdminUser } from "@/lib/auth-guard";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import SelectStoreAuthCode from "@/features/store/components/select-auth-code";
-import { SquarePen, CirclePlus, List, Medal } from "lucide-react";
+import { SquarePen, CirclePlus, List, Medal, History } from "lucide-react";
 import ChangeEventIsVoteShowing from "@/features/store/vote/change-showing";
 import ChangeEventIsVoting from "@/features/store/vote/change-voting";
 
@@ -129,6 +129,16 @@ export default async function AdminEventPage(props: {
                 投票結果を見る
               </Link>
             </Button>
+
+                        <Button asChild variant="card" className="w-full">
+                          <Link
+                            href={`/dashboard/admin/event/${event_id}/register-log-history`}
+                            className="flex items-center gap-2 h-full"
+                          >
+                            <History />
+                            会計・在庫履歴
+                          </Link>
+                        </Button>
             <ChangeEventIsVoting
               eventId={event_id}
               isVoting={eventRows[0].isVoting ?? true}

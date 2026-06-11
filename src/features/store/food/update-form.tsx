@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { updateFoodConfig, FoodConfigState } from "./action";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,7 @@ import { ErrorPrompt } from "@/components/prompt/error-prompt";
 import { MessagePrompt } from "@/components/prompt/message-prompt";
 import { Food, foodTagValues } from "@/lib/db/schema";
 import { FOOD_TAG_MAP } from "@/lib/type";
+import { Switch } from "@/components/ui/switch";
 
 interface UpdateFoodConfigProps {
   food: Food;
@@ -41,6 +42,9 @@ export default function UpdateFoodConfigForm({ food }: UpdateFoodConfigProps) {
     updateFoodConfig,
     INITIAL_STATE,
   );
+
+  const [isUseLane, setisUseLane] = useState<boolean>(food.isUseLane || true);
+    
 
   return (
     <Card>
@@ -75,12 +79,27 @@ export default function UpdateFoodConfigForm({ food }: UpdateFoodConfigProps) {
                       </SelectContent>
                     </Select>
                   </Field>
+                                  <Field>
+                                    <FieldLabel>レーンを使用する</FieldLabel>
+                                    <Switch
+                                      disabled={isPending}
+                                      checked={isUseLane}
+                                      onCheckedChange={setisUseLane}
+                                    />
+                                    <FieldError message={state.zodErrors?.isUseLane?.[0]} />
+                                  </Field>
                   <FieldError message={state.zodErrors?.foodTag?.[0]} />
                 </Field>
               </FieldGroup>
             </FieldSet>
             <FieldSeparator />
             <input type="hidden" name="storeId" value={food.storeId} />
+            <input type="hidden" name="foodId" value={food.id} />
+            <input
+              type="hidden"
+              name="isUseLane"
+              value={isUseLane ? "true" : "false"}
+            />
             <Button
               type="submit"
               variant="card"

@@ -34,6 +34,7 @@ type Props = {
 type FoodOption = {
   foodId: string;
   storeName: string;
+  isUseLane: boolean;
 };
 
 type Quantities = Record<string, number>;
@@ -50,15 +51,20 @@ const INITIAL_STATE: RegisterAndStockState = {
 
 export default function FoodRegisterForm({ items, lanes, foodOptions }: Props) {
   const [selectedLaneId, setSelectedLaneId] = useState<string>("none");
-  const [selectedFoodId, setSelectedFoodId] = useState<string>("");
+  const [selectedFoodId, setSelectedFoodId] = useState<string>("none");
 
-  const foodItems = useMemo(
+  const useLaneFoodIds = useMemo(
     () =>
-      selectedFoodId
-        ? items.filter((item) => item.foodId === selectedFoodId)
-        : [],
-    [items, selectedFoodId],
+      foodOptions.filter((f) => f.isUseLane).map((f) => f.foodId),
+    [foodOptions],
   );
+
+  const foodItems = useMemo(() => {
+    if (selectedFoodId === "none") {
+      return items.filter((item) => useLaneFoodIds.includes(item.foodId));
+    }
+    return items.filter((item) => item.foodId === selectedFoodId);
+  }, [items, selectedFoodId, useLaneFoodIds]);
 
   const [quantities, setQuantities] = useState<Quantities>(
     items.reduce((acc, item) => ({ ...acc, [item.id]: 0 }), {}),
@@ -77,14 +83,24 @@ export default function FoodRegisterForm({ items, lanes, foodOptions }: Props) {
   };
 
   const handleFoodChange = (nextFoodId: string) => {
-    const nextFoodItems = items.filter((item) => item.foodId === nextFoodId);
     setSelectedFoodId(nextFoodId);
-    setQuantities(
-      nextFoodItems.reduce(
-        (acc, item) => ({ ...acc, [item.id]: 0 }),
-        {} as Quantities,
-      ),
-    );
+    if (nextFoodId === "none") {
+      const nextFoodItems = items.filter((item) => useLaneFoodIds.includes(item.foodId));
+      setQuantities(
+        nextFoodItems.reduce(
+          (acc, item) => ({ ...acc, [item.id]: 0 }),
+          {} as Quantities,
+        ),
+      );
+    } else {
+      const nextFoodItems = items.filter((item) => item.foodId === nextFoodId);
+      setQuantities(
+        nextFoodItems.reduce(
+          (acc, item) => ({ ...acc, [item.id]: 0 }),
+          {} as Quantities,
+        ),
+      );
+    }
     setAmountPaid("");
     setShowPaymentForm(false);
   };
@@ -98,7 +114,6 @@ export default function FoodRegisterForm({ items, lanes, foodOptions }: Props) {
   );
 
   const hasItems = Object.values(quantities).some((qty) => qty > 0);
-  const isFoodSelected = Boolean(selectedFoodId);
 
   const handleQuantityChange = (itemId: string, value: string) => {
     const num = Math.max(0, parseInt(value) || 0);
@@ -106,14 +121,13 @@ export default function FoodRegisterForm({ items, lanes, foodOptions }: Props) {
   };
 
   const handleCheckout = () => {
-    if (!hasItems || !isFoodSelected) return;
+    if (!hasItems) return;
     setShowPaymentForm(true);
   };
 
   const handleFormSubmit = async (formData: FormData) => {
-    if (!selectedFoodId) return;
     formData.set("laneId", selectedLaneId === "none" ? "" : selectedLaneId);
-    formData.set("foodId", selectedFoodId);
+    formData.set("foodId", selectedFoodId === "none" ? "" : selectedFoodId);
     formData.set("totalAmount", String(totalAmount));
     Object.entries(quantities).forEach(([itemId, qty]) => {
       formData.set(`quantity_${itemId}`, String(qty));
@@ -163,6 +177,7 @@ export default function FoodRegisterForm({ items, lanes, foodOptions }: Props) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
+                    <SelectItem value="none">模擬店未選択（全レーン対象店）</SelectItem>
                     {foodOptions.map((f) => (
                       <SelectItem key={f.foodId} value={f.foodId}>
                         {f.storeName}
@@ -175,11 +190,6 @@ export default function FoodRegisterForm({ items, lanes, foodOptions }: Props) {
 
             <h3 className="font-semibold mb-4">販売商品を選択</h3>
             <FieldGroup>
-              {!isFoodSelected && (
-                <div className="text-sm text-gray-600 px-2 py-3">
-                  先に模擬店を選択してください。
-                </div>
-              )}
               {foodItems.map((item) => (
                 <div
                   key={item.id}
@@ -239,7 +249,7 @@ export default function FoodRegisterForm({ items, lanes, foodOptions }: Props) {
           {!showPaymentForm && (
             <Button
               onClick={handleCheckout}
-              disabled={!hasItems || !isFoodSelected}
+              disabled={!hasItems}
               className="w-full"
             >
               会計へ進む
@@ -265,9 +275,6 @@ export default function FoodRegisterForm({ items, lanes, foodOptions }: Props) {
                     required
                   />
                   <FieldError message={state.zodErrors?.amountPaid?.[0]} />
-                  {!selectedFoodId && (
-                    <FieldError message="模擬店を選択してください" />
-                  )}
                   {amountPaid && parseInt(amountPaid) < totalAmount && (
                     <FieldError
                       message={`合計金額(${totalAmount.toLocaleString()}円)未満です`}

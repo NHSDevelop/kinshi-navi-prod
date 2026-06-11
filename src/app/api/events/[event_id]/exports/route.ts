@@ -1,6 +1,5 @@
 import { getDb } from "@/lib/db/drizzle";
 import { foods, items, registerLogs, stockLogs, stores } from "@/lib/db/schema";
-import { canManageStore } from "@/lib/auth-guard";
 import { getSessionFromRequestHeaders } from "@/lib/auth-session";
 import { and, asc, eq, gte, lte, sql } from "drizzle-orm";
 import { NextRequest } from "next/server";
@@ -84,15 +83,16 @@ function isRateLimited(key: string) {
 }
 
 type RouteContext = {
-  params: Promise<{ store_id: string }>;
+  params: Promise<{ event_id: string }>;
 };
 
 export async function GET(request: NextRequest, context: RouteContext) {
   const params = await context.params;
-  const store_id = params?.store_id;
-  if (!store_id) {
-    return new Response("Store id is required.", { status: 400 });
+  const event_id = params?.event_id;
+  if (!event_id) {
+    return new Response("Event id is required.", { status: 400 });
   }
+
   const exportType = request.nextUrl.searchParams.get(
     "type",
   ) as ExportType | null;
@@ -108,12 +108,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
     return new Response("Unauthorized.", { status: 401 });
   }
 
-  const isAllowed = await canManageStore(userId, store_id);
-  if (!isAllowed) {
-    return new Response("Forbidden.", { status: 403 });
-  }
-
-  const rateLimitKey = `${userId}:${store_id}:${exportType}`;
+  const rateLimitKey = `${userId}:${event_id}:${exportType}`;
   if (isRateLimited(rateLimitKey)) {
     return new Response("Rate limit exceeded.", { status: 429 });
   }
@@ -128,33 +123,11 @@ export async function GET(request: NextRequest, context: RouteContext) {
   }
 
   const db = await getDb();
-  const storeRows = await db
-    .select({ slug: stores.slug })
-    .from(stores)
-    .where(eq(stores.id, store_id))
-    .limit(1);
-
-  if (storeRows.length === 0) {
-    return new Response("Store not found.", { status: 404 });
-  }
-
-  const foodRows = await db
-    .select({ id: foods.id })
-    .from(foods)
-    .where(eq(foods.storeId, store_id))
-    .limit(1);
-
-  const food = foodRows[0];
-  if (!food) {
-    return new Response("Store does not have food records.", { status: 404 });
-  }
-
-  const storeSlug = sanitizeFilename(storeRows[0].slug);
   const dateLabel = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-  const fileBaseName = `export-${storeSlug}-${exportType}-${dateLabel}.csv`;
+  const fileBaseName = `export-event-${event_id}-${exportType}-${dateLabel}.csv`;
 
   if (exportType === "accounting") {
-    const registerFilters = [eq(registerLogs.foodId, food.id)];
+    const registerFilters = [eq(stores.eventId, event_id)];
     if (fromDate) {
       registerFilters.push(gte(registerLogs.createdAt, fromDate));
     }
@@ -165,6 +138,8 @@ export async function GET(request: NextRequest, context: RouteContext) {
     const registerCountRows = await db
       .select({ count: sql<number>`count(*)` })
       .from(registerLogs)
+      .leftJoin(foods, eq(foods.id, registerLogs.foodId))
+      .leftJoin(stores, eq(stores.id, foods.storeId))
       .where(and(...registerFilters));
 
     if ((registerCountRows[0]?.count ?? 0) > MAX_EXPORT_ROWS) {
@@ -180,15 +155,19 @@ export async function GET(request: NextRequest, context: RouteContext) {
         amountPaid: registerLogs.amountPaid,
         meta: registerLogs.meta,
         createdAt: registerLogs.createdAt,
+        storeName: stores.name,
       })
       .from(registerLogs)
+      .leftJoin(foods, eq(foods.id, registerLogs.foodId))
+      .leftJoin(stores, eq(stores.id, foods.storeId))
       .where(and(...registerFilters))
       .orderBy(asc(registerLogs.createdAt));
 
     const csv = buildCsv([
-      ["会計ID", "記録日時", "合計金額", "受取金額", "お釣り", "メモ"],
+      ["会計ID", "店舗名", "記録日時", "合計金額", "受取金額", "お釣り", "メモ"],
       ...rows.map((row) => [
         row.id,
+        row.storeName ?? "レーン会計",
         row.createdAt.toISOString(),
         row.totalAmount,
         row.amountPaid,
@@ -208,7 +187,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
     });
   }
 
-  const stockFilters = [eq(foods.id, food.id), eq(foods.storeId, store_id)];
+  const stockFilters = [eq(stores.eventId, event_id)];
   if (fromDate) {
     stockFilters.push(gte(stockLogs.createdAt, fromDate));
   }
@@ -221,6 +200,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
     .from(stockLogs)
     .innerJoin(items, eq(items.id, stockLogs.itemId))
     .innerJoin(foods, eq(foods.id, items.foodId))
+    .innerJoin(stores, eq(stores.id, foods.storeId))
     .where(and(...stockFilters));
 
   if ((stockCountRows[0]?.count ?? 0) > MAX_EXPORT_ROWS) {
@@ -236,17 +216,20 @@ export async function GET(request: NextRequest, context: RouteContext) {
       difference: stockLogs.difference,
       meta: stockLogs.meta,
       createdAt: stockLogs.createdAt,
+      storeName: stores.name,
     })
     .from(stockLogs)
     .innerJoin(items, eq(items.id, stockLogs.itemId))
     .innerJoin(foods, eq(foods.id, items.foodId))
+    .innerJoin(stores, eq(stores.id, foods.storeId))
     .where(and(...stockFilters))
     .orderBy(asc(stockLogs.createdAt));
 
   const csv = buildCsv([
-    ["変動ID", "記録日時", "商品名", "変動数", "メモ"],
+    ["変動ID", "店舗名", "記録日時", "商品名", "変動数", "メモ"],
     ...rows.map((row) => [
       row.id,
+      row.storeName ?? "",
       row.createdAt.toISOString(),
       row.itemName,
       row.difference,

@@ -1,0 +1,1 @@
+ALTER TABLE `foods` ADD `isUseLane` integer DEFAULT false;

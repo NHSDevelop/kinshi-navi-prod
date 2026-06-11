@@ -177,16 +177,6 @@ export default async function StoreStaffHomePage(props: {
                 商品の在庫を追加
               </Link>
             </Button>
-
-            <Button asChild variant="card" className="w-full">
-              <Link
-                href={`/dashboard/staff/store/${store_id}/register-log-history`}
-                className="flex items-center gap-2 h-full"
-              >
-                <History />
-                会計・在庫履歴
-              </Link>
-            </Button>
           </div>
         )}
         <ToActiveStore
