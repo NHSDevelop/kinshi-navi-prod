@@ -1,7 +1,7 @@
 "use client";
 
 import { Item, RegisterLane } from "@/lib/db/schema";
-import { useState, useActionState, useMemo } from "react";
+import { useState, useActionState, useMemo, useEffect } from "react";
 import { processRegisterAndStock, RegisterAndStockState } from "./action";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,7 @@ import {
 import { MessagePrompt } from "@/components/prompt/message-prompt";
 import { ErrorPrompt } from "@/components/prompt/error-prompt";
 import { FieldError } from "@/components/ui/field-error";
+import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 
 type Props = {
   items: Item[];
@@ -76,6 +77,19 @@ export default function FoodRegisterForm({ items, lanes, foodOptions }: Props) {
     INITIAL_STATE,
   );
 
+  const [finalAmountPaid, setFinalAmountPaid] = useState(0);
+  const [finalTotalAmount, setFinalTotalAmount] = useState(0);
+
+  useEffect(() => {
+    if (state?.success) {
+      setFinalAmountPaid(parseInt(amountPaid) || 0);
+      setFinalTotalAmount(totalAmount);
+      
+      setShowPaymentForm(false);
+      setQuantities(items.reduce((acc, item) => ({ ...acc, [item.id]: 0 }), {}));
+    }
+  }, [state?.success]);
+
   const handleLaneChange = (nextLaneId: string) => {
     setSelectedLaneId(nextLaneId);
     setAmountPaid("");
@@ -84,23 +98,14 @@ export default function FoodRegisterForm({ items, lanes, foodOptions }: Props) {
 
   const handleFoodChange = (nextFoodId: string) => {
     setSelectedFoodId(nextFoodId);
-    if (nextFoodId === "none") {
-      const nextFoodItems = items.filter((item) => useLaneFoodIds.includes(item.foodId));
-      setQuantities(
-        nextFoodItems.reduce(
-          (acc, item) => ({ ...acc, [item.id]: 0 }),
-          {} as Quantities,
-        ),
-      );
-    } else {
-      const nextFoodItems = items.filter((item) => item.foodId === nextFoodId);
-      setQuantities(
-        nextFoodItems.reduce(
-          (acc, item) => ({ ...acc, [item.id]: 0 }),
-          {} as Quantities,
-        ),
-      );
-    }
+    
+    setQuantities(
+      items.reduce(
+        (acc, item) => ({ ...acc, [item.id]: 0 }),
+        {} as Quantities,
+      ),
+    );
+    
     setAmountPaid("");
     setShowPaymentForm(false);
   };
@@ -116,7 +121,12 @@ export default function FoodRegisterForm({ items, lanes, foodOptions }: Props) {
   const hasItems = Object.values(quantities).some((qty) => qty > 0);
 
   const handleQuantityChange = (itemId: string, value: string) => {
-    const num = Math.max(0, parseInt(value) || 0);
+    const item = items.find((i) => i.id === itemId);
+    if (!item) return;
+
+    const parsedNum = parseInt(value) || 0;
+    const num = Math.min(item.stock, Math.max(0, parsedNum));
+    
     setQuantities((prev) => ({ ...prev, [itemId]: num }));
   };
 
@@ -135,6 +145,15 @@ export default function FoodRegisterForm({ items, lanes, foodOptions }: Props) {
     await formAction(formData);
   };
 
+  const handleReset = () => {
+    setAmountPaid("");
+    setFinalAmountPaid(0);
+    setFinalTotalAmount(0);
+    if (typeof window !== "undefined") {
+      window.location.reload();
+    }
+  };
+
   return (
     <Card>
       <CardContent>
@@ -146,7 +165,7 @@ export default function FoodRegisterForm({ items, lanes, foodOptions }: Props) {
                 name="laneId"
                 value={selectedLaneId}
                 onValueChange={handleLaneChange}
-                disabled={isPending || showPaymentForm}
+                disabled={isPending || showPaymentForm || state?.success}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="レーンを選択" />
@@ -170,7 +189,7 @@ export default function FoodRegisterForm({ items, lanes, foodOptions }: Props) {
                 name="foodId"
                 value={selectedFoodId}
                 onValueChange={handleFoodChange}
-                disabled={isPending || showPaymentForm}
+                disabled={isPending || showPaymentForm || state?.success}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="模擬店を選択" />
@@ -190,51 +209,56 @@ export default function FoodRegisterForm({ items, lanes, foodOptions }: Props) {
 
             <h3 className="font-semibold mb-4">販売商品を選択</h3>
             <FieldGroup>
-              {foodItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center justify-between gap-4 p-4 border rounded-lg"
-                >
-                  <div>{item.name}</div>
-                  <div className="text-sm text-gray-600">
-                    {item.price}円 / 在庫: {item.stock}
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Button
-                      type="button"
-                      onClick={() =>
-                        handleQuantityChange(
-                          item.id,
-                          String(Math.max(0, (quantities[item.id] || 0) - 1)),
-                        )
-                      }
-                      disabled={showPaymentForm}
-                      size="sm"
-                    >
-                      −
-                    </Button>
-                    <div className="w-12 text-center text-lg font-semibold">
-                      {quantities[item.id] || 0}
+              {foodItems.length > 0 ? (
+                foodItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between gap-4 p-4 border rounded-lg"
+                  >
+                    <div>{item.name}</div>
+                    <div className="text-sm text-gray-600">
+                      {item.price}円 / 在庫: {item.stock}
                     </div>
-                    <Button
-                      type="button"
-                      onClick={() =>
-                        handleQuantityChange(
-                          item.id,
-                          String((quantities[item.id] || 0) + 1),
-                        )
-                      }
-                      disabled={
-                        showPaymentForm ||
-                        (quantities[item.id] || 0) >= item.stock
-                      }
-                      size="sm"
-                    >
-                      +
-                    </Button>
+                    <div className="flex items-center gap-3">
+                      <Button
+                        type="button"
+                        onClick={() =>
+                          handleQuantityChange(
+                            item.id,
+                            String(Math.max(0, (quantities[item.id] || 0) - 1)),
+                          )
+                        }
+                        disabled={showPaymentForm || state?.success}
+                        size="sm"
+                      >
+                        −
+                      </Button>
+                      <div className="w-12 text-center text-lg font-semibold">
+                        {quantities[item.id] || 0}
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={() =>
+                          handleQuantityChange(
+                            item.id,
+                            String((quantities[item.id] || 0) + 1),
+                          )
+                        }
+                        disabled={
+                          showPaymentForm ||
+                          state?.success ||
+                          (quantities[item.id] || 0) >= item.stock
+                        }
+                        size="sm"
+                      >
+                        +
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <NotFoundPrompt context="条件に合う商品" />
+              )}
             </FieldGroup>
           </div>
 
@@ -246,7 +270,7 @@ export default function FoodRegisterForm({ items, lanes, foodOptions }: Props) {
             </div>
           </div>
 
-          {!showPaymentForm && (
+          {!showPaymentForm && !state?.success && (
             <Button
               onClick={handleCheckout}
               disabled={!hasItems}
@@ -316,7 +340,7 @@ export default function FoodRegisterForm({ items, lanes, foodOptions }: Props) {
               <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <div className="text-sm text-gray-600">おつり</div>
                 <div className="text-2xl font-bold text-blue-600">
-                  {(parseInt(amountPaid) - totalAmount).toLocaleString()}円
+                  {(finalAmountPaid - finalTotalAmount).toLocaleString()}円
                 </div>
               </div>
             </div>
@@ -327,10 +351,8 @@ export default function FoodRegisterForm({ items, lanes, foodOptions }: Props) {
 
           {state?.success && (
             <Button
-              onClick={() => {
-                window.location.reload();
-                setAmountPaid("");
-              }}
+              onClick={handleReset}
+              className="w-full"
             >
               別の会計を開始
             </Button>

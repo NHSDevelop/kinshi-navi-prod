@@ -130,7 +130,7 @@ export default async function AdminEventPage(props: {
               </Link>
             </Button>
 
-                        <Button asChild variant="card" className="w-full">
+                        <Button asChild variant="card">
                           <Link
                             href={`/dashboard/admin/event/${event_id}/register-log-history`}
                             className="flex items-center gap-2 h-full"

@@ -3,7 +3,7 @@
 import { registerLogs, stockLogs, items, foods } from "@/lib/db/schema";
 import z from "zod";
 import { getDb } from "@/lib/db/drizzle";
-import { eq, inArray, sql } from "drizzle-orm";
+import { eq, inArray, sql, and, gte } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 function invalidateRegisterPages(storeId: string) {
@@ -182,6 +182,36 @@ export async function processRegisterAndStock(
       }
     });
 
+    const itemIds = Object.keys(quantitiesToRecord);
+    if (itemIds.length === 0) {
+      return {
+        quantities: prevState.quantities,
+        totalAmount: prevState.totalAmount,
+        amountPaid: formData.get("amountPaid") as string,
+        laneId: formData.get("laneId") as string,
+        zodErrors: null,
+        message: "購入商品が選択されていません",
+        success: false,
+      };
+    }
+
+    const batchQueries: any[] = [];
+
+    const selectQuery = db
+      .select({ id: items.id, name: items.name, stock: items.stock })
+      .from(items)
+      .where(inArray(items.id, itemIds));
+    batchQueries.push(selectQuery);
+
+    for (const itemId of itemIds) {
+      const qty = quantitiesToRecord[itemId];
+      const updateQuery = db
+        .update(items)
+        .set({ stock: sql`${items.stock} - ${qty}` })
+        .where(and(eq(items.id, itemId), gte(items.stock, qty)));
+      batchQueries.push(updateQuery);
+    }
+
     const stockLogRecords = Object.entries(quantitiesToRecord).map(
       ([itemId, qty]) => ({
         itemId,
@@ -189,31 +219,40 @@ export async function processRegisterAndStock(
         meta: `会計時に販売: ${qty}個`,
       }),
     );
+    batchQueries.push(db.insert(stockLogs).values(stockLogRecords));
 
-    if (stockLogRecords.length > 0) {
-      await db.insert(stockLogs).values(stockLogRecords);
+    batchQueries.push(
+      db.insert(registerLogs).values({
+        foodId: foodId || null,
+        totalAmount,
+        amountPaid,
+        laneId: laneId || null,
+        meta: `販売${Object.values(quantitiesToRecord).reduce((a, b) => a + b, 0)}個`,
+      })
+    );
+
+    const batchResults = await db.batch(batchQueries as any);
+
+    const dbItems = batchResults[0];
+
+    for (let i = 0; i < itemIds.length; i++) {
+      const itemId = itemIds[i];
+      const updateResult = batchResults[i + 1];
+      
+      if (updateResult.meta?.changes === 0) {
+        const itemInfo = dbItems.find((item: any) => item.id === itemId);
+        const currentStock = itemInfo ? itemInfo.stock : 0;
+        return {
+          quantities: prevState.quantities,
+          totalAmount: prevState.totalAmount,
+          amountPaid: formData.get("amountPaid") as string,
+          laneId: formData.get("laneId") as string,
+          zodErrors: null,
+          message: `${itemInfo?.name || "商品"} の在庫が不足しています（注文時点の在庫: ${currentStock}個）。`,
+          success: false,
+        };
+      }
     }
-
-    const itemIds = Object.keys(quantitiesToRecord);
-    if (itemIds.length > 0) {
-      const updateCases = itemIds.map((itemId) => {
-        const qty = quantitiesToRecord[itemId];
-        return sql`WHEN ${itemId} THEN ${sql`${items.stock} - ${qty}`}`;
-      });
-      const updatedStock = sql`CASE ${items.id} ${sql.join(updateCases, sql` `)} ELSE ${items.stock} END`;
-      await db
-        .update(items)
-        .set({ stock: updatedStock })
-        .where(inArray(items.id, itemIds));
-    }
-
-    await db.insert(registerLogs).values({
-      foodId: foodId || null,
-      totalAmount,
-      amountPaid,
-      laneId: laneId || null,
-      meta: `販売${Object.values(quantitiesToRecord).reduce((a, b) => a + b, 0)}個`,
-    });
 
     if (foodId) {
       const storeId = await getStoreIdByFoodId(foodId);

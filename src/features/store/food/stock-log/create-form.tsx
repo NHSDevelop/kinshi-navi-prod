@@ -1,7 +1,7 @@
 "use client";
 
 import { Item } from "@/lib/db/schema";
-import { useActionState } from "react";
+import { useActionState, useState, useEffect } from "react";
 import createStockLog, { StockLogState } from "./action";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,7 @@ interface CreateStockLogFormProps {
 const INITIAL_STATE: StockLogState = {
   itemId: "",
   difference: "",
+  meta: "",
   zodErrors: null,
   message: null,
   success: false,
@@ -43,10 +44,24 @@ export default function CreateStockLogForm({ items }: CreateStockLogFormProps) {
     INITIAL_STATE,
   );
 
+  const [selectedItemId, setSelectedItemId] = useState<string>("");
+  const [difference, setDifference] = useState<string>("");
+  const [meta, setMeta] = useState<string>("");
+
+  const selectedItem = items.find((item) => item.id === selectedItemId);
+
+  useEffect(() => {
+    if (state.success) {
+      setSelectedItemId("");
+      setDifference("");
+      setMeta("");
+    }
+  }, [state.success]);
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>商品の在庫を追加</CardTitle>
+        <CardTitle>商品の在庫を調整</CardTitle>
       </CardHeader>
       <CardContent>
         <form action={formAction}>
@@ -59,7 +74,8 @@ export default function CreateStockLogForm({ items }: CreateStockLogFormProps) {
                     name="itemId"
                     required
                     disabled={isPending}
-                    defaultValue={state.itemId}
+                    value={selectedItemId}
+                    onValueChange={setSelectedItemId}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="商品を選択" />
@@ -68,7 +84,7 @@ export default function CreateStockLogForm({ items }: CreateStockLogFormProps) {
                       <SelectGroup>
                         {items.map((item) => (
                           <SelectItem key={item.id} value={item.id}>
-                            {item.name}
+                            {item.name} (現在: {item.stock}個)
                           </SelectItem>
                         ))}
                       </SelectGroup>
@@ -76,6 +92,7 @@ export default function CreateStockLogForm({ items }: CreateStockLogFormProps) {
                   </Select>
                   <FieldError message={state.zodErrors?.itemId?.[0]} />
                 </Field>
+                
                 <Field>
                   <FieldLabel>変動数（単位：個）</FieldLabel>
                   <Input
@@ -83,16 +100,28 @@ export default function CreateStockLogForm({ items }: CreateStockLogFormProps) {
                     type="number"
                     required
                     disabled={isPending}
-                    defaultValue={state.difference}
+                    value={difference}
+                    onChange={(e) => setDifference(e.target.value)}
+                    placeholder="仕入れは正の数、廃棄などは負の数を入力"
                   />
                   <FieldError message={state.zodErrors?.difference?.[0]} />
+                  {selectedItem && difference && parseInt(difference) < 0 && (
+                    selectedItem.stock + parseInt(difference) < 0
+                  ) && (
+                    <FieldError
+                      message={`在庫不足です。現在の在庫(${selectedItem.stock}個)を超える減算はできません。`}
+                    />
+                  )}
                 </Field>
+                
                 <Field>
                   <FieldLabel>メモ（任意）</FieldLabel>
                   <Input
                     name="meta"
                     disabled={isPending}
-                    defaultValue={state.meta}
+                    value={meta}
+                    onChange={(e) => setMeta(e.target.value)}
+                    placeholder="例: 定期仕入れ、廃棄処分など"
                   />
                   <FieldError message={state.zodErrors?.meta?.[0]} />
                 </Field>
@@ -104,15 +133,20 @@ export default function CreateStockLogForm({ items }: CreateStockLogFormProps) {
             type="submit"
             variant="card"
             className="mt-4"
-            disabled={isPending}
+            disabled={
+              !!(isPending || 
+              (selectedItem && difference && parseInt(difference) < 0 && selectedItem.stock + parseInt(difference) < 0))
+            }
           >
-            {isPending ? "追加中..." : "在庫を追加"}
+            {isPending ? "更新中..." : "在庫を更新"}
           </Button>
         </form>
-        {state?.success && <MessagePrompt message={state.message} />}
-        {!state?.success && state?.message && (
-          <ErrorPrompt error={state.message} />
-        )}
+        <div className="mt-4 space-y-2">
+          {state?.success && <MessagePrompt message={state.message} />}
+          {!state?.success && state?.message && (
+            <ErrorPrompt error={state.message} />
+          )}
+        </div>
       </CardContent>
     </Card>
   );
