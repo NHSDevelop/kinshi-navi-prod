@@ -3,7 +3,7 @@ import { getDb } from "@/lib/db/drizzle";
 import { stores, StoreType } from "@/lib/db/schema";
 import CreateStoreVoteForm from "./create-form";
 import CreateAnonymousUser from "@/features/auth/anonymous/create";
-import { and, eq } from "drizzle-orm";
+import { and, eq, asc } from "drizzle-orm";
 import { getSessionFromRequestHeaders } from "@/lib/auth-session";
 import { Suspense } from "react";
 import { LoadingPrompt } from "@/components/prompt/loading-prompt";
@@ -20,22 +20,15 @@ export default async function CreateStoreVote({ storeType }: Props) {
   }
 
   // セッション取得と店舗リストの取得を並列化
-  const dbPromise = getDb().then((db) =>
-    db
-      .select()
-      .from(stores)
-      .where(
-        and(
-          eq(stores.eventId, mainEvent.id),
-          eq(stores.canVoted, true),
-          eq(stores.storeType, storeType),
-        ),
-      ),
-  );
+  const db = await getDb();
 
   const [session, storeRows] = await Promise.all([
     getSessionFromRequestHeaders(),
-    dbPromise,
+    db.select({id: stores.id, name:stores.name, imageUrl: stores.imageUrl, storeType:stores.storeType}).from(stores).where(and(
+          eq(stores.eventId, mainEvent.id),
+          eq(stores.canVoted, true),
+          eq(stores.storeType, storeType),
+        ),).orderBy(asc(stores.name))
   ]);
 
   const user = session?.user;

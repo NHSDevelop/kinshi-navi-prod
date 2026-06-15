@@ -11,8 +11,15 @@ import { MessagePrompt } from "@/components/prompt/message-prompt";
 import { ErrorPrompt } from "@/components/prompt/error-prompt";
 import { Spinner } from "@/components/ui/spinner";
 
+type CustomStore = {
+  id:string,
+  name: string, 
+  imageUrl: string | null,
+  storeType: StoreType,
+}
+
 type Props = {
-  stores: Store[];
+  stores: CustomStore[];
   storeType: StoreType;
 };
 

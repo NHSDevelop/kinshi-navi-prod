@@ -1,3 +1,4 @@
+import { LoadingPrompt } from "@/components/prompt/loading-prompt";
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import {
   Table,
@@ -9,7 +10,8 @@ import {
 } from "@/components/ui/table";
 import { getDb } from "@/lib/db/drizzle";
 import { attractions, stores, tickets } from "@/lib/db/schema";
-import { aliasedTable, and, eq, max } from "drizzle-orm";
+import { aliasedTable, and, eq, max, asc } from "drizzle-orm";
+import { Suspense } from "react";
 
 interface AttractionWaitngStatusProps {
   eventId: string;
@@ -57,7 +59,7 @@ export default async function AttractionWaitngStatus({
       issuedTickets.numberOfPeople,
     )
     .orderBy(
-      
+      asc(stores.name)
     )
 
   const attractionMap = new Map<
@@ -120,6 +122,7 @@ export default async function AttractionWaitngStatus({
               );
               const waitMinutes = groupCount * (attraction.playTime || 1);
               return (
+                <Suspense fallback={<LoadingPrompt context="待機状況" />}>
                 <TableRow key={attraction.id}>
                   <TableCell>{attraction.storeName}</TableCell>
                   <TableCell>
@@ -130,6 +133,7 @@ export default async function AttractionWaitngStatus({
                   <TableCell>{waitingPeople}</TableCell>
                   <TableCell>{waitMinutes}</TableCell>
                 </TableRow>
+                </Suspense>
               );
             })}
           </TableBody>

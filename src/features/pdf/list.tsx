@@ -26,6 +26,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Suspense } from "react";
+import { LoadingPrompt } from "@/components/prompt/loading-prompt";
 
 function formatSize(size: number) {
   if (size < 1024 * 1024) {

@@ -14,6 +14,8 @@ import {
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 import { getDb } from "@/lib/db/drizzle";
 import { pdfDocuments } from "@/lib/db/schema";
+import { Suspense } from "react";
+import { LoadingPrompt } from "@/components/prompt/loading-prompt";
 
 function formatSize(size: number) {
   if (size < 1024 * 1024) {
@@ -51,6 +53,8 @@ export default async function PublicPdfDocumentList() {
 
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+
+                <Suspense fallback={<LoadingPrompt context="お知らせ" />} >
       {pdfDocumentRows.map((pdfDocument) => (
         <Card key={pdfDocument.id} className="border-main-200/80 shadow-sm">
           <CardHeader>
@@ -74,6 +78,7 @@ export default async function PublicPdfDocumentList() {
           </CardFooter>
         </Card>
       ))}
+      </Suspense>
     </div>
   );
 }
