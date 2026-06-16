@@ -29,7 +29,7 @@ export default function CreateStoreVoteForm({ stores, storeType }: Props) {
   const [chosenStoreName, setChosenStorename] = useState<string>("");
   const [chosenStoreImageUrl, setChosenStoreImageUrl] = useState<string>("");
 
-  const handleClick = (store: Store) => {
+  const handleClick = (store: CustomStore) => {
     setChosenStoreId(store.id);
     setChosenStorename(store.name);
     if (store.imageUrl) {
