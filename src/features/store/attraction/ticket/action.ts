@@ -176,7 +176,7 @@ export async function createTicket(
     const countRows = await db
       .select({ count: sql<number>`count(*)` })
       .from(tickets)
-      .where(eq(tickets.attractionId, attraction.id));
+      .where(and(eq(tickets.attractionId, attraction.id), inArray(tickets.status, ["ISSUED", "CALLED", "COMPLETED", "CANCELED"])));
 
     const ticketCount: number = Number(countRows[0]?.count ?? 0);
 
