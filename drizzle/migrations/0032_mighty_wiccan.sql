@@ -1,3 +1,4 @@
+PRAGMA defer_foreign_keys=on;
 PRAGMA foreign_keys=OFF;--> statement-breakpoint
 CREATE TABLE `__new_register_logs` (
 	`id` text PRIMARY KEY NOT NULL,
@@ -15,5 +16,6 @@ CREATE TABLE `__new_register_logs` (
 INSERT INTO `__new_register_logs`("id", "laneId", "foodId", "total_amount", "amount_paid", "meta", "createdAt", "updatedAt") SELECT "id", "laneId", "foodId", "total_amount", "amount_paid", "meta", "createdAt", "updatedAt" FROM `register_logs`;--> statement-breakpoint
 DROP TABLE `register_logs`;--> statement-breakpoint
 ALTER TABLE `__new_register_logs` RENAME TO `register_logs`;--> statement-breakpoint
+PRAGMA defer_foreign_keys=off;
 PRAGMA foreign_keys=ON;--> statement-breakpoint
 ALTER TABLE `items` ADD `soldStock` integer DEFAULT 0;
