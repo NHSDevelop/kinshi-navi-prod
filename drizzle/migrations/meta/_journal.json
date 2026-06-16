@@ -225,6 +225,13 @@
       "when": 1781148440508,
       "tag": "0031_violet_mongu",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "6",
+      "when": 1781594845024,
+      "tag": "0032_mighty_wiccan",
+      "breakpoints": true
     }
   ]
 }

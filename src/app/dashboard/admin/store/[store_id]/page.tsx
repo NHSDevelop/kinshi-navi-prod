@@ -265,8 +265,8 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
                     href={`/dashboard/admin/store/${store_id}/edit-config/food`}
                     className="flex items-center gap-2 h-full"
                   >
-                    設定を編集
                     <SquarePen />
+                    設定を編集
                   </Link>
                 </Button>
               </CardHeader>
@@ -275,7 +275,18 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
               </CardContent>
             </Card>
             <Separator />
+            <div className="flex justify-between items-center">
             <h3 className="text-lg">商品一覧</h3>
+            <Button asChild variant="card" className="max-w-32">
+                  <Link
+                    href={`/dashboard/admin/store/${store_id}/create-item`}
+                    className="flex items-center gap-2 h-full"
+                  >
+                    <CirclePlus />
+                    商品を追加
+                  </Link>
+                </Button>
+            </div>
             <ItemList foodId={foodRows[0].id} storeId={store_id} />
             <Separator />
             <h3 className="text-lg">商品設定の編集</h3>

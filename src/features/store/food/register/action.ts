@@ -198,7 +198,7 @@ export async function processRegisterAndStock(
     const batchQueries: any[] = [];
 
     const selectQuery = db
-      .select({ id: items.id, name: items.name, stock: items.stock })
+      .select({ id: items.id, name: items.name, stock: items.stock, soldStock: items.soldStock })
       .from(items)
       .where(inArray(items.id, itemIds));
     batchQueries.push(selectQuery);
@@ -207,7 +207,7 @@ export async function processRegisterAndStock(
       const qty = quantitiesToRecord[itemId];
       const updateQuery = db
         .update(items)
-        .set({ stock: sql`${items.stock} - ${qty}` })
+        .set({ stock: sql`${items.stock} - ${qty}`, soldStock: sql`${items.soldStock} + ${qty}` })
         .where(and(eq(items.id, itemId), gte(items.stock, qty)));
       batchQueries.push(updateQuery);
     }

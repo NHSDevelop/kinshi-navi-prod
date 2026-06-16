@@ -38,6 +38,7 @@ export default async function ItemStockStatus({
       itemId: items.id,
       itemName: items.name,
       stock: items.stock,
+      soldStock: items.soldStock,
     })
     .from(items)
     .innerJoin(foods, eq(foods.id, items.foodId))
@@ -62,6 +63,7 @@ export default async function ItemStockStatus({
         itemId: string;
         itemName: string;
         stock: number;
+        soldStock: number | null;
       }>;
     }
   >();
@@ -79,6 +81,7 @@ export default async function ItemStockStatus({
             itemId: row.itemId,
             itemName: row.itemName,
             stock: row.stock,
+            soldStock: row.soldStock,
           },
         ],
       });
@@ -89,6 +92,7 @@ export default async function ItemStockStatus({
       itemId: row.itemId,
       itemName: row.itemName,
       stock: row.stock,
+      soldStock: row.soldStock,
     });
   }
 
@@ -124,7 +128,7 @@ export default async function ItemStockStatus({
                     className="text-sm"
                     variant={item.stock === 0 ? "danger" : "default"}
                   >
-                    {item.stock}
+                    {item.stock}/{item.stock + (item.soldStock ?? 0)}
                   </Badge>
                 </TableCell>
               </TableRow>

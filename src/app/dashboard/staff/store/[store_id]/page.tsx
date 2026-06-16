@@ -167,22 +167,8 @@ export default async function StoreStaffHomePage(props: {
                 商品一覧
               </Link>
             </Button>
-
-            <Button asChild variant="card" className="w-full">
-              <Link
-                href={`/dashboard/staff/store/${store_id}/add-stock`}
-                className="flex items-center gap-2 h-full"
-              >
-                <CirclePlus />
-                商品の在庫を追加
-              </Link>
-            </Button>
           </div>
         )}
-        <ToActiveStore
-          storeId={storeRows[0].id}
-          isActive={storeRows[0].isActive}
-        />
         <Separator />
         <Card>
           <CardHeader className="flex items-center justify-between">
