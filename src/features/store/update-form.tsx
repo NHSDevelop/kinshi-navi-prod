@@ -25,9 +25,10 @@ import { useEffect } from "react";
 import { UpdateStoreConfigState } from "./action";
 import Image from "next/image";
 import { Switch } from "@/components/ui/switch";
+import { resizeImageToWebP } from "@/lib/resize-image";
 
 interface updateStoreConfigFormProps {
-  store: Store; //isActiveを取得するためStore型
+  store: Store;
 }
 
 const INITIAL_STATE: UpdateStoreConfigState = {
@@ -84,12 +85,18 @@ export default function UpdateStoreConfigForm({
     setIsUploadingImage(true);
 
     try {
-      const data = new FormData();
-      data.append("imageFileData", file);
+      const uploadFormData = new FormData();
+      uploadFormData.append("originalName", file.name);
+
+      const RESOLUTIONS = [640, 1024, 1600] as const;
+      for (const width of RESOLUTIONS) {
+        const webpBlob = await resizeImageToWebP(file, width);
+        uploadFormData.append(`image_${width}`, webpBlob, `${width}.webp`);
+      }
 
       const response = await fetch("/api/uploads/image", {
         method: "POST",
-        body: data,
+        body: uploadFormData,
       });
 
       const result = (await response.json()) as {

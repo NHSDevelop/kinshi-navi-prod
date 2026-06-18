@@ -18,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ErrorPrompt } from "@/components/prompt/error-prompt";
 import { MessagePrompt } from "@/components/prompt/message-prompt";
 import Image from "next/image";
+import { resizeImageToWebP } from "@/lib/resize-image";
 
 type Props = {
   item: Item;
@@ -51,12 +52,25 @@ export default function UpdateItemForm({ item }: Props) {
 
     try {
       const data = new FormData();
-      data.append("imageFileData", file);
-
-      const response = await fetch("/api/uploads/image", {
-        method: "POST",
-        body: data,
-      });
+      const originalFile = data.get("imageFileData");
+      
+            if (!(originalFile instanceof File)) {
+              throw new Error("ファイルが見つかりません。");
+            }
+      
+            const uploadFormData = new FormData();
+            uploadFormData.append("originalName", originalFile.name);
+      
+            const RESOLUTIONS = [640, 1024, 1600] as const;
+            for (const width of RESOLUTIONS) {
+              const webpBlob = await resizeImageToWebP(originalFile, width);
+              uploadFormData.append(`image_${width}`, webpBlob, `${width}.webp`);
+            }
+      
+            const response = await fetch("/api/uploads/image", {
+              method: "POST",
+              body: uploadFormData,
+            });
 
       const result = (await response.json()) as {
         url?: string;

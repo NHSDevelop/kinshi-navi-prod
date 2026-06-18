@@ -19,6 +19,7 @@ import { MessagePrompt } from "@/components/prompt/message-prompt";
 import { ErrorPrompt } from "@/components/prompt/error-prompt";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { resizeImageToWebP } from "@/lib/resize-image";
 
 interface CreateItemProps {
   foodId: string;
@@ -52,11 +53,24 @@ export function CreateItem({ foodId }: CreateItemProps) {
 
     try {
       const data = new FormData();
-      data.append("imageFileData", file);
+      const originalFile = data.get("imageFileData");
+
+      if (!(originalFile instanceof File)) {
+        throw new Error("ファイルが見つかりません。");
+      }
+
+      const uploadFormData = new FormData();
+      uploadFormData.append("originalName", originalFile.name);
+
+      const RESOLUTIONS = [640, 1024, 1600] as const;
+      for (const width of RESOLUTIONS) {
+        const webpBlob = await resizeImageToWebP(originalFile, width);
+        uploadFormData.append(`image_${width}`, webpBlob, `${width}.webp`);
+      }
 
       const response = await fetch("/api/uploads/image", {
         method: "POST",
-        body: data,
+        body: uploadFormData,
       });
 
       const result = (await response.json()) as {

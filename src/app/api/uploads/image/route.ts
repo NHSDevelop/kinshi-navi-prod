@@ -4,65 +4,30 @@ import {
   getAuthenticatedUser,
 } from "@/lib/auth-guard";
 import { NextRequest, NextResponse } from "next/server";
-import sharp from "sharp";
 
 const RESOLUTIONS = [640, 1024, 1600] as const;
-const WEBP_QUALITY = 75;
 
 export async function POST(req: NextRequest) {
   try {
     const user = await getAuthenticatedUser();
     if (!user || user.isAnonymous) {
       return NextResponse.json(
-        {
-          message: "ログインが必要です。",
-        },
+        { message: "ログインが必要です。" },
         { status: 401 },
       );
     }
 
     if (!(await canUseManagementActions(user.id))) {
       return NextResponse.json(
-        {
-          message: "権限がありません。",
-        },
+        { message: "権限がありません。" },
         { status: 403 },
       );
     }
 
     const formData = await req.formData();
-    const imageFileData = formData.get("imageFileData");
+    const originalName = (formData.get("originalName") as string) || "image";
 
-    if (!(imageFileData instanceof File)) {
-      return NextResponse.json(
-        {
-          message: "画像ファイルが見つかりません。",
-        },
-        { status: 400 },
-      );
-    }
-
-    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-    if (imageFileData.size > MAX_FILE_SIZE) {
-      return NextResponse.json(
-        { message: "ファイルサイズが大きすぎます。5MB以下にしてください。" },
-        { status: 400 },
-      );
-    }
-
-    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-    if (!allowedTypes.includes(imageFileData.type)) {
-      return NextResponse.json(
-        { message: "許可されていないファイル形式です。" },
-        { status: 400 },
-      );
-    }
-
-    const imageFileDataArrayBuffer = await imageFileData.arrayBuffer();
-    const imageFileDataBuffer = Buffer.from(imageFileDataArrayBuffer);
-
-    // ファイル名の拡張子を除去
-    const fileNameWithoutExt = imageFileData.name
+    const fileNameWithoutExt = originalName
       .replace(/\.[^/.]+$/, "")
       .replace(/[^a-zA-Z0-9-_]/g, "-")
       .toLowerCase();
@@ -78,18 +43,21 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // 複数解像度で webp に変換
     const uploadedUrls: Array<{ width: number; url: string }> = [];
-    const sharpInstance = sharp(imageFileDataBuffer).withMetadata();
 
+    // クライアントから送信された各解像度のファイルを取り出してそのままR2に保存
     for (const width of RESOLUTIONS) {
-      const webpBuffer = await sharpInstance
-        .resize(width, width, {
-          fit: "inside",
-          withoutEnlargement: true,
-        })
-        .webp({ quality: WEBP_QUALITY })
-        .toBuffer();
+      const fileData = formData.get(`image_${width}`);
+
+      if (!(fileData instanceof File)) {
+        return NextResponse.json(
+          { message: "画像データが不完全です。" },
+          { status: 400 },
+        );
+      }
+
+      const arrayBuffer = await fileData.arrayBuffer();
+      const buffer = new Uint8Array(arrayBuffer); // Cloudflare Workers環境ではBufferではなくUint8Arrayを使用
 
       const key = `images/${baseFileName}-${width}w.webp`;
 
@@ -98,7 +66,7 @@ export async function POST(req: NextRequest) {
           Bucket: process.env.R2_BUCKET_NAME,
           Key: key,
           ContentType: "image/webp",
-          Body: webpBuffer,
+          Body: buffer,
           CacheControl: "public, max-age=31536000, immutable",
         }),
       );
@@ -107,7 +75,6 @@ export async function POST(req: NextRequest) {
       uploadedUrls.push({ width, url });
     }
 
-    // メイン URL（1024px）とsrcset を構築
     const mainUrl = uploadedUrls.find((u) => u.width === 1024)?.url;
     const srcset = uploadedUrls.map((u) => `${u.url} ${u.width}w`).join(", ");
 
@@ -119,9 +86,7 @@ export async function POST(req: NextRequest) {
   } catch (error: unknown) {
     console.error("Error uploading file:", error);
     return NextResponse.json(
-      {
-        message: "アップロードに失敗しました。",
-      },
+      { message: "アップロードに失敗しました。" },
       { status: 500 },
     );
   }

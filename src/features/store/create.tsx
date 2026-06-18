@@ -32,6 +32,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { ja } from "date-fns/locale";
 import { Switch } from "@/components/ui/switch";
+import { resizeImageToWebP } from "@/lib/resize-image";
 
 interface CreateStoreProps {
   eventId: string;
@@ -72,11 +73,24 @@ export default function CreateStore({ eventId }: CreateStoreProps) {
 
     try {
       const data = new FormData();
-      data.append("imageFileData", file);
+      const originalFile = data.get("imageFileData");
+
+      if (!(originalFile instanceof File)) {
+        throw new Error("ファイルが見つかりません。");
+      }
+
+      const uploadFormData = new FormData();
+      uploadFormData.append("originalName", originalFile.name);
+
+      const RESOLUTIONS = [640, 1024, 1600] as const;
+      for (const width of RESOLUTIONS) {
+        const webpBlob = await resizeImageToWebP(originalFile, width);
+        uploadFormData.append(`image_${width}`, webpBlob, `${width}.webp`);
+      }
 
       const response = await fetch("/api/uploads/image", {
         method: "POST",
-        body: data,
+        body: uploadFormData,
       });
 
       const result = (await response.json()) as {
