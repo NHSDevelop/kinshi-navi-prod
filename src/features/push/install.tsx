@@ -21,6 +21,7 @@ import {
 import Image from "next/image";
 import { MessagePrompt } from "@/components/prompt/message-prompt";
 import { LoadingPrompt } from "@/components/prompt/loading-prompt";
+import { Download } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -95,8 +96,11 @@ export function InstallPrompt() {
     <div className="space-y-4">
       {deferredPrompt && (
         <div className="flex flex-col gap-4">
-          <Button onClick={handleInstall} disabled={isInstalling}>
-            {isInstalling ? "確認中..." : "インストールする"}
+          <Button onClick={handleInstall} disabled={isInstalling} asChild>
+            <div className="flex items-center gap-2 h-full max-w-xs">
+              <Download />
+              {isInstalling ? "確認中..." : "インストールする"}
+            </div>
           </Button>
         </div>
       )}
@@ -147,7 +151,7 @@ export function InstallPrompt() {
       )}
       {!isIOS && !deferredPrompt && (
         <p className="text-sm text-muted-foreground">
-          このブラウザではインストール可能になるとボタンが表示されます。
+          既にインストール済みか、お使いのブラウザではインストールに対応していません。
         </p>
       )}
     </div>

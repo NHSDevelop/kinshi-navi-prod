@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   Field,
+  FieldDescription,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
@@ -29,7 +30,7 @@ import {
 import { MessagePrompt } from "@/components/prompt/message-prompt";
 import { ErrorPrompt } from "@/components/prompt/error-prompt";
 import { FieldError } from "@/components/ui/field-error";
-import { AiOutlinePlus, AiOutlineMinus, AiOutlineUser } from "react-icons/ai";
+import { AiOutlinePlus, AiOutlineMinus } from "react-icons/ai";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface IssueTicketFormProps {
@@ -99,6 +100,7 @@ export function IssueTicketForm({
                 )}
                 <Field>
                   <FieldLabel>人数</FieldLabel>
+                  <FieldDescription>※最大10人まで</FieldDescription>
                   <div className="flex items-center gap-3">
                     <input
                       name="numberOfPeople"
@@ -121,7 +123,7 @@ export function IssueTicketForm({
                     <Button
                       type="button"
                       size="icon-sm"
-                      disabled={isPending}
+                      disabled={isPending || numberOfPeople >= 10}
                       onClick={() => setNumberOfPeople((prev) => prev + 1)}
                     >
                       <AiOutlinePlus />

@@ -30,7 +30,10 @@ export default async function StoreVoteResult({
   }
 
   const voteRows = await db
-    .select()
+    .select({
+      id: stores.id,
+      name: stores.name,
+    })
     .from(storeVotes)
     .innerJoin(stores, eq(stores.id, storeVotes.storeId))
     .where(
@@ -43,7 +46,7 @@ export default async function StoreVoteResult({
 
   const voteResults = Array.from(
     voteRows.reduce((acc, row) => {
-      const storeId = row.stores.id;
+      const storeId = row.id;
       const current = acc.get(storeId);
 
       if (current) {
@@ -51,7 +54,7 @@ export default async function StoreVoteResult({
       } else {
         acc.set(storeId, {
           storeId,
-          storeName: row.stores.name,
+          storeName: row.name,
           voteCount: 1,
         });
       }

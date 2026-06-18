@@ -106,7 +106,7 @@ export type UpdateStoreConfigState = {
 
 const CreateStoreSchema = z.object({
   slug: slugSchema,
-  name: z.string().min(1, "必須項目です"),
+  name: z.string().min(1, "必須項目です").max(60, "最大60文字です"),
   storeType: z.enum(storeTypeValues),
   imageUrl: z.string().url("画像URLの形式が正しくありません").nullable(),
   apparanceImageUrl: z
@@ -123,7 +123,7 @@ const CreateStoreSchema = z.object({
     .string()
     .regex(/^\d{2}:\d{2}$/, "HH:mm形式で入力してください")
     .nullable(),
-  description: z.string().nullable(),
+  description: z.string().max(60, "最大60文字です").nullable(),
   canVoted: z
     .enum(["true", "false"])
     .transform((val: "true" | "false") => val === "true"),
@@ -266,7 +266,7 @@ export async function createStore(
 }
 
 const storeConfigSchema = z.object({
-  name: z.string().min(1, "必須項目です"),
+  name: z.string().max(60, "最大60文字です").min(1, "必須項目です"),
   imageUrl: z.string().url("画像URLの形式が正しくありません").nullable(),
   apparanceImageUrl: z
     .string()
@@ -283,7 +283,7 @@ const storeConfigSchema = z.object({
     .string()
     .regex(/^\d{2}:\d{2}$/, "HH:mm形式で入力してください")
     .nullable(),
-  description: z.string().nullable(),
+  description: z.string().max(60, "最大60文字です").nullable(),
   canVoted: z
     .enum(["true", "false"])
     .transform((val: "true" | "false") => val === "true"),

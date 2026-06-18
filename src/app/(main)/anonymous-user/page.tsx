@@ -9,6 +9,7 @@ import { LoadingPrompt } from "@/components/prompt/loading-prompt";
 import { Separator } from "@/components/ui/separator";
 import { PageBunner } from "@/components/navigation/page-bunner";
 import { Metadata } from "next";
+import ReloadButton from "@/components/polling/reload-button";
 
 export const metadata: Metadata = {
   title: "ゲストユーザーページ ",
@@ -110,6 +111,7 @@ export default async function AnonymousUserPage() {
           </Suspense>
         </div>
       </section>
+      <ReloadButton />
     </div>
   );
 }

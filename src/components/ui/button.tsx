@@ -10,14 +10,14 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-biloba-flower-400 text-white font-bold shadow-xs hover:bg-biloba-flower-600 transition-colors",
+          "border border-biloba-flower-200 bg-white text-biloba-flower-950 font-medium hover:bg-biloba-flower-50 transition-colors",
         outline:
           "bg-main-100 text-main-800 font-medium hover:bg-main-200 transition-colors",
         card: "border border-biloba-flower-200 bg-white text-biloba-flower-950 font-medium hover:bg-biloba-flower-50 transition-colors",
         ghost: "hover:bg-biloba-flower-100 hover:text-biloba-flower-950",
         warn: "bg-amber-100 text-amber-950 hover:bg-amber-300/90",
         danger: "bg-rose-600  text-white hover:bg-red-300/90",
-        success: "bg-emerald-600 text-white hover:bg-green-300/90",
+        success: "bg-emerald-500  text-white hover:bg-emerald-300/90",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

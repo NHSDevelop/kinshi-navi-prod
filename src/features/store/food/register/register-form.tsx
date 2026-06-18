@@ -55,8 +55,7 @@ export default function FoodRegisterForm({ items, lanes, foodOptions }: Props) {
   const [selectedFoodId, setSelectedFoodId] = useState<string>("none");
 
   const useLaneFoodIds = useMemo(
-    () =>
-      foodOptions.filter((f) => f.isUseLane).map((f) => f.foodId),
+    () => foodOptions.filter((f) => f.isUseLane).map((f) => f.foodId),
     [foodOptions],
   );
 
@@ -82,11 +81,14 @@ export default function FoodRegisterForm({ items, lanes, foodOptions }: Props) {
 
   useEffect(() => {
     if (state?.success) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFinalAmountPaid(parseInt(amountPaid) || 0);
       setFinalTotalAmount(totalAmount);
-      
+
       setShowPaymentForm(false);
-      setQuantities(items.reduce((acc, item) => ({ ...acc, [item.id]: 0 }), {}));
+      setQuantities(
+        items.reduce((acc, item) => ({ ...acc, [item.id]: 0 }), {}),
+      );
     }
   }, [state?.success]);
 
@@ -98,14 +100,11 @@ export default function FoodRegisterForm({ items, lanes, foodOptions }: Props) {
 
   const handleFoodChange = (nextFoodId: string) => {
     setSelectedFoodId(nextFoodId);
-    
+
     setQuantities(
-      items.reduce(
-        (acc, item) => ({ ...acc, [item.id]: 0 }),
-        {} as Quantities,
-      ),
+      items.reduce((acc, item) => ({ ...acc, [item.id]: 0 }), {} as Quantities),
     );
-    
+
     setAmountPaid("");
     setShowPaymentForm(false);
   };
@@ -126,7 +125,7 @@ export default function FoodRegisterForm({ items, lanes, foodOptions }: Props) {
 
     const parsedNum = parseInt(value) || 0;
     const num = Math.min(item.stock, Math.max(0, parsedNum));
-    
+
     setQuantities((prev) => ({ ...prev, [itemId]: num }));
   };
 
@@ -196,7 +195,9 @@ export default function FoodRegisterForm({ items, lanes, foodOptions }: Props) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectItem value="none">模擬店未選択（全レーン対象店）</SelectItem>
+                    <SelectItem value="none">
+                      模擬店未選択（全レーン対象店）
+                    </SelectItem>
                     {foodOptions.map((f) => (
                       <SelectItem key={f.foodId} value={f.foodId}>
                         {f.storeName}
@@ -350,10 +351,7 @@ export default function FoodRegisterForm({ items, lanes, foodOptions }: Props) {
           )}
 
           {state?.success && (
-            <Button
-              onClick={handleReset}
-              className="w-full"
-            >
+            <Button onClick={handleReset} className="w-full">
               別の会計を開始
             </Button>
           )}

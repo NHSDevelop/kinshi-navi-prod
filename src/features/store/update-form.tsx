@@ -140,6 +140,7 @@ export default function UpdateStoreConfigForm({
                     required
                     disabled={isPending}
                     defaultValue={state.name || store.name}
+                    maxLength={60}
                   />
                   <FieldError message={state.zodErrors?.name?.[0]} />
                 </Field>
@@ -331,6 +332,7 @@ export default function UpdateStoreConfigForm({
                     name="description"
                     disabled={isPending}
                     defaultValue={state.description || store.description || ""}
+                    maxLength={60}
                   />
                   <FieldError message={state.zodErrors?.description?.[0]} />
                 </Field>

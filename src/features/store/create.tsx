@@ -122,6 +122,7 @@ export default function CreateStore({ eventId }: CreateStoreProps) {
                     name="slug"
                     defaultValue={state.slug}
                     disabled={isPending}
+                    required
                   />
                   <FieldError message={state.zodErrors?.slug?.[0]} />
                 </Field>
@@ -131,6 +132,8 @@ export default function CreateStore({ eventId }: CreateStoreProps) {
                     name="name"
                     defaultValue={state.name}
                     disabled={isPending}
+                    maxLength={60}
+                    required
                   />
                   <FieldError message={state.zodErrors?.name?.[0]} />
                 </Field>
@@ -346,7 +349,11 @@ export default function CreateStore({ eventId }: CreateStoreProps) {
                 </Field>
                 <Field>
                   <FieldLabel>詳細</FieldLabel>
-                  <Textarea name="description" disabled={isPending} />
+                  <Textarea
+                    name="description"
+                    disabled={isPending}
+                    maxLength={60}
+                  />
                   <FieldError message={state.zodErrors?.description?.[0]} />
                 </Field>
                 <Field>

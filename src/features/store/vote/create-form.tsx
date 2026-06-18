@@ -12,11 +12,11 @@ import { ErrorPrompt } from "@/components/prompt/error-prompt";
 import { Spinner } from "@/components/ui/spinner";
 
 type CustomStore = {
-  id:string,
-  name: string, 
-  imageUrl: string | null,
-  storeType: StoreType,
-}
+  id: string;
+  name: string;
+  imageUrl: string | null;
+  storeType: StoreType;
+};
 
 type Props = {
   stores: CustomStore[];
@@ -76,7 +76,7 @@ export default function CreateStoreVoteForm({ stores, storeType }: Props) {
             </p>
 
             <Button type="button" onClick={handleCancel}>
-              <div className="flex max-w-ws">
+              <div className="flex items-center gap-2 h-full max-w-xs">
                 <AiOutlineCloseCircle />
                 <p>選択を解除</p>
               </div>

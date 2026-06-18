@@ -58,9 +58,7 @@ export default async function AttractionWaitngStatus({
       issuedTickets.id,
       issuedTickets.numberOfPeople,
     )
-    .orderBy(
-      asc(stores.name)
-    )
+    .orderBy(asc(stores.name));
 
   const attractionMap = new Map<
     string,
@@ -122,17 +120,20 @@ export default async function AttractionWaitngStatus({
               );
               const waitMinutes = groupCount * (attraction.playTime || 1);
               return (
-                <Suspense fallback={<LoadingPrompt context="待機状況" />}>
-                <TableRow key={attraction.id}>
-                  <TableCell>{attraction.storeName}</TableCell>
-                  <TableCell>
-                    {attraction.maxCalledIndex !== null
-                      ? attraction.maxCalledIndex
-                      : "-"}
-                  </TableCell>
-                  <TableCell>{waitingPeople}</TableCell>
-                  <TableCell>{waitMinutes}</TableCell>
-                </TableRow>
+                <Suspense
+                  fallback={<LoadingPrompt context="待機状況" />}
+                  key={attraction.id}
+                >
+                  <TableRow>
+                    <TableCell>{attraction.storeName}</TableCell>
+                    <TableCell>
+                      {attraction.maxCalledIndex !== null
+                        ? attraction.maxCalledIndex
+                        : "-"}
+                    </TableCell>
+                    <TableCell>{waitingPeople}</TableCell>
+                    <TableCell>{waitMinutes}</TableCell>
+                  </TableRow>
                 </Suspense>
               );
             })}
