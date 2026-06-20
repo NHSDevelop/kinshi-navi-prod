@@ -10,7 +10,6 @@ import {
 import QRCode from "@/components/ui/qrcode";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { useRouter } from "next/navigation";
 import { TicketStatus } from "@/lib/db/schema";
 import { TICKET_STATUS_MAP } from "@/lib/type";
 import CancelTicket from "./cancel";
@@ -34,15 +33,6 @@ interface TicketCardProps {
 }
 
 export function TicketCard({ ticket }: TicketCardProps) {
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [isCanceled, setIsCanceled] = useState(false);
-
-
-  if (isCanceled) {
-    return null;
-  }
-
   const statusLabel =
     TICKET_STATUS_MAP[ticket.status as keyof typeof TICKET_STATUS_MAP]?.label ??
     ticket.status;
