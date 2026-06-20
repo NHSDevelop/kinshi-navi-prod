@@ -8,8 +8,9 @@ import {
   pushSubscriptions,
   stores,
   tickets,
+  type TicketStatus,
 } from "@/lib/db/schema";
-import { and, asc, eq, gte, inArray, lte, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import { sendPushNotification } from "@/features/push/action";
 import { getDb } from "@/lib/db/drizzle";
 import { revalidatePath } from "next/cache";
@@ -843,6 +844,78 @@ export async function completePaperTicket(
       storeId,
       error: error instanceof Error ? error.message : String(error),
     });
+    return {
+      success: false,
+      message: null,
+      error: "サーバーエラーが発生しました。",
+    };
+  }
+}
+
+export async function fetchTicketsByStatus(
+  storeId: string,
+  status: TicketStatus | null,
+) {
+  const user = await getAuthenticatedUser();
+  if (!user || !(await canStaffOrManageStore(user.id, storeId))) {
+    return {
+      success: false,
+      message: "権限がありません。",
+      error: null,
+    };
+  }
+
+  const db = await getDb();
+  try {
+    const attractionRows = await db
+      .select({ id: attractions.id })
+      .from(attractions)
+      .where(eq(attractions.storeId, storeId))
+      .limit(1);
+    const attraction = attractionRows[0];
+    if (!attraction) {
+      return;
+    }
+
+    const ticketList = status
+      ? await db
+          .select()
+          .from(tickets)
+          .where(
+            and(
+              eq(tickets.attractionId, attraction.id),
+              eq(tickets.status, status),
+              inArray(tickets.status, [
+                "ISSUED",
+                "CALLED",
+                "COMPLETED",
+                "CANCELED",
+              ]),
+            ),
+          )
+          .orderBy(desc(tickets.index))
+      : await db
+          .select()
+          .from(tickets)
+          .where(
+            and(
+              eq(tickets.attractionId, attraction.id),
+              inArray(tickets.status, [
+                "ISSUED",
+                "CALLED",
+                "COMPLETED",
+                "CANCELED",
+              ]),
+            ),
+          )
+          .orderBy(desc(tickets.index));
+
+    return {
+      success: true,
+      tickets: ticketList,
+    };
+  } catch (error) {
+    console.log(error);
     return {
       success: false,
       message: null,
