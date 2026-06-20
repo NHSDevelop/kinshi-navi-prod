@@ -8,14 +8,33 @@ import {
   pushSubscriptions,
   stores,
   tickets,
-  type TicketStatus,
 } from "@/lib/db/schema";
-import { and, asc, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
+import { and, asc, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import { sendPushNotification } from "@/features/push/action";
 import { getDb } from "@/lib/db/drizzle";
 import { revalidatePath } from "next/cache";
 import { getSessionFromRequestHeaders } from "@/lib/auth-session";
 import { getCloudflareBindings } from "@/lib/runtime-env";
+import "server-only";
+
+type TicketEvent =
+  | "TICKET_ISSUED"
+  | "TICKET_CALLED"
+  | "TICKET_ACCEPTED"
+  | "TICKET_CANCELED"
+  | "TICKET_DISABLED"
+  | "TICKET_ERROR";
+
+function logQueueEvent(event: TicketEvent, payload: Record<string, unknown>) {
+  console.log(
+    JSON.stringify({
+      type: "APP_QUEUE_LOG",
+      timestamp: new Date().toISOString(),
+      event,
+      ...payload,
+    }),
+  );
+}
 
 async function notifyDurableObject(ticketId: string) {
   const env = getCloudflareBindings();
@@ -162,7 +181,7 @@ export async function createTicket(
       .where(
         and(
           eq(tickets.userId, user.id),
-          inArray(tickets.status,["ISSUED","CALLED"]),
+          inArray(tickets.status, ["ISSUED", "CALLED"]),
           eq(tickets.isPaper, false),
         ),
       );
@@ -176,7 +195,17 @@ export async function createTicket(
     const countRows = await db
       .select({ count: sql<number>`count(*)` })
       .from(tickets)
-      .where(and(eq(tickets.attractionId, attraction.id), inArray(tickets.status, ["ISSUED", "CALLED", "COMPLETED", "CANCELED"])));
+      .where(
+        and(
+          eq(tickets.attractionId, attraction.id),
+          inArray(tickets.status, [
+            "ISSUED",
+            "CALLED",
+            "COMPLETED",
+            "CANCELED",
+          ]),
+        ),
+      );
 
     const ticketCount: number = Number(countRows[0]?.count ?? 0);
 
@@ -191,6 +220,15 @@ export async function createTicket(
       isPaper: isPaper,
     });
 
+    logQueueEvent("TICKET_ISSUED", {
+      userId: user.id,
+      storeId,
+      attractionId: attraction.id,
+      ticketIndex: nextIndex,
+      numberOfPeople,
+      isPaper,
+    });
+
     invalidateTicketPages(storeId);
 
     return {
@@ -200,7 +238,12 @@ export async function createTicket(
       issuedNumber: nextIndex,
     };
   } catch (error) {
-    console.log(error);
+    logQueueEvent("TICKET_ERROR", {
+      action: "CREATE",
+      userId: user.id,
+      storeId,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return {
       zodErrors: null,
       message: "サーバーエラーが発生しました",
@@ -213,13 +256,13 @@ export async function disableAttractionTickets(
   prevState: unknown,
   formData: FormData,
 ) {
+  const user = await getAuthenticatedUser();
+  const storeId = formData.get("storeId") as string;
   try {
-    const user = await getAuthenticatedUser();
     if (!user) {
       return { success: false as const, message: "ログインが必要です" };
     }
 
-    const storeId = formData.get("storeId") as string;
     if (!storeId || !(await canStaffOrManageStore(user.id, storeId))) {
       return { success: false as const, message: "権限がありません" };
     }
@@ -283,7 +326,7 @@ export async function disableAttractionTickets(
     }
 
     const targetTickets = await db
-      .select({ id: tickets.id })
+      .select({ id: tickets.id, index: tickets.index, userId: tickets.userId })
       .from(tickets)
       .where(and(...targetConditions));
 
@@ -302,6 +345,13 @@ export async function disableAttractionTickets(
       .where(and(...targetConditions));
 
     for (const ticket of targetTickets) {
+      logQueueEvent("TICKET_DISABLED", {
+        ticketId: ticket.id,
+        ticketIndex: ticket.index,
+        userId: ticket.userId,
+        storeId,
+        attractionId: attraction.id,
+      });
       await notifyDurableObject(ticket.id);
     }
 
@@ -313,7 +363,12 @@ export async function disableAttractionTickets(
       count: targetTickets.length,
     };
   } catch (error) {
-    console.log(error);
+    logQueueEvent("TICKET_ERROR", {
+      action: "DISABLE",
+      userId: user?.id,
+      storeId,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return {
       success: false as const,
       message: "サーバーエラーが発生しました",
@@ -325,8 +380,9 @@ const CallFirstTicketSchema = z.object({
   count: z.coerce
     .number()
     .int("整数である必要があります")
-    .positive("正の数である必要があります"),
+    .min(1, "1以上である必要があります"),
 });
+
 export async function callFirstTicket(
   attractionId: string,
   prevState: unknown,
@@ -343,7 +399,7 @@ export async function callFirstTicket(
   }
 
   const validationResult = CallFirstTicketSchema.safeParse({
-    count: formData.get("count"),
+    count: formData.get("count") as string,
   });
 
   if (!validationResult.success) {
@@ -383,6 +439,7 @@ export async function callFirstTicket(
         userId: tickets.userId,
         index: tickets.index,
         isPaper: tickets.isPaper,
+        numberOfPeople: tickets.numberOfPeople,
       })
       .from(tickets)
       .innerJoin(attractions, eq(tickets.attractionId, attractions.id))
@@ -413,8 +470,17 @@ export async function callFirstTicket(
 
     invalidateTicketPages(access.storeId);
 
-    for (const id of ids) {
-      await notifyDurableObject(id);
+    for (const ticket of issuedTickets) {
+      logQueueEvent("TICKET_CALLED", {
+        ticketId: ticket.id,
+        ticketIndex: ticket.index,
+        userId: ticket.userId,
+        storeId: access.storeId,
+        attractionId,
+        numberOfPeople: ticket.numberOfPeople,
+        isPaper: ticket.isPaper,
+      });
+      await notifyDurableObject(ticket.id);
     }
 
     const digitalTickets = issuedTickets.filter((ticket) => !ticket.isPaper);
@@ -460,7 +526,12 @@ export async function callFirstTicket(
       success: true,
     };
   } catch (error) {
-    console.log(error);
+    logQueueEvent("TICKET_ERROR", {
+      action: "CALL",
+      storeId: access.storeId,
+      attractionId,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return {
       zodErrors: null,
       message: "サーバーエラーが発生しました",
@@ -470,6 +541,7 @@ export async function callFirstTicket(
 }
 
 export async function completeTicket(ticketId: string) {
+  let storeId: string | undefined;
   try {
     const user = await getAuthenticatedUser();
     if (!user) {
@@ -494,7 +566,7 @@ export async function completeTicket(ticketId: string) {
       .innerJoin(stores, eq(attractions.storeId, stores.id))
       .where(eq(attractions.id, fetchedTicket.attractionId))
       .limit(1);
-    const storeId = storeRows[0]?.storeId;
+    storeId = storeRows[0]?.storeId;
     if (!storeId || !(await canStaffOrManageStore(user.id, storeId))) {
       return { success: false as const, message: "権限がありません" };
     }
@@ -506,7 +578,13 @@ export async function completeTicket(ticketId: string) {
       };
     }
     const nextIssuedRows = await db
-      .select({ id: tickets.id })
+      .select({
+        id: tickets.id,
+        index: tickets.index,
+        userId: tickets.userId,
+        isPaper: tickets.isPaper,
+        numberOfPeople: tickets.numberOfPeople,
+      })
       .from(tickets)
       .where(
         and(
@@ -522,6 +600,16 @@ export async function completeTicket(ticketId: string) {
       .set({ status: "COMPLETED" })
       .where(eq(tickets.id, ticketId));
 
+    logQueueEvent("TICKET_ACCEPTED", {
+      ticketId,
+      ticketIndex: fetchedTicket.index,
+      userId: fetchedTicket.userId,
+      storeId,
+      attractionId: fetchedTicket.attractionId,
+      numberOfPeople: fetchedTicket.numberOfPeople,
+      isPaper: fetchedTicket.isPaper,
+    });
+
     await notifyDurableObject(ticketId);
 
     if (nextIssuedRows[0]) {
@@ -529,6 +617,16 @@ export async function completeTicket(ticketId: string) {
         .update(tickets)
         .set({ status: "CALLED" })
         .where(eq(tickets.id, nextIssuedRows[0].id));
+
+      logQueueEvent("TICKET_CALLED", {
+        ticketId: nextIssuedRows[0].id,
+        ticketIndex: nextIssuedRows[0].index,
+        userId: nextIssuedRows[0].userId,
+        storeId,
+        attractionId: fetchedTicket.attractionId,
+        numberOfPeople: nextIssuedRows[0].numberOfPeople,
+        isPaper: nextIssuedRows[0].isPaper,
+      });
 
       await notifyDurableObject(nextIssuedRows[0].id);
     }
@@ -540,7 +638,12 @@ export async function completeTicket(ticketId: string) {
       message: "操作が完了しました。",
     };
   } catch (error) {
-    console.log(error);
+    logQueueEvent("TICKET_ERROR", {
+      action: "COMPLETE",
+      ticketId,
+      storeId,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return {
       success: false,
       message: null,
@@ -575,7 +678,14 @@ export async function cancelTicket(prevState: unknown, formData: FormData) {
 
     const db = await getDb();
     const fetchedRows = await db
-      .select({ userId: tickets.userId, storeId: stores.id })
+      .select({
+        userId: tickets.userId,
+        storeId: stores.id,
+        index: tickets.index,
+        attractionId: tickets.attractionId,
+        numberOfPeople: tickets.numberOfPeople,
+        isPaper: tickets.isPaper,
+      })
       .from(tickets)
       .where(eq(tickets.id, ticketId))
       .innerJoin(attractions, eq(attractions.id, tickets.attractionId))
@@ -599,6 +709,16 @@ export async function cancelTicket(prevState: unknown, formData: FormData) {
       .set({ status: "CANCELED" })
       .where(eq(tickets.id, ticketId));
 
+    logQueueEvent("TICKET_CANCELED", {
+      ticketId,
+      ticketIndex: fetchedTicket.index,
+      userId: fetchedTicket.userId,
+      storeId: fetchedTicket.storeId,
+      attractionId: fetchedTicket.attractionId,
+      numberOfPeople: fetchedTicket.numberOfPeople,
+      isPaper: fetchedTicket.isPaper,
+    });
+
     invalidateTicketPages(fetchedTicket.storeId);
 
     return {
@@ -606,79 +726,11 @@ export async function cancelTicket(prevState: unknown, formData: FormData) {
       message: "操作が完了しました。",
     };
   } catch (error) {
-    console.log(error);
-    return {
-      success: false,
-      message: null,
-      error: "サーバーエラーが発生しました。",
-    };
-  }
-}
-
-export async function fetchTicketsByStatus(
-  storeId: string,
-  status: TicketStatus | null,
-) {
-  const user = await getAuthenticatedUser();
-  if (!user || !(await canStaffOrManageStore(user.id, storeId))) {
-    return {
-      success: false,
-      message: "権限がありません。",
-      error: null,
-    };
-  }
-
-  const db = await getDb();
-  try {
-    const attractionRows = await db
-      .select({ id: attractions.id })
-      .from(attractions)
-      .where(eq(attractions.storeId, storeId))
-      .limit(1);
-    const attraction = attractionRows[0];
-    if (!attraction) {
-      return;
-    }
-
-    const ticketList = status
-      ? await db
-          .select()
-          .from(tickets)
-          .where(
-            and(
-              eq(tickets.attractionId, attraction.id),
-              eq(tickets.status, status),
-              inArray(tickets.status, [
-                "ISSUED",
-                "CALLED",
-                "COMPLETED",
-                "CANCELED",
-              ]),
-            ),
-          )
-          .orderBy(desc(tickets.index))
-      : await db
-          .select()
-          .from(tickets)
-          .where(
-            and(
-              eq(tickets.attractionId, attraction.id),
-              inArray(tickets.status, [
-                "ISSUED",
-                "CALLED",
-                "COMPLETED",
-                "CANCELED",
-              ]),
-            ),
-          )
-          .orderBy(desc(tickets.index));
-
-    return {
-      success: true,
-      tickets: ticketList,
-    };
-  } catch (error) {
-    console.log(error);
+    logQueueEvent("TICKET_ERROR", {
+      action: "CANCEL",
+      ticketId,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return {
       success: false,
       message: null,
@@ -692,6 +744,7 @@ export async function completePaperTicket(
   formData: FormData,
 ) {
   const ticketId = formData.get("ticketId") as string;
+  let storeId: string | undefined;
   try {
     const user = await getAuthenticatedUser();
     if (!user) {
@@ -716,7 +769,7 @@ export async function completePaperTicket(
       .innerJoin(stores, eq(attractions.storeId, stores.id))
       .where(eq(attractions.id, fetchedTicket.attractionId))
       .limit(1);
-    const storeId = storeRows[0]?.storeId;
+    storeId = storeRows[0]?.storeId;
     if (!storeId || !(await canStaffOrManageStore(user.id, storeId))) {
       return { success: false as const, message: "権限がありません" };
     }
@@ -728,7 +781,13 @@ export async function completePaperTicket(
       };
     }
     const nextIssuedRows = await db
-      .select({ id: tickets.id })
+      .select({
+        id: tickets.id,
+        index: tickets.index,
+        userId: tickets.userId,
+        isPaper: tickets.isPaper,
+        numberOfPeople: tickets.numberOfPeople,
+      })
       .from(tickets)
       .where(
         and(
@@ -744,11 +803,31 @@ export async function completePaperTicket(
       .set({ status: "COMPLETED" })
       .where(eq(tickets.id, ticketId));
 
+    logQueueEvent("TICKET_ACCEPTED", {
+      ticketId,
+      ticketIndex: fetchedTicket.index,
+      userId: fetchedTicket.userId,
+      storeId,
+      attractionId: fetchedTicket.attractionId,
+      numberOfPeople: fetchedTicket.numberOfPeople,
+      isPaper: fetchedTicket.isPaper,
+    });
+
     if (nextIssuedRows[0]) {
       await db
         .update(tickets)
         .set({ status: "CALLED" })
         .where(eq(tickets.id, nextIssuedRows[0].id));
+
+      logQueueEvent("TICKET_CALLED", {
+        ticketId: nextIssuedRows[0].id,
+        ticketIndex: nextIssuedRows[0].index,
+        userId: nextIssuedRows[0].userId,
+        storeId,
+        attractionId: fetchedTicket.attractionId,
+        numberOfPeople: nextIssuedRows[0].numberOfPeople,
+        isPaper: nextIssuedRows[0].isPaper,
+      });
     }
 
     invalidateTicketPages(storeId);
@@ -758,7 +837,12 @@ export async function completePaperTicket(
       message: "操作が完了しました。",
     };
   } catch (error) {
-    console.log(error);
+    logQueueEvent("TICKET_ERROR", {
+      action: "COMPLETE_PAPER",
+      ticketId,
+      storeId,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return {
       success: false,
       message: null,
