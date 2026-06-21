@@ -159,6 +159,7 @@ export const attractions = sqliteTable("attractions", {
     .$defaultFn(() => createId()),
   playTime: integer("playTime").default(5),
   peopleCapacity: integer("peopleCapacity").notNull().default(5),
+  maxGroups: integer("max_groups").default(1),
   storeId: text("storeId")
     .notNull()
     .unique()

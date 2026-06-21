@@ -24,10 +24,12 @@ export default async function AttractionInfo({
       <div className="flex flex-col items-start gap-4">
         <p>一組当たりのプレイ時間：</p>
         <p>一組当たりの最大人数：</p>
+        <p>会場内の最大組数：</p>
       </div>
       <div className="flex flex-col items-start gap-4">
         <p>{attraction.playTime}分</p>
         <p>{attraction.peopleCapacity}人</p>
+        <p>{attraction.maxGroups}組</p>
       </div>
     </div>
   );

@@ -59,16 +59,22 @@ const updateAttractionConfigSchema = z.object({
     .number()
     .int("整数である必要があります")
     .min(1, "1以上である必要があります"),
+  maxGroups: z.coerce
+    .number()
+    .int("整数である必要があります")
+    .min(1, "1以上である必要があります"),
 });
 
 export type ZodErrors = {
   playTime?: string[];
   peopleCapacity?: string[];
+  maxGroups?: string[];
 } | null;
 
 export type AttractionConfigState = {
   playTime?: string;
   peopleCapacity?: string;
+  maxGroups?: string;
   zodErrors: ZodErrors;
   message?: string | null;
   success?: boolean;
@@ -83,6 +89,7 @@ export async function updateAttractionConfig(
     return {
       playTime: (formData.get("playTime") as string) || "",
       peopleCapacity: (formData.get("peopleCapacity") as string) || "",
+      maxGroups: (formData.get("maxGroups") as string) || "",
       zodErrors: null,
       message: "ログインが必要です。",
       success: false,
@@ -92,19 +99,21 @@ export async function updateAttractionConfig(
   const validationResult = updateAttractionConfigSchema.safeParse({
     playTime: formData.get("playTime"),
     peopleCapacity: formData.get("peopleCapacity"),
+    maxGroups: formData.get("maxGroups"),
   });
 
   if (!validationResult.success) {
     return {
       playTime: (formData.get("playTime") as string) || "",
       peopleCapacity: (formData.get("peopleCapacity") as string) || "",
+      maxGroups: (formData.get("maxGroups") as string) || "",
       zodErrors: validationResult.error.flatten().fieldErrors,
       message: "入力形式が正しくありません",
       success: false,
     };
   }
 
-  const { playTime, peopleCapacity } = validationResult.data;
+  const { playTime, peopleCapacity, maxGroups } = validationResult.data;
   const attractionId = formData.get("attractionId") as string;
 
   try {
@@ -137,6 +146,7 @@ export async function updateAttractionConfig(
       .set({
         playTime: playTime,
         peopleCapacity: peopleCapacity,
+        maxGroups: maxGroups,
       })
       .where(eq(attractions.id, attractionId));
 

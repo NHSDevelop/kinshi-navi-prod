@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/table";
 import { getDb } from "@/lib/db/drizzle";
 import { attractions, stores, tickets } from "@/lib/db/schema";
-import { aliasedTable, and, eq, max, asc } from "drizzle-orm";
+import { aliasedTable, and, eq, max, asc, count } from "drizzle-orm";
 import { Suspense } from "react";
 
 interface AttractionWaitngStatusProps {
@@ -28,9 +28,10 @@ export default async function AttractionWaitngStatus({
     .select({
       attractionId: attractions.id,
       peopleCapacity: attractions.peopleCapacity,
+      maxGroups: attractions.maxGroups,
       playTime: attractions.playTime,
       storeName: stores.name,
-      waitingPeople: issuedTickets.numberOfPeople,
+      waitingGroups: count(issuedTickets.id),
       maxCalledIndex: max(calledTickets.index),
     })
     .from(attractions)
@@ -53,52 +54,11 @@ export default async function AttractionWaitngStatus({
     .groupBy(
       attractions.id,
       attractions.peopleCapacity,
+      attractions.maxGroups,
       attractions.playTime,
       stores.name,
-      issuedTickets.id,
-      issuedTickets.numberOfPeople,
     )
     .orderBy(asc(stores.name));
-
-  const attractionMap = new Map<
-    string,
-    {
-      storeName: string;
-      peopleCapacity: number | null;
-      playTime: number | null;
-      waitingPeople: number;
-      maxCalledIndex: number | null;
-    }
-  >();
-
-  for (const row of rows) {
-    const current = attractionMap.get(row.attractionId);
-    const waiting = row.waitingPeople ?? 0;
-    const calledIndex = row.maxCalledIndex;
-
-    if (!current) {
-      attractionMap.set(row.attractionId, {
-        storeName: row.storeName,
-        peopleCapacity: row.peopleCapacity,
-        playTime: row.playTime,
-        waitingPeople: waiting,
-        maxCalledIndex: calledIndex,
-      });
-      continue;
-    }
-
-    current.waitingPeople += waiting;
-    if (
-      calledIndex !== null &&
-      (current.maxCalledIndex === null || calledIndex > current.maxCalledIndex)
-    ) {
-      current.maxCalledIndex = calledIndex;
-    }
-  }
-
-  const waitingStatusList = Array.from(attractionMap.entries()).map(
-    ([id, value]) => ({ id, ...value }),
-  );
 
   return (
     <>
@@ -108,21 +68,21 @@ export default async function AttractionWaitngStatus({
             <TableRow>
               <TableHead>企画名</TableHead>
               <TableHead>最新の呼び出し番号</TableHead>
-              <TableHead>待ち人数（人）</TableHead>
+              <TableHead>待ち組数（組）</TableHead>
               <TableHead>待ち時間（分）</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {waitingStatusList.map((attraction) => {
-              const waitingPeople = attraction.waitingPeople;
-              const groupCount = Math.ceil(
-                waitingPeople / (attraction.peopleCapacity || 1),
-              );
-              const waitMinutes = groupCount * (attraction.playTime || 1);
+            {rows.map((attraction) => {
+              const waitingGroups = attraction.waitingGroups;
+              const maxGroups = attraction.maxGroups || 1;
+              const cycleCount = Math.ceil(waitingGroups / maxGroups);
+              const waitMinutes = cycleCount * (attraction.playTime || 1);
+
               return (
                 <Suspense
                   fallback={<LoadingPrompt context="待機状況" />}
-                  key={attraction.id}
+                  key={attraction.attractionId}
                 >
                   <TableRow>
                     <TableCell>{attraction.storeName}</TableCell>
@@ -131,7 +91,7 @@ export default async function AttractionWaitngStatus({
                         ? attraction.maxCalledIndex
                         : "-"}
                     </TableCell>
-                    <TableCell>{waitingPeople}</TableCell>
+                    <TableCell>{waitingGroups}</TableCell>
                     <TableCell>{waitMinutes}</TableCell>
                   </TableRow>
                 </Suspense>

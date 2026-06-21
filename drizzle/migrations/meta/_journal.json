@@ -232,6 +232,13 @@
       "when": 1781594845024,
       "tag": "0032_mighty_wiccan",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "6",
+      "when": 1782041306974,
+      "tag": "0033_magenta_angel",
+      "breakpoints": true
     }
   ]
 }

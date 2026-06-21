@@ -41,22 +41,18 @@ export default async function ShowAttractionStatusPage(props: {
     .from(tickets)
     .where(eq(tickets.attractionId, attraction.id));
 
-  // 待ち人数（ISSUED ステータスの合計人数）
-  const waitingPeople = ticketRows
-    .filter((ticket) => ticket.status === "ISSUED")
-    .reduce((sum, ticket) => sum + ticket.numberOfPeople, 0);
+  const waitingGroups = ticketRows.filter(
+    (ticket) => ticket.status === "ISSUED",
+  ).length;
 
-  // 最新の呼び出し番号（CALLED ステータスの最新）
   const calledTickets = ticketRows
     .filter((ticket) => ticket.status === "CALLED")
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   const latestCalledNumber = calledTickets[0]?.index ?? null;
 
-  // 待ち時間（分）
-  const groupCount = Math.ceil(
-    waitingPeople / (attraction.peopleCapacity || 1),
-  );
-  const waitingMinutes = groupCount * (attraction.playTime || 0);
+  const maxGroups = attraction.maxGroups || 1;
+  const cycleCount = Math.ceil(waitingGroups / maxGroups);
+  const waitingMinutes = cycleCount * (attraction.playTime || 0);
 
   return (
     <DashboardPageShell
@@ -69,12 +65,12 @@ export default async function ShowAttractionStatusPage(props: {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                待ち人数
+                待ち組数
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{waitingPeople}</div>
-              <p className="text-xs text-muted-foreground mt-1">人</p>
+              <div className="text-3xl font-bold">{waitingGroups}</div>
+              <p className="text-xs text-muted-foreground mt-1">組</p>
             </CardContent>
           </Card>
 

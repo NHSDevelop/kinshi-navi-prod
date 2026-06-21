@@ -24,6 +24,7 @@ interface UpdateAttractionConfigProps {
 const INITIAL_STATE: AttractionConfigState = {
   playTime: "",
   peopleCapacity: "",
+  maxGroups: "",
   zodErrors: null,
   message: null,
   success: false,
@@ -70,6 +71,17 @@ export default function UpdateAttractionConfigForm({
                     }
                   />
                   <FieldError message={state.zodErrors?.peopleCapacity?.[0]} />
+                </Field>
+                <Field>
+                  <FieldLabel>会場内の最大組数</FieldLabel>
+                  <Input
+                    name="maxGroups"
+                    type="number"
+                    required
+                    disabled={isPending}
+                    defaultValue={state.maxGroups ?? attraction.maxGroups ?? 1}
+                  />
+                  <FieldError message={state.zodErrors?.maxGroups?.[0]} />
                 </Field>
               </FieldGroup>
             </FieldSet>

@@ -1,0 +1,1 @@
+ALTER TABLE `attractions` ADD `max_groups` integer DEFAULT 1;
