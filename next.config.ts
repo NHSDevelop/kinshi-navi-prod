@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [new URL("https://img.kinshi-navi.com/**")],
   },
+  serverActions: {
+    bodySizeLimit: "25mb",
+  },
 };
 
 const withMDX = createMDX({
