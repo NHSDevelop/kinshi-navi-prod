@@ -1,6 +1,6 @@
 "use client";
 
-import { Item, RegisterLane } from "@/lib/db/schema";
+import { RegisterLane } from "@/lib/db/schema";
 import { useState, useActionState, useMemo, useEffect } from "react";
 import { processRegisterAndStock, RegisterAndStockState } from "./action";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,10 +26,22 @@ import { ErrorPrompt } from "@/components/prompt/error-prompt";
 import { FieldError } from "@/components/ui/field-error";
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 
+type DisplayItem = {
+  id: string;
+  foodId: string;
+  name: string;
+  price: number;
+  stock: number;
+  isActive: boolean | null;
+  storeName: string;
+};
+
 type Props = {
-  items: Item[];
+  items: DisplayItem[];
   lanes: RegisterLane[];
   foodOptions: FoodOption[];
+  defaultFoodId: string;
+  isStoreLaneUser: boolean;
 };
 
 type FoodOption = {
@@ -50,9 +62,17 @@ const INITIAL_STATE: RegisterAndStockState = {
   success: false,
 };
 
-export default function FoodRegisterForm({ items, lanes, foodOptions }: Props) {
+export default function FoodRegisterForm({
+  items,
+  lanes,
+  foodOptions,
+  defaultFoodId,
+  isStoreLaneUser,
+}: Props) {
   const [selectedLaneId, setSelectedLaneId] = useState<string>("none");
-  const [selectedFoodId, setSelectedFoodId] = useState<string>("none");
+  const [selectedFoodId, setSelectedFoodId] = useState<string>(
+    isStoreLaneUser ? "none" : defaultFoodId,
+  );
 
   const useLaneFoodIds = useMemo(
     () => foodOptions.filter((f) => f.isUseLane).map((f) => f.foodId),
@@ -81,7 +101,6 @@ export default function FoodRegisterForm({ items, lanes, foodOptions }: Props) {
 
   useEffect(() => {
     if (state?.success) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFinalAmountPaid(parseInt(amountPaid) || 0);
       setFinalTotalAmount(totalAmount);
 
@@ -216,7 +235,12 @@ export default function FoodRegisterForm({ items, lanes, foodOptions }: Props) {
                     key={item.id}
                     className="flex items-center justify-between gap-4 p-4 border rounded-lg"
                   >
-                    <div>{item.name}</div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-500 block">
+                        {item.storeName}
+                      </span>
+                      <span className="font-semibold">{item.name}</span>
+                    </div>
                     <div className="text-sm text-gray-600">
                       {item.price}円 / 在庫: {item.stock}
                     </div>

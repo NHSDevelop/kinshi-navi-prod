@@ -215,14 +215,13 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
           <CardHeader className="flex items-center justify-between">
             <CardTitle>店舗の情報</CardTitle>
             <Button asChild variant="card" className="max-w-32">
-                
-                <Link
-                  href={`/dashboard/admin/store/${store_id}/edit-config/store`}
-                  className="flex items-center gap-2 h-full"
-                >
-                  <SquarePen />
-                  設定を編集
-                </Link>
+              <Link
+                href={`/dashboard/admin/store/${store_id}/edit-config/store`}
+                className="flex items-center gap-2 h-full"
+              >
+                <SquarePen />
+                設定を編集
+              </Link>
             </Button>
           </CardHeader>
           <CardContent>
@@ -278,16 +277,16 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
             </Card>
             <Separator />
             <div className="flex justify-between items-center">
-            <h3 className="text-lg">商品一覧</h3>
-            <Button asChild variant="card" className="max-w-32">
-                  <Link
-                    href={`/dashboard/admin/store/${store_id}/create-item`}
-                    className="flex items-center gap-2 h-full"
-                  >
-                    <CirclePlus />
-                    商品を追加
-                  </Link>
-                </Button>
+              <h3 className="text-lg">商品一覧</h3>
+              <Button asChild variant="card" className="max-w-32">
+                <Link
+                  href={`/dashboard/admin/store/${store_id}/create-item`}
+                  className="flex items-center gap-2 h-full"
+                >
+                  <CirclePlus />
+                  商品を追加
+                </Link>
+              </Button>
             </div>
             <ItemList foodId={foodRows[0].id} storeId={store_id} />
             <Separator />
@@ -304,7 +303,7 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
         )}
         <Separator />
         <p className="text-lg">店舗のスタッフ用認証コード</p>
-        <p>認証コード:{storeRows[0].staffCode}</p>
+        <p>認証コード： {storeRows[0].staffCode}</p>
         <Separator />
         <p className="text-lg">店舗の管理者一覧</p>
         {adminRows.length > 0 ? (

@@ -4,6 +4,8 @@ import { DurableObject } from "cloudflare:workers";
 
 interface Env {
   TICKET_SESSION: DurableObjectNamespace;
+  NEXT_CACHE_DO_QUEUE: DurableObjectNamespace;
+  NEXT_CACHE_DO_TAG: DurableObjectNamespace;
 }
 
 export default {

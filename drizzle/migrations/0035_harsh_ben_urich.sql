@@ -1,0 +1,1 @@
+DROP TABLE `register_lane_foods`;

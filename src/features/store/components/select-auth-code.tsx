@@ -13,15 +13,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
 
-type StoreOption = { id: string; name: string, authCode: string | null };
+type StoreOption = { id: string; name: string; authCode: string | null };
 
 interface Props {
   stores: StoreOption[];
 }
 
-export default function SelectStoreAuthCode({
-  stores,
-}: Props) {
+export default function SelectStoreAuthCode({ stores }: Props) {
   const [selectedAuthCode, setSelectedAuthCode] = useState<string>("");
 
   return (
@@ -43,7 +41,7 @@ export default function SelectStoreAuthCode({
             </SelectContent>
           </Select>
           {selectedAuthCode ? (
-            <p>認証コード:{selectedAuthCode}</p>
+            <p>認証コード：{selectedAuthCode}</p>
           ) : (
             <p>店舗を選択してください</p>
           )}

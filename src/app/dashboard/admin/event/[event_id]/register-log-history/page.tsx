@@ -21,8 +21,10 @@ export default async function AdminRegisterLogHistoryPage(props: {
 
   const db = await getDb();
 
-  const storeRows = await db.select({id: stores.id}).from(stores).where(eq(stores.eventId, event_id));
-
+  const storeRows = await db
+    .select({ id: stores.id })
+    .from(stores)
+    .where(eq(stores.eventId, event_id));
 
   const buildExportUrl = (type: "accounting" | "inventory") => {
     const params = new URLSearchParams({ type });
@@ -94,7 +96,7 @@ export default async function AdminRegisterLogHistoryPage(props: {
           </Button>
         </div>
         <Suspense fallback={<LoadingPrompt context="履歴" />}>
-          <CombinedHistoryList />
+          <CombinedHistoryList eventId={event_id} />
         </Suspense>
       </div>
     </DashboardPageShell>

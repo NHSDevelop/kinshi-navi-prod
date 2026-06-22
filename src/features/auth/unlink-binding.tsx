@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,15 +36,23 @@ export default function UnlinkBindingButton({
 }: Props) {
   const [state, formAction, isPending] = useActionState(unlinkBinding, null);
   const router = useRouter();
+  const isSignOutCalled = useRef(false);
 
   useEffect(() => {
-    if (!state?.success) {
+    if (!state?.success || isSignOutCalled.current) {
       return;
     }
 
+    isSignOutCalled.current = true;
+
     const handleSignOut = async () => {
-      await authClient.signOut();
-      router.replace("/");
+      await authClient.signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            router.replace("/");
+          },
+        },
+      });
     };
 
     void handleSignOut();

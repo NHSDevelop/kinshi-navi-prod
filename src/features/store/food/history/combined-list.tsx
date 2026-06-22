@@ -11,7 +11,11 @@ import {
   stockLogs,
   stores,
 } from "@/lib/db/schema";
-import { asc, eq } from "drizzle-orm";
+import { asc, eq, or } from "drizzle-orm";
+
+type Props = {
+  eventId: string;
+};
 
 type SaleStockChange = {
   id: string;
@@ -42,7 +46,7 @@ type HistoryBlock =
       createdAt: Date;
     };
 
-export default async function CombinedHistoryList() {
+export default async function CombinedHistoryList({ eventId }: Props) {
   const db = await getDb();
 
   const [registerRows, stockRows] = await Promise.all([
@@ -60,6 +64,9 @@ export default async function CombinedHistoryList() {
       .leftJoin(registerLanes, eq(registerLanes.id, registerLogs.laneId))
       .leftJoin(foods, eq(foods.id, registerLogs.foodId))
       .leftJoin(stores, eq(stores.id, foods.storeId))
+      .where(
+        or(eq(registerLanes.eventId, eventId), eq(stores.eventId, eventId)),
+      )
       .orderBy(asc(registerLogs.createdAt)),
     db
       .select({
@@ -71,6 +78,9 @@ export default async function CombinedHistoryList() {
       })
       .from(stockLogs)
       .innerJoin(items, eq(items.id, stockLogs.itemId))
+      .innerJoin(foods, eq(foods.id, items.foodId))
+      .innerJoin(stores, eq(stores.id, foods.storeId))
+      .where(eq(stores.eventId, eventId))
       .orderBy(asc(stockLogs.createdAt)),
   ]);
 
@@ -188,7 +198,9 @@ export default async function CombinedHistoryList() {
                       会計
                     </Badge>
                     <CardTitle className="text-lg">
-                      {block.storeName ? `${block.storeName} の会計記録` : "レーン会計"}
+                      {block.storeName
+                        ? `${block.storeName} の会計記録`
+                        : "レーン会計"}
                     </CardTitle>
                   </div>
                   <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">

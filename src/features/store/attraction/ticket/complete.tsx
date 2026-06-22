@@ -19,7 +19,7 @@ export default function CompleteTicket() {
 
   const { ref } = useZxing({
     onDecodeResult(result) {
-      const id = result.getText();
+      const id = result.rawValue;
       setTicketId(id);
       setIsScanning(false);
       // 読み取り後に自動で呼び出し

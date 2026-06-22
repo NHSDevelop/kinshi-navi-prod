@@ -1,12 +1,17 @@
-import { NotFoundPrompt } from "@/components/prompt/not-found-prompt";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { DashboardPageShell } from "@/components/dashboard/page-shell";
 import { getDb } from "@/lib/db/drizzle";
 import { admins, staffs } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { getSessionFromRequestHeaders } from "@/lib/auth-session";
-import { Redirector } from "@/components/navigation/redirector";
 import ConnectAuthUser from "@/features/auth/connect";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +19,7 @@ export default async function DashBoardPage() {
   const session = await getSessionFromRequestHeaders();
 
   if (!session?.user || session.user.isAnonymous) {
-    return <Redirector redirectTo="/login" />;
+    redirect("/login");
   }
 
   const db = await getDb();
@@ -52,7 +57,7 @@ export default async function DashBoardPage() {
   }
 
   if (targetUrl) {
-    return <Redirector redirectTo={targetUrl} />;
+    redirect(targetUrl);
   }
 
   return (
@@ -63,7 +68,9 @@ export default async function DashBoardPage() {
       <Card className="border-main-200/80 shadow-sm">
         <CardHeader>
           <CardTitle>ユーザーの権限紐付け</CardTitle>
-          <CardDescription>ユーザーに紐づいたイベントや店舗が存在しません。認証コードを入力して紐付けを行ってください。</CardDescription>
+          <CardDescription>
+            ユーザーに紐づいたイベントや店舗が存在しません。認証コードを入力して紐付けを行ってください。
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <ConnectAuthUser />
