@@ -24,6 +24,7 @@ import SelectStoreAuthCode from "@/features/store/components/select-auth-code";
 import { SquarePen, CirclePlus, List, Medal, History } from "lucide-react";
 import ChangeEventIsVoteShowing from "@/features/store/vote/change-showing";
 import ChangeEventIsVoting from "@/features/store/vote/change-voting";
+import ToActiveEvent from "@/features/event/to-active";
 
 export const dynamic = "force-dynamic";
 
@@ -147,6 +148,7 @@ export default async function AdminEventPage(props: {
               eventId={event_id}
               isVoteShowing={eventRows[0].isVoteShowing ?? true}
             />
+            <ToActiveEvent eventId={event_id} isActive={eventRows[0].isActive ?? false} />
           </div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>

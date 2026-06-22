@@ -47,7 +47,7 @@ export default async function StoreInfo({
 
   return (
     <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:gap-8">
-      <div className="block lg:hidden">
+      <div className="block xl:hidden">
         <h3 className="text-lg font-semibold text-main-950">{store.name}</h3>
         <div className="mt-2 flex flex-wrap gap-2">
           <Badge>{storeType}</Badge>

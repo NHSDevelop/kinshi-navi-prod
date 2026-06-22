@@ -6,6 +6,7 @@ import { admins, Event, events, stores } from "@/lib/db/schema";
 import z from "zod";
 import { eq } from "drizzle-orm";
 import { revalidateTag, unstable_cache } from "next/cache";
+import { revalidatePath } from "next/cache";
 
 const MAIN_EVENT_CACHE_TAG = "main-event";
 
@@ -67,6 +68,11 @@ const CreateEventSchema = z.object({
   description: z.string().nullable(),
 });
 
+function revalidateEventCache(eventId: string) {
+  revalidatePath(`/dashboard/admin/event/${eventId}`);
+  revalidatePath("/");
+  revalidatePath("/dashboard/super-admin");
+}
 export async function createEvent(
   prevState: unknown,
   formData: FormData,
@@ -132,16 +138,24 @@ export async function createEvent(
     } = validationResult.data;
     const db = await getDb();
 
-    await db.insert(events).values({
-      name: validatedName,
-      startedAtDate: startedAtDate,
-      startedAtTime: startedAtTime,
-      finishedAtDate: finishedAtDate,
-      finishedAtTime: finishedAtTime,
-      description: description,
-    });
+    const createdEventRows = await db
+      .insert(events)
+      .values({
+        name: validatedName,
+        startedAtDate: startedAtDate,
+        startedAtTime: startedAtTime,
+        finishedAtDate: finishedAtDate,
+        finishedAtTime: finishedAtTime,
+        description: description,
+      })
+      .returning({ id: events.id });
+    const createdEvent = createdEventRows[0];
 
     revalidateTag(MAIN_EVENT_CACHE_TAG, "max");
+
+    if (createdEvent?.id) {
+      revalidateEventCache(createdEvent.id);
+    }
 
     return {
       zodErrors: null,
@@ -254,6 +268,8 @@ export async function updateEventConfig(
 
     revalidateTag(MAIN_EVENT_CACHE_TAG, "max");
 
+    revalidateEventCache(eventId);
+
     return {
       zodErrors: null,
       success: true,
@@ -307,6 +323,7 @@ export async function toActiveEvent(prevState: unknown, formData: FormData) {
       .where(eq(events.id, eventId));
 
     revalidateTag(MAIN_EVENT_CACHE_TAG, "max");
+    revalidateEventCache(eventId);
     return {
       success: true,
       message: "操作が完了しました。",
@@ -340,6 +357,7 @@ export async function toMainEvent(prevState: unknown, formData: FormData) {
     await db.update(events).set({ isMain: true }).where(eq(events.id, eventId));
 
     revalidateTag(MAIN_EVENT_CACHE_TAG, "max");
+    revalidateEventCache(eventId);
     return {
       success: true,
       message: "操作が完了しました。",
@@ -424,6 +442,7 @@ export async function deleteEvent(prevState: unknown, formData: FormData) {
     await db.delete(events).where(eq(events.id, eventId));
 
     revalidateTag(MAIN_EVENT_CACHE_TAG, "max");
+    revalidateEventCache(eventId);
     return {
       success: true,
     };

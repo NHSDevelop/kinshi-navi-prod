@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import ToActiveStore from "@/features/store/to-active";
 import { getDb } from "@/lib/db/drizzle";
 import { stores, users, staffs } from "@/lib/db/schema";
 import { Separator } from "@/components/ui/separator";

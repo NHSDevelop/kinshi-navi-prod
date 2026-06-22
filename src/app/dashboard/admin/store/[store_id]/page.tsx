@@ -59,6 +59,7 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
       db
         .select({
           id: stores.id,
+          storeType: stores.storeType,
           staffCode: stores.staffCode,
           isActive: stores.isActive,
         })
@@ -230,6 +231,7 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
         </Card>
         <ToActiveStore
           storeId={storeRows[0].id}
+          storeType={storeRows[0].storeType}
           isActive={storeRows[0].isActive}
         />
         <Separator />
