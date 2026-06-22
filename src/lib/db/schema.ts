@@ -133,6 +133,7 @@ export const stores = sqliteTable("stores", {
   finishedAtDate: integer("finishedAtDate", { mode: "timestamp_ms" }),
   finishedAtTime: text("finishedAtTime"),
   description: text("description"),
+  place: text("place"),
   storeType: text("storeType", { enum: storeTypeValues })
     .$type<StoreType>()
     .notNull(),

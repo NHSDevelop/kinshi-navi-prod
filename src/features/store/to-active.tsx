@@ -1,11 +1,12 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { toActiveStore } from "./action";
 import { Button } from "@/components/ui/button";
 import { ErrorPrompt } from "@/components/prompt/error-prompt";
 import DisableAttractionTickets from "@/features/store/attraction/ticket/disable";
 import { StoreType } from "@/lib/db/schema";
+import { useRouter } from "next/navigation";
 
 type Props = {
   storeId: string;
@@ -19,9 +20,14 @@ export default function ToActiveStore({
   isActive,
 }: Props) {
   const [state, formAction, isPending] = useActionState(toActiveStore, null);
+  const router = useRouter();
   const isActiveStore = state?.isActive ?? isActive;
 
-
+  useEffect(() => {
+    if (state?.success) {
+      router.refresh();
+    }
+  }, [state, router]);
 
   return (
     <div className="space-y-4">

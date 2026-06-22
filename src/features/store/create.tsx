@@ -72,19 +72,12 @@ export default function CreateStore({ eventId }: CreateStoreProps) {
     setIsUploadingImage(true);
 
     try {
-      const data = new FormData();
-      const originalFile = data.get("imageFileData");
-
-      if (!(originalFile instanceof File)) {
-        throw new Error("ファイルが見つかりません。");
-      }
-
-      const uploadFormData = new FormData();
-      uploadFormData.append("originalName", originalFile.name);
-
       const RESOLUTIONS = [640, 1024, 1600] as const;
+      const uploadFormData = new FormData();
+      uploadFormData.append("originalName", file.name);
+
       for (const width of RESOLUTIONS) {
-        const webpBlob = await resizeImageToWebP(originalFile, width);
+        const webpBlob = await resizeImageToWebP(file, width);
         uploadFormData.append(`image_${width}`, webpBlob, `${width}.webp`);
       }
 
@@ -150,6 +143,16 @@ export default function CreateStore({ eventId }: CreateStoreProps) {
                     required
                   />
                   <FieldError message={state.zodErrors?.name?.[0]} />
+                </Field>
+                <Field>
+                  <FieldLabel>出店場所</FieldLabel>
+                  <Input
+                    name="place"
+                    defaultValue={state.place}
+                    disabled={isPending}
+                    maxLength={100}
+                  />
+                  <FieldError message={state.zodErrors?.place?.[0]} />
                 </Field>
                 <Field>
                   <FieldLabel>店舗の種類</FieldLabel>
@@ -307,7 +310,7 @@ export default function CreateStore({ eventId }: CreateStoreProps) {
                       <DatePicker
                         selected={finishedAtDate}
                         onChange={(date: Date | null) =>
-                          setFinishedAtDate(date)
+                          setStartedAtDate(date)
                         }
                         dateFormat="yyyy/MM/dd"
                         disabled={isPending}

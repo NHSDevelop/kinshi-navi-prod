@@ -33,6 +33,7 @@ export type ZodErrors = {
   storeType?: string[];
   imageUrl?: string[];
   apparanceImageUrl?: string[];
+  place?: string[];
   startedAtDate?: string[];
   startedAtTime?: string[];
   finishedAtDate?: string[];
@@ -47,6 +48,7 @@ export type StoreState = {
   storeType?: string;
   imageUrl?: string;
   apparanceImageUrl?: string;
+  place?: string;
   startedAtDate?: string;
   startedAtTime?: string;
   finishedAtDate?: string;
@@ -58,7 +60,6 @@ export type StoreState = {
   success?: boolean;
 };
 
-// ISR 対象ページを無効化する関数
 function invalidateStorePages(storeId?: string, storeSlug?: string) {
   if (storeId) {
     revalidatePath(`/dashboard/staff/store/${storeId}`);
@@ -80,6 +81,7 @@ export type UpdateStoreConfigZodErrors = {
   name?: string[];
   imageUrl?: string[];
   apparanceImageUrl?: string[];
+  place?: string[];
   startedAtDate?: string[];
   startedAtTime?: string[];
   finishedAtDate?: string[];
@@ -92,6 +94,7 @@ export type UpdateStoreConfigState = {
   name?: string;
   imageUrl?: string;
   apparanceImageUrl?: string;
+  place?: string;
   startedAtDate?: string;
   startedAtTime?: string;
   finishedAtDate?: string;
@@ -113,6 +116,7 @@ const CreateStoreSchema = z.object({
     .string()
     .url("画像URLの形式が正しくありません")
     .nullable(),
+  place: z.string().max(100, "最大100文字です").nullable(),
   startedAtDate: z.date().nullable(),
   startedAtTime: z
     .string()
@@ -152,6 +156,7 @@ export async function createStore(
     apparanceImageUrl: formData.get("apparanceImageUrl")
       ? (formData.get("apparanceImageUrl") as string)
       : null,
+    place: formData.get("place") ? (formData.get("place") as string) : null,
     startedAtDate: formData.get("startedAtDate")
       ? new Date(formData.get("startedAtDate") as string)
       : null,
@@ -177,6 +182,7 @@ export async function createStore(
       storeType: (formData.get("storeType") as string) || "",
       imageUrl: (formData.get("imageUrl") as string) || "",
       apparanceImageUrl: (formData.get("apparanceImageUrl") as string) || "",
+      place: (formData.get("place") as string) || "",
       startedAtDate: (formData.get("startedAtDate") as string) || "",
       startedAtTime: (formData.get("startedAtTime") as string) || "",
       finishedAtDate: (formData.get("finishedAtDate") as string) || "",
@@ -195,6 +201,7 @@ export async function createStore(
     storeType,
     imageUrl,
     apparanceImageUrl,
+    place,
     startedAtDate,
     startedAtTime,
     finishedAtDate,
@@ -237,6 +244,7 @@ export async function createStore(
         eventId: eventId,
         imageUrl: imageUrl,
         apparanceImageUrl: apparanceImageUrl,
+        place: place,
         startedAtDate: startedAtDate,
         startedAtTime: startedAtTime,
         finishedAtDate: finishedAtDate,
@@ -272,6 +280,7 @@ const storeConfigSchema = z.object({
     .string()
     .url("画像URLの形式が正しくありません")
     .nullable(),
+  place: z.string().max(100, "最大100文字です").nullable(),
   isActive: z.boolean(),
   startedAtDate: z.date().nullable(),
   startedAtTime: z
@@ -312,6 +321,7 @@ export async function updateStoreConfig(
     apparanceImageUrl: formData.get("apparanceImageUrl")
       ? (formData.get("apparanceImageUrl") as string)
       : null,
+    place: formData.get("place") ? (formData.get("place") as string) : null,
     isActive: isActiveRaw === "true" || isActiveRaw === "on",
     startedAtDate: formData.get("startedAtDate")
       ? new Date(formData.get("startedAtDate") as string)
@@ -335,6 +345,7 @@ export async function updateStoreConfig(
       name: (formData.get("name") as string) || "",
       imageUrl: (formData.get("imageUrl") as string) || "",
       apparanceImageUrl: (formData.get("apparanceImageUrl") as string) || "",
+      place: (formData.get("place") as string) || "",
       startedAtDate: (formData.get("startedAtDate") as string) || "",
       startedAtTime: (formData.get("startedAtTime") as string) || "",
       finishedAtDate: (formData.get("finishedAtDate") as string) || "",
@@ -351,6 +362,7 @@ export async function updateStoreConfig(
     name,
     imageUrl,
     apparanceImageUrl,
+    place,
     isActive,
     startedAtDate,
     startedAtTime,
@@ -378,6 +390,7 @@ export async function updateStoreConfig(
         name: name,
         imageUrl: imageUrl,
         apparanceImageUrl: apparanceImageUrl,
+        place: place,
         isActive: isActive,
         startedAtDate: startedAtDate,
         startedAtTime: startedAtTime,
@@ -405,12 +418,10 @@ export async function updateStoreConfig(
   }
 }
 
-// キャッシュ対象のコア処理
 const getCachedStoresInMainEvent = unstable_cache(
   async (eventId: string, storeType: StoreType | "all" | null) => {
     const db = await getDb();
 
-    // DB WHERE で storeType フィルタリング
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const whereConditions: Array<any> = [eq(stores.eventId, eventId)];
     if (storeType && storeType !== "all") {
@@ -447,7 +458,6 @@ export async function getStoresInMainEvent(
       };
     }
 
-    // キャッシュ版を呼び出し
     const storeRows = await getCachedStoresInMainEvent(
       mainEvent.id,
       storeType || "all",

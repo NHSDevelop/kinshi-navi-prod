@@ -33,6 +33,7 @@ interface updateStoreConfigFormProps {
 
 const INITIAL_STATE: UpdateStoreConfigState = {
   name: "",
+  place: "",
   imageUrl: "",
   apparanceImageUrl: "",
   startedAtDate: "",
@@ -150,6 +151,17 @@ export default function UpdateStoreConfigForm({
                     maxLength={60}
                   />
                   <FieldError message={state.zodErrors?.name?.[0]} />
+                </Field>
+                <Field>
+                  <FieldLabel>出店場所</FieldLabel>
+                  <Input
+                    name="place"
+                    type="string"
+                    disabled={isPending}
+                    defaultValue={state.place || store.place || ""}
+                    maxLength={100}
+                  />
+                  <FieldError message={state.zodErrors?.place?.[0]} />
                 </Field>
                 <Field>
                   <FieldLabel>ポスター画像</FieldLabel>

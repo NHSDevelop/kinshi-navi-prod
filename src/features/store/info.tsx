@@ -125,6 +125,10 @@ export default async function StoreInfo({
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-4 text-sm xl:text-base">
+          <p className="font-medium text-slate-700">出店場所：</p>
+          <p className="min-w-0 wrap-break-word">
+            {store.place ?? "なし"}
+          </p>
           <p className="font-medium text-slate-700">開催日：</p>
           <p className="min-w-0 wrap-break-word">{dateRange}</p>
           <p className="font-medium text-slate-700">開催時間：</p>
