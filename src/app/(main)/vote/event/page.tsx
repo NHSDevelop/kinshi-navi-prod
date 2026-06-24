@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 export default function FoodVotePage() {
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 lg:gap-8">
-      <PageBunner title="イベント等の投票" />
+      <PageBunner title="イベントの投票" />
       <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6 flex flex-col gap-4">
         <p>
           リンク先のフォームは投票時間になるまでアクセスが制限されます。ご了承ください。

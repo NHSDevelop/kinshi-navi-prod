@@ -66,7 +66,7 @@ export const quickActions: QuickAction[] = [
   },
   {
     href: "/vote/event",
-    title: "イベントの人気投票",
+    title: "イベントの投票",
     iconName: "vote",
   },
   {

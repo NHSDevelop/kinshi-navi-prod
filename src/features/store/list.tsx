@@ -25,7 +25,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Suspense } from "react";
+import { LoadingPrompt } from "@/components/prompt/loading-prompt";
 
 const initialState: FormState<Store[]> = {
   success: false,
@@ -34,7 +36,10 @@ const initialState: FormState<Store[]> = {
   data: [],
 };
 
+const MAX_NAME_LENGTH = 10;
+
 export default function StoreList() {
+  const router = useRouter();
   const hasFetchedInitial = useRef(false);
   const [state, formAction, isPending] = useActionState<
     FormState<Store[]>,
@@ -84,48 +89,65 @@ export default function StoreList() {
         </form>
       </div>
       <Separator />
+      <Suspense fallback={<LoadingPrompt context="店舗の一覧" />}>
+        {state?.data && state.data.length > 0 ? (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>店舗名</TableHead>
+                <TableHead>店舗の種類</TableHead>
+                <TableHead>場所</TableHead>
+                <TableHead>状態</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {state.data.map((store) => {
+                const storeType =
+                  STORE_TYPE_MAP[store.storeType as keyof typeof STORE_TYPE_MAP]
+                    ?.label ?? store.storeType;
 
-      {state?.data && state.data.length > 0 ? (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>店舗名</TableHead>
-              <TableHead>店舗の種類</TableHead>
-              <TableHead>状態</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {state.data.map((store) => {
-              const storeType =
-                STORE_TYPE_MAP[store.storeType as keyof typeof STORE_TYPE_MAP]
-                  ?.label ?? store.storeType;
-              return (
-                <TableRow key={store.id}>
-                  <TableCell className="font-semibold md:text-lg">
-                    <Link href={`/store/${store.slug}`}>{store.name}</Link>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className="text-sm">{storeType}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    {store.isActive ? (
-                      <Badge variant="success" className="text-sm">
-                        開催中
+                const truncatedName =
+                  store.name.length > MAX_NAME_LENGTH
+                    ? `${store.name.slice(0, MAX_NAME_LENGTH)}...`
+                    : store.name;
+
+                return (
+                  <TableRow
+                    key={store.id}
+                    className="cursor-pointer"
+                    onClick={() => router.push(`/store/${store.slug}`)}
+                  >
+                    <TableCell className="font-semibold md:text-lg">
+                      <span title={store.name}>{truncatedName}</span>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className="text-sm">
+                        {store.place ?? "未設定"}
                       </Badge>
-                    ) : (
-                      <Badge variant="danger" className="text-sm">
-                        停止中
-                      </Badge>
-                    )}
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      ) : (
-        <NotFoundPrompt context="店舗" />
-      )}
+                    </TableCell>
+                    <TableCell>
+                      <Badge className="text-sm">{storeType}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      {store.isActive ? (
+                        <Badge variant="success" className="text-sm">
+                          開催中
+                        </Badge>
+                      ) : (
+                        <Badge variant="danger" className="text-sm">
+                          停止中
+                        </Badge>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        ) : (
+          <NotFoundPrompt context="店舗" />
+        )}
+      </Suspense>
     </div>
   );
 }

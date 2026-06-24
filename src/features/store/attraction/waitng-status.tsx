@@ -17,6 +17,9 @@ interface AttractionWaitngStatusProps {
   eventId: string;
 }
 
+const DEFAULT_PAGE_SIZE = 50;
+const MAX_STORE_NAME_LENGTH = 10;
+
 export default async function AttractionWaitngStatus({
   eventId,
 }: AttractionWaitngStatusProps) {
@@ -62,6 +65,7 @@ export default async function AttractionWaitngStatus({
 
   return (
     <>
+      =
       {rows.length > 0 ? (
         <Table>
           <TableHeader>
@@ -79,13 +83,20 @@ export default async function AttractionWaitngStatus({
               const cycleCount = Math.ceil(waitingGroups / maxGroups);
               const waitMinutes = cycleCount * (attraction.playTime || 1);
 
+              const truncatedStoreName =
+                attraction.storeName.length > MAX_STORE_NAME_LENGTH
+                  ? `${attraction.storeName.slice(0, MAX_STORE_NAME_LENGTH)}...`
+                  : attraction.storeName;
+
               return (
                 <Suspense
                   fallback={<LoadingPrompt context="待機状況" />}
                   key={attraction.attractionId}
                 >
                   <TableRow>
-                    <TableCell>{attraction.storeName}</TableCell>
+                    <TableCell title={attraction.storeName}>
+                      {truncatedStoreName}
+                    </TableCell>
                     <TableCell>
                       {attraction.maxCalledIndex !== null
                         ? attraction.maxCalledIndex

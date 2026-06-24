@@ -20,6 +20,7 @@ interface ItemStockStatusProps {
 }
 
 const DEFAULT_PAGE_SIZE = 50;
+const MAX_STORE_NAME_LENGTH = 10;
 
 export default async function ItemStockStatus({
   eventId,
@@ -52,7 +53,6 @@ export default async function ItemStockStatus({
     return <NotFoundPrompt context="商品" />;
   }
 
-  // foodごとにitemをグループ化
   const foodItemMap = new Map<
     string,
     {
@@ -110,31 +110,40 @@ export default async function ItemStockStatus({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {stockStatusList.map((food) => (
-          <Fragment key={food.foodId}>
-            {food.items.map((item, itemIndex) => (
-              <TableRow key={item.itemId}>
-                {itemIndex === 0 && (
-                  <TableCell
-                    className="font-semibold md:text-lg"
-                    rowSpan={food.items.length}
-                  >
-                    {food.storeName}
+        =
+        {stockStatusList.map((food) => {
+          const truncatedStoreName =
+            food.storeName.length > MAX_STORE_NAME_LENGTH
+              ? `${food.storeName.slice(0, MAX_STORE_NAME_LENGTH)}...`
+              : food.storeName;
+
+          return (
+            <Fragment key={food.foodId}>
+              {food.items.map((item, itemIndex) => (
+                <TableRow key={item.itemId}>
+                  {itemIndex === 0 && (
+                    <TableCell
+                      className="font-semibold md:text-lg"
+                      rowSpan={food.items.length}
+                      title={food.storeName}
+                    >
+                      {truncatedStoreName}
+                    </TableCell>
+                  )}
+                  <TableCell>{item.itemName}</TableCell>
+                  <TableCell>
+                    <Badge
+                      className="text-sm"
+                      variant={item.stock === 0 ? "danger" : "default"}
+                    >
+                      {item.stock}/{item.stock + (item.soldStock ?? 0)}
+                    </Badge>
                   </TableCell>
-                )}
-                <TableCell>{item.itemName}</TableCell>
-                <TableCell>
-                  <Badge
-                    className="text-sm"
-                    variant={item.stock === 0 ? "danger" : "default"}
-                  >
-                    {item.stock}/{item.stock + (item.soldStock ?? 0)}
-                  </Badge>
-                </TableCell>
-              </TableRow>
-            ))}
-          </Fragment>
-        ))}
+                </TableRow>
+              ))}
+            </Fragment>
+          );
+        })}
       </TableBody>
     </Table>
   );
