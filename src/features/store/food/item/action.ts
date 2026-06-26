@@ -364,3 +364,52 @@ export async function resetItemSoldStock(
     };
   }
 }
+
+export async function resetItemSoldStock(
+  prevState: unknown,
+  formData: FormData,
+) {
+  const itemId = formData.get("itemId") as string;
+  if (!itemId) {
+    return {
+      success: false,
+      message: "指定された商品がありません。",
+    };
+  }
+  try {
+    const db = await getDb();
+    await db.update(items).set({ soldStock: 0 }).where(eq(items.id, itemId));
+    const itemRows = await db
+      .select({ foodId: items.foodId })
+      .from(items)
+      .where(eq(items.id, itemId));
+    const item = itemRows[0];
+
+    if (!item) {
+      return {
+        success: false,
+        message: "商品が存在しません。",
+      };
+    }
+    const storeIdRows = await db
+      .select({ storeId: foods.storeId })
+      .from(foods)
+      .where(eq(foods.id, item.foodId))
+      .limit(1);
+    const storeId = storeIdRows[0]?.storeId;
+    if (storeId) {
+      revalidateTag(`store-${storeId}`, "max");
+    }
+    revalidateTag("stock-status", "max");
+    return {
+      success: true,
+      message: "操作が完了しました。",
+    };
+  } catch (e) {
+    console.log(e);
+    return {
+      success: false,
+      message: "サーバーエラーが発生しました",
+    };
+  }
+}
