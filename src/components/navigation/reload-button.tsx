@@ -19,7 +19,7 @@ export function ReloadButton() {
     <Button type="button" onClick={handleReload} disabled={isPending}>
       <div className="flex items-center gap-2 max-w-xs">
         <AiOutlineReload className={isPending ? "animate-spin" : ""} />
-        {isPending ? "更新中..." : "画面を再読み込み"}
+        {isPending ? "更新中..." : "再読み込み"}
       </div>
     </Button>
   );

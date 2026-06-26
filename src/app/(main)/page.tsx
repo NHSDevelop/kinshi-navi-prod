@@ -6,6 +6,11 @@ import { InstallPrompt } from "@/features/push/install";
 import { HelpPrompt } from "@/components/prompt/help";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import UserTicketList from "@/features/store/attraction/ticket/user-list";
+import { getSessionFromRequestHeaders } from "@/lib/auth-session";
+import { ReloadButton } from "@/components/navigation/reload-button";
 
 export const metadata: Metadata = {
   title: "トップページ",
@@ -38,19 +43,50 @@ export default async function EventTopPage() {
               </p>
             </div>
           </div>
-
-          <div className="w-full max-w-md px-4">
-            <Image
-              src="/images/poster.webp"
-              alt="ポスター画像"
-              width={1423}
-              height={2048}
-              sizes="(max-w-768px) 100vw, 448px"
-              className="w-full h-auto rounded-lg shadow-sm"
-            />
-          </div>
         </div>
       </section>
+      <Separator />
+      {user && user.isAnonymous && (
+        <div className="space-y-4">
+          <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-lg font-bold text-main-950 md:text-xl">
+                取得した整理券
+              </h2>
+              <div className="flex gap-2 justify-end items-center">
+                <ReloadButton />
+                <HelpPrompt title="整理券について">
+                  <ul className="w-auto list-disc space-y-4">
+                    <li className="text-sm">
+                      整理券が「呼び出し中」になったら、企画の開催場所までお越しください。
+                    </li>
+                    <li className="text-sm">
+                      企画に参加する際は、画面右上のユーザーアイコンから、「ゲストユーザーページ」にある整理券のQRコードを受付にて係員に表示してください。
+                    </li>
+                    <li className="text-sm">
+                      整理券が呼び出されたかどうかは、このページ以外にも「イベントページ」→「企画の待機状況」からご覧になることができます。
+                    </li>
+                    <li className="text-sm">
+                      呼び出されていても整理券が「発券済み」の場合は、お手数ですが画面の再読み込みをお願いします。
+                    </li>
+                    <li className="text-sm">
+                      プッシュ通知を購読していると、整理券が呼び出されたときに通知を受け取ることができます。
+                    </li>
+                  </ul>
+                </HelpPrompt>
+              </div>
+            </div>
+            <p className="text-sm">
+              ※整理券の状態が更新されない場合、お手数ですが「再読み込み」を押してください。
+            </p>
+            <div className="mt-4">
+              <Suspense fallback={<LoadingPrompt context="取得した整理券" />}>
+                <UserTicketList userId={user.id} />
+              </Suspense>
+            </div>
+          </section>
+        </div>
+      )}
       <Separator />
       <Button asChild className="max-w-xs">
         <Link href="/help">使い方ガイド</Link>

@@ -42,6 +42,7 @@ import {
   SquarePen,
   Ticket,
 } from "lucide-react";
+import ResetItemSoldStock from "@/features/store/food/item/reset-soldStock";
 
 export const dynamic = "force-dynamic";
 
@@ -296,6 +297,15 @@ export default async function AdminStorePage({ params }: AdminStorePageProps) {
               href={`/dashboard/admin/store/${store_id}/edit-item`}
               context="商品の設定を編集"
             />
+            <Separator />
+            <h3 className="text-lg">商品の総在庫の反映</h3>
+            <h4 className="text-sm">
+              「模擬店の在庫一覧」の「/」の右側の数字が現在の在庫数（左側の数字）に変更されます。
+            </h4>
+            <h4 className="text-sm">
+              「模擬店の在庫一覧」の表示が変わるだけで、実際の在庫数に変動はありません。
+            </h4>
+            <ResetItemSoldStock storeId={store_id} />
             <Separator />
             <h3 className="text-lg">商品の削除</h3>
             <DisabledItem storeId={store_id} />

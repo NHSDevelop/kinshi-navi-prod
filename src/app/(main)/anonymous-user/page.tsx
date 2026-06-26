@@ -9,7 +9,10 @@ import { LoadingPrompt } from "@/components/prompt/loading-prompt";
 import { Separator } from "@/components/ui/separator";
 import { PageBunner } from "@/components/navigation/page-bunner";
 import { Metadata } from "next";
-import ReloadButton from "@/components/polling/reload-button";
+import { ReloadButton } from "@/components/navigation/reload-button";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: "ゲストユーザーページ ",
@@ -46,31 +49,38 @@ export default async function AnonymousUserPage() {
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 lg:gap-8">
       <PageBunner title="ゲストユーザーページ" />
+
       <section className="rounded-[1.5rem] border border-main-200 bg-white p-4 shadow-sm md:p-6">
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-lg font-bold text-main-950 md:text-xl">
             取得した整理券
           </h2>
-          <HelpPrompt title="整理券について">
-            <ul className="w-auto list-disc space-y-4">
-              <li className="text-sm">
-                整理券が「呼び出し中」になったら、企画の開催場所までお越しください。
-              </li>
-              <li className="text-sm">
-                企画に参加する際は、画面右上のユーザーアイコンから、「ゲストユーザーページ」にある整理券のQRコードを受付にて係員に表示してください。
-              </li>
-              <li className="text-sm">
-                整理券が呼び出されたかどうかは、このページ以外にも「イベントページ」→「企画の待機状況」からご覧になることができます。
-              </li>
-              <li className="text-sm">
-                呼び出されていても整理券が「発券済み」の場合は、お手数ですが画面の再読み込みをお願いします。
-              </li>
-              <li className="text-sm">
-                プッシュ通知を購読していると、整理券が呼び出されたときに通知を受け取ることができます。
-              </li>
-            </ul>
-          </HelpPrompt>
+          <div className="flex gap-2 justify-end items-center">
+            <ReloadButton />
+            <HelpPrompt title="整理券について">
+              <ul className="w-auto list-disc space-y-4">
+                <li className="text-sm">
+                  整理券が「呼び出し中」になったら、企画の開催場所までお越しください。
+                </li>
+                <li className="text-sm">
+                  企画に参加する際は、画面右上のユーザーアイコンから、「ゲストユーザーページ」にある整理券のQRコードを受付にて係員に表示してください。
+                </li>
+                <li className="text-sm">
+                  整理券が呼び出されたかどうかは、このページ以外にも「イベントページ」→「企画の待機状況」からご覧になることができます。
+                </li>
+                <li className="text-sm">
+                  呼び出されていても整理券が「発券済み」の場合は、お手数ですが画面の再読み込みをお願いします。
+                </li>
+                <li className="text-sm">
+                  プッシュ通知を購読していると、整理券が呼び出されたときに通知を受け取ることができます。
+                </li>
+              </ul>
+            </HelpPrompt>
+          </div>
         </div>
+        <p className="text-sm">
+          ※整理券の状態が更新されない場合、お手数ですが「再読み込み」を押してください。
+        </p>
         <div className="mt-4">
           <Suspense fallback={<LoadingPrompt context="取得した整理券" />}>
             <UserTicketList userId={user.id} />
